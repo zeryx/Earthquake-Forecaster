@@ -1,0 +1,27 @@
+project(QmakePredictor)
+cmake_minimum_required(VERSION 2.8)
+aux_source_directory(. SRC_LIST)
+include(dlib/cmake)
+find_package(Threads)
+find_package(CUDA)
+list(APPEND CUDA_NVCC_FLAGS "-arch=sm_20;-std=c++11;-02;-DVERBOSE")
+SET(CUDA_PROPAGATE_HOST_FLAGS OFF)
+CUDA_ADD_EXECUTABLE(${PROJECT_NAME} ${SRC_LIST})
+target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} dlib)
+
+   file(WRITE "${CMAKE_SOURCE_DIR}/QtCreatorDeployment.txt" "</home/ubuntu/earthquake_forcaster>\n")
+
+        macro(add_deployment_file SRC DEST)
+            file(RELATIVE_PATH path ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+            file(APPEND "${CMAKE_SOURCE_DIR}/QtCreatorDeployment.txt" "${path}/${SRC}:${DEST}\n")
+        endmacro()
+
+        macro(add_deployment_directory SRC DEST)
+            file(GLOB_RECURSE files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${SRC}/*")
+            foreach(filename ${files})
+                get_filename_component(path ${filename} PATH)
+                add_deployment_file("${filename}" "${DEST}/${path}")
+            endforeach(filename)
+        endmacro()
+

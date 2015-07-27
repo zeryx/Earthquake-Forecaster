@@ -1,0 +1,821 @@
+The system is: Linux - 3.19.0-23-generic - x86_64
+Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+Compiler: /usr/bin/cc 
+Build flags: 
+Id flags: 
+
+The output was:
+0
+
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
+
+The C compiler identification is GNU, found in "/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/3.2.1/CompilerIdC/a.out"
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+Compiler: /usr/bin/c++ 
+Build flags: 
+Id flags: 
+
+The output was:
+0
+
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
+
+The CXX compiler identification is GNU, found in "/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/3.2.1/CompilerIdCXX/a.out"
+
+Determining if the C compiler works passed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec3486206377/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec3486206377.dir/build.make CMakeFiles/cmTryCompileExec3486206377.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec3486206377.dir/testCCompiler.c.o
+/usr/bin/cc    -o CMakeFiles/cmTryCompileExec3486206377.dir/testCCompiler.c.o   -c /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/testCCompiler.c
+Linking C executable cmTryCompileExec3486206377
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec3486206377.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTryCompileExec3486206377.dir/testCCompiler.c.o  -o cmTryCompileExec3486206377 -rdynamic 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+Detecting C compiler ABI info compiled with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec108738572/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec108738572.dir/build.make CMakeFiles/cmTryCompileExec108738572.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec108738572.dir/CMakeCCompilerABI.c.o
+/usr/bin/cc    -o CMakeFiles/cmTryCompileExec108738572.dir/CMakeCCompilerABI.c.o   -c /usr/local/share/cmake-3.2/Modules/CMakeCCompilerABI.c
+Linking C executable cmTryCompileExec108738572
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec108738572.dir/link.txt --verbose=1
+/usr/bin/cc      -v CMakeFiles/cmTryCompileExec108738572.dir/CMakeCCompilerABI.c.o  -o cmTryCompileExec108738572 -rdynamic  
+Using built-in specs.
+COLLECT_GCC=/usr/bin/cc
+COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/4.9/lto-wrapper
+Target: x86_64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Ubuntu 4.9.2-10ubuntu13' --with-bugurl=file:///usr/share/doc/gcc-4.9/README.Bugs --enable-languages=c,c++,java,go,d,fortran,objc,obj-c++ --prefix=/usr --program-suffix=-4.9 --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --with-gxx-include-dir=/usr/include/c++/4.9 --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --with-system-zlib --disable-browser-plugin --enable-java-awt=gtk --enable-gtk-cairo --with-java-home=/usr/lib/jvm/java-1.5.0-gcj-4.9-amd64/jre --enable-java-home --with-jvm-root-dir=/usr/lib/jvm/java-1.5.0-gcj-4.9-amd64 --with-jvm-jar-dir=/usr/lib/jvm-exports/java-1.5.0-gcj-4.9-amd64 --with-arch-directory=amd64 --with-ecj-jar=/usr/share/java/eclipse-ecj.jar --enable-objc-gc --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
+Thread model: posix
+gcc version 4.9.2 (Ubuntu 4.9.2-10ubuntu13) 
+COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/
+LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTryCompileExec108738572' '-rdynamic' '-mtune=generic' '-march=x86-64'
+ /usr/lib/gcc/x86_64-linux-gnu/4.9/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/4.9/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/4.9/lto-wrapper -plugin-opt=-fresolution=/tmp/ccYCavUV.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -z relro -o cmTryCompileExec108738572 /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crt1.o /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/4.9/crtbegin.o -L/usr/lib/gcc/x86_64-linux-gnu/4.9 -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../.. CMakeFiles/cmTryCompileExec108738572.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/lib/gcc/x86_64-linux-gnu/4.9/crtend.o /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crtn.o
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+Parsed C implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command:"/usr/bin/make" "cmTryCompileExec108738572/fast"]
+  ignore line: [/usr/bin/make -f CMakeFiles/cmTryCompileExec108738572.dir/build.make CMakeFiles/cmTryCompileExec108738572.dir/build]
+  ignore line: [make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp']
+  ignore line: [/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1]
+  ignore line: [Building C object CMakeFiles/cmTryCompileExec108738572.dir/CMakeCCompilerABI.c.o]
+  ignore line: [/usr/bin/cc    -o CMakeFiles/cmTryCompileExec108738572.dir/CMakeCCompilerABI.c.o   -c /usr/local/share/cmake-3.2/Modules/CMakeCCompilerABI.c]
+  ignore line: [Linking C executable cmTryCompileExec108738572]
+  ignore line: [/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec108738572.dir/link.txt --verbose=1]
+  ignore line: [/usr/bin/cc      -v CMakeFiles/cmTryCompileExec108738572.dir/CMakeCCompilerABI.c.o  -o cmTryCompileExec108738572 -rdynamic  ]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/cc]
+  ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/4.9/lto-wrapper]
+  ignore line: [Target: x86_64-linux-gnu]
+  ignore line: [Configured with: ../src/configure -v --with-pkgversion='Ubuntu 4.9.2-10ubuntu13' --with-bugurl=file:///usr/share/doc/gcc-4.9/README.Bugs --enable-languages=c,c++,java,go,d,fortran,objc,obj-c++ --prefix=/usr --program-suffix=-4.9 --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --with-gxx-include-dir=/usr/include/c++/4.9 --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --with-system-zlib --disable-browser-plugin --enable-java-awt=gtk --enable-gtk-cairo --with-java-home=/usr/lib/jvm/java-1.5.0-gcj-4.9-amd64/jre --enable-java-home --with-jvm-root-dir=/usr/lib/jvm/java-1.5.0-gcj-4.9-amd64 --with-jvm-jar-dir=/usr/lib/jvm-exports/java-1.5.0-gcj-4.9-amd64 --with-arch-directory=amd64 --with-ecj-jar=/usr/share/java/eclipse-ecj.jar --enable-objc-gc --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 4.9.2 (Ubuntu 4.9.2-10ubuntu13) ]
+  ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/]
+  ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../:/lib/:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTryCompileExec108738572' '-rdynamic' '-mtune=generic' '-march=x86-64']
+  link line: [ /usr/lib/gcc/x86_64-linux-gnu/4.9/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/4.9/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/4.9/lto-wrapper -plugin-opt=-fresolution=/tmp/ccYCavUV.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -z relro -o cmTryCompileExec108738572 /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crt1.o /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/4.9/crtbegin.o -L/usr/lib/gcc/x86_64-linux-gnu/4.9 -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../.. CMakeFiles/cmTryCompileExec108738572.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/lib/gcc/x86_64-linux-gnu/4.9/crtend.o /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crtn.o]
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/collect2] ==> ignore
+    arg [-plugin] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/liblto_plugin.so] ==> ignore
+    arg [-plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/4.9/lto-wrapper] ==> ignore
+    arg [-plugin-opt=-fresolution=/tmp/ccYCavUV.res] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [--sysroot=/] ==> ignore
+    arg [--build-id] ==> ignore
+    arg [--eh-frame-hdr] ==> ignore
+    arg [-m] ==> ignore
+    arg [elf_x86_64] ==> ignore
+    arg [--hash-style=gnu] ==> ignore
+    arg [--as-needed] ==> ignore
+    arg [-export-dynamic] ==> ignore
+    arg [-dynamic-linker] ==> ignore
+    arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+    arg [-zrelro] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTryCompileExec108738572] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crt1.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crti.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/crtbegin.o] ==> ignore
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/4.9] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/4.9]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib]
+    arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+    arg [-L/lib/../lib] ==> dir [/lib/../lib]
+    arg [-L/usr/lib/x86_64-linux-gnu] ==> dir [/usr/lib/x86_64-linux-gnu]
+    arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../..]
+    arg [CMakeFiles/cmTryCompileExec108738572.dir/CMakeCCompilerABI.c.o] ==> ignore
+    arg [-lgcc] ==> lib [gcc]
+    arg [--as-needed] ==> ignore
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [--no-as-needed] ==> ignore
+    arg [-lc] ==> lib [c]
+    arg [-lgcc] ==> lib [gcc]
+    arg [--as-needed] ==> ignore
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [--no-as-needed] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/crtend.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crtn.o] ==> ignore
+  remove lib [gcc]
+  remove lib [gcc_s]
+  remove lib [gcc]
+  remove lib [gcc_s]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/4.9] ==> [/usr/lib/gcc/x86_64-linux-gnu/4.9]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib] ==> [/usr/lib]
+  collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+  collapse library dir [/lib/../lib] ==> [/lib]
+  collapse library dir [/usr/lib/x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/../lib] ==> [/usr/lib]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../..] ==> [/usr/lib]
+  implicit libs: [c]
+  implicit dirs: [/usr/lib/gcc/x86_64-linux-gnu/4.9;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib]
+  implicit fwks: []
+
+
+
+
+Detecting C [-std=c11] compiler features compiled with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec2887428091/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec2887428091.dir/build.make CMakeFiles/cmTryCompileExec2887428091.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec2887428091.dir/feature_tests.c.o
+/usr/bin/cc   -std=c11 -o CMakeFiles/cmTryCompileExec2887428091.dir/feature_tests.c.o   -c /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/feature_tests.c
+Linking C executable cmTryCompileExec2887428091
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec2887428091.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTryCompileExec2887428091.dir/feature_tests.c.o  -o cmTryCompileExec2887428091 -rdynamic 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+    Feature record: C_FEATURE:1c_function_prototypes
+    Feature record: C_FEATURE:1c_restrict
+    Feature record: C_FEATURE:1c_static_assert
+    Feature record: C_FEATURE:1c_variadic_macros
+
+
+Detecting C [-std=c99] compiler features compiled with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec596908017/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec596908017.dir/build.make CMakeFiles/cmTryCompileExec596908017.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec596908017.dir/feature_tests.c.o
+/usr/bin/cc   -std=c99 -o CMakeFiles/cmTryCompileExec596908017.dir/feature_tests.c.o   -c /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/feature_tests.c
+Linking C executable cmTryCompileExec596908017
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec596908017.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTryCompileExec596908017.dir/feature_tests.c.o  -o cmTryCompileExec596908017 -rdynamic 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+    Feature record: C_FEATURE:1c_function_prototypes
+    Feature record: C_FEATURE:1c_restrict
+    Feature record: C_FEATURE:0c_static_assert
+    Feature record: C_FEATURE:1c_variadic_macros
+
+
+Detecting C [-std=c90] compiler features compiled with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec3720309240/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec3720309240.dir/build.make CMakeFiles/cmTryCompileExec3720309240.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec3720309240.dir/feature_tests.c.o
+/usr/bin/cc   -std=c90 -o CMakeFiles/cmTryCompileExec3720309240.dir/feature_tests.c.o   -c /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/feature_tests.c
+Linking C executable cmTryCompileExec3720309240
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec3720309240.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTryCompileExec3720309240.dir/feature_tests.c.o  -o cmTryCompileExec3720309240 -rdynamic 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+    Feature record: C_FEATURE:1c_function_prototypes
+    Feature record: C_FEATURE:0c_restrict
+    Feature record: C_FEATURE:0c_static_assert
+    Feature record: C_FEATURE:0c_variadic_macros
+Determining if the CXX compiler works passed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec488254208/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec488254208.dir/build.make CMakeFiles/cmTryCompileExec488254208.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec488254208.dir/testCXXCompiler.cxx.o
+/usr/bin/c++     -o CMakeFiles/cmTryCompileExec488254208.dir/testCXXCompiler.cxx.o -c /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTryCompileExec488254208
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec488254208.dir/link.txt --verbose=1
+/usr/bin/c++        CMakeFiles/cmTryCompileExec488254208.dir/testCXXCompiler.cxx.o  -o cmTryCompileExec488254208 -rdynamic 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+Detecting CXX compiler ABI info compiled with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec2204784679/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec2204784679.dir/build.make CMakeFiles/cmTryCompileExec2204784679.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec2204784679.dir/CMakeCXXCompilerABI.cpp.o
+/usr/bin/c++     -o CMakeFiles/cmTryCompileExec2204784679.dir/CMakeCXXCompilerABI.cpp.o -c /usr/local/share/cmake-3.2/Modules/CMakeCXXCompilerABI.cpp
+Linking CXX executable cmTryCompileExec2204784679
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec2204784679.dir/link.txt --verbose=1
+/usr/bin/c++       -v CMakeFiles/cmTryCompileExec2204784679.dir/CMakeCXXCompilerABI.cpp.o  -o cmTryCompileExec2204784679 -rdynamic  
+Using built-in specs.
+COLLECT_GCC=/usr/bin/c++
+COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/4.9/lto-wrapper
+Target: x86_64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Ubuntu 4.9.2-10ubuntu13' --with-bugurl=file:///usr/share/doc/gcc-4.9/README.Bugs --enable-languages=c,c++,java,go,d,fortran,objc,obj-c++ --prefix=/usr --program-suffix=-4.9 --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --with-gxx-include-dir=/usr/include/c++/4.9 --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --with-system-zlib --disable-browser-plugin --enable-java-awt=gtk --enable-gtk-cairo --with-java-home=/usr/lib/jvm/java-1.5.0-gcj-4.9-amd64/jre --enable-java-home --with-jvm-root-dir=/usr/lib/jvm/java-1.5.0-gcj-4.9-amd64 --with-jvm-jar-dir=/usr/lib/jvm-exports/java-1.5.0-gcj-4.9-amd64 --with-arch-directory=amd64 --with-ecj-jar=/usr/share/java/eclipse-ecj.jar --enable-objc-gc --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
+Thread model: posix
+gcc version 4.9.2 (Ubuntu 4.9.2-10ubuntu13) 
+COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/
+LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTryCompileExec2204784679' '-rdynamic' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+ /usr/lib/gcc/x86_64-linux-gnu/4.9/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/4.9/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/4.9/lto-wrapper -plugin-opt=-fresolution=/tmp/cc0yYaPn.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -z relro -o cmTryCompileExec2204784679 /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crt1.o /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/4.9/crtbegin.o -L/usr/lib/gcc/x86_64-linux-gnu/4.9 -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../.. CMakeFiles/cmTryCompileExec2204784679.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/4.9/crtend.o /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crtn.o
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+Parsed CXX implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command:"/usr/bin/make" "cmTryCompileExec2204784679/fast"]
+  ignore line: [/usr/bin/make -f CMakeFiles/cmTryCompileExec2204784679.dir/build.make CMakeFiles/cmTryCompileExec2204784679.dir/build]
+  ignore line: [make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp']
+  ignore line: [/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1]
+  ignore line: [Building CXX object CMakeFiles/cmTryCompileExec2204784679.dir/CMakeCXXCompilerABI.cpp.o]
+  ignore line: [/usr/bin/c++     -o CMakeFiles/cmTryCompileExec2204784679.dir/CMakeCXXCompilerABI.cpp.o -c /usr/local/share/cmake-3.2/Modules/CMakeCXXCompilerABI.cpp]
+  ignore line: [Linking CXX executable cmTryCompileExec2204784679]
+  ignore line: [/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec2204784679.dir/link.txt --verbose=1]
+  ignore line: [/usr/bin/c++       -v CMakeFiles/cmTryCompileExec2204784679.dir/CMakeCXXCompilerABI.cpp.o  -o cmTryCompileExec2204784679 -rdynamic  ]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/c++]
+  ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/4.9/lto-wrapper]
+  ignore line: [Target: x86_64-linux-gnu]
+  ignore line: [Configured with: ../src/configure -v --with-pkgversion='Ubuntu 4.9.2-10ubuntu13' --with-bugurl=file:///usr/share/doc/gcc-4.9/README.Bugs --enable-languages=c,c++,java,go,d,fortran,objc,obj-c++ --prefix=/usr --program-suffix=-4.9 --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --with-gxx-include-dir=/usr/include/c++/4.9 --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --with-system-zlib --disable-browser-plugin --enable-java-awt=gtk --enable-gtk-cairo --with-java-home=/usr/lib/jvm/java-1.5.0-gcj-4.9-amd64/jre --enable-java-home --with-jvm-root-dir=/usr/lib/jvm/java-1.5.0-gcj-4.9-amd64 --with-jvm-jar-dir=/usr/lib/jvm-exports/java-1.5.0-gcj-4.9-amd64 --with-arch-directory=amd64 --with-ecj-jar=/usr/share/java/eclipse-ecj.jar --enable-objc-gc --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 4.9.2 (Ubuntu 4.9.2-10ubuntu13) ]
+  ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/]
+  ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/4.9/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../:/lib/:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTryCompileExec2204784679' '-rdynamic' '-shared-libgcc' '-mtune=generic' '-march=x86-64']
+  link line: [ /usr/lib/gcc/x86_64-linux-gnu/4.9/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/4.9/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/4.9/lto-wrapper -plugin-opt=-fresolution=/tmp/cc0yYaPn.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -z relro -o cmTryCompileExec2204784679 /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crt1.o /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/4.9/crtbegin.o -L/usr/lib/gcc/x86_64-linux-gnu/4.9 -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../.. CMakeFiles/cmTryCompileExec2204784679.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/4.9/crtend.o /usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crtn.o]
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/collect2] ==> ignore
+    arg [-plugin] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/liblto_plugin.so] ==> ignore
+    arg [-plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/4.9/lto-wrapper] ==> ignore
+    arg [-plugin-opt=-fresolution=/tmp/cc0yYaPn.res] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [--sysroot=/] ==> ignore
+    arg [--build-id] ==> ignore
+    arg [--eh-frame-hdr] ==> ignore
+    arg [-m] ==> ignore
+    arg [elf_x86_64] ==> ignore
+    arg [--hash-style=gnu] ==> ignore
+    arg [--as-needed] ==> ignore
+    arg [-export-dynamic] ==> ignore
+    arg [-dynamic-linker] ==> ignore
+    arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+    arg [-zrelro] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTryCompileExec2204784679] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crt1.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crti.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/crtbegin.o] ==> ignore
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/4.9] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/4.9]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib]
+    arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+    arg [-L/lib/../lib] ==> dir [/lib/../lib]
+    arg [-L/usr/lib/x86_64-linux-gnu] ==> dir [/usr/lib/x86_64-linux-gnu]
+    arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/4.9/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../..]
+    arg [CMakeFiles/cmTryCompileExec2204784679.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+    arg [-lstdc++] ==> lib [stdc++]
+    arg [-lm] ==> lib [m]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lc] ==> lib [c]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/crtend.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu/crtn.o] ==> ignore
+  remove lib [gcc_s]
+  remove lib [gcc]
+  remove lib [gcc_s]
+  remove lib [gcc]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/4.9] ==> [/usr/lib/gcc/x86_64-linux-gnu/4.9]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../../../lib] ==> [/usr/lib]
+  collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+  collapse library dir [/lib/../lib] ==> [/lib]
+  collapse library dir [/usr/lib/x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/../lib] ==> [/usr/lib]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/4.9/../../..] ==> [/usr/lib]
+  implicit libs: [stdc++;m;c]
+  implicit dirs: [/usr/lib/gcc/x86_64-linux-gnu/4.9;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib]
+  implicit fwks: []
+
+
+
+
+Detecting CXX [-std=c++14] compiler features compiled with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec1779201248/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec1779201248.dir/build.make CMakeFiles/cmTryCompileExec1779201248.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec1779201248.dir/feature_tests.cxx.o
+/usr/bin/c++    -std=c++14 -o CMakeFiles/cmTryCompileExec1779201248.dir/feature_tests.cxx.o -c /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/feature_tests.cxx
+Linking CXX executable cmTryCompileExec1779201248
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec1779201248.dir/link.txt --verbose=1
+/usr/bin/c++        CMakeFiles/cmTryCompileExec1779201248.dir/feature_tests.cxx.o  -o cmTryCompileExec1779201248 -rdynamic 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+    Feature record: CXX_FEATURE:0cxx_aggregate_default_initializers
+    Feature record: CXX_FEATURE:1cxx_alias_templates
+    Feature record: CXX_FEATURE:1cxx_alignas
+    Feature record: CXX_FEATURE:1cxx_alignof
+    Feature record: CXX_FEATURE:1cxx_attributes
+    Feature record: CXX_FEATURE:1cxx_attribute_deprecated
+    Feature record: CXX_FEATURE:1cxx_auto_type
+    Feature record: CXX_FEATURE:1cxx_binary_literals
+    Feature record: CXX_FEATURE:1cxx_constexpr
+    Feature record: CXX_FEATURE:1cxx_contextual_conversions
+    Feature record: CXX_FEATURE:1cxx_decltype
+    Feature record: CXX_FEATURE:1cxx_decltype_auto
+    Feature record: CXX_FEATURE:1cxx_decltype_incomplete_return_types
+    Feature record: CXX_FEATURE:1cxx_default_function_template_args
+    Feature record: CXX_FEATURE:1cxx_defaulted_functions
+    Feature record: CXX_FEATURE:1cxx_defaulted_move_initializers
+    Feature record: CXX_FEATURE:1cxx_delegating_constructors
+    Feature record: CXX_FEATURE:1cxx_deleted_functions
+    Feature record: CXX_FEATURE:1cxx_digit_separators
+    Feature record: CXX_FEATURE:1cxx_enum_forward_declarations
+    Feature record: CXX_FEATURE:1cxx_explicit_conversions
+    Feature record: CXX_FEATURE:1cxx_extended_friend_declarations
+    Feature record: CXX_FEATURE:1cxx_extern_templates
+    Feature record: CXX_FEATURE:1cxx_final
+    Feature record: CXX_FEATURE:1cxx_func_identifier
+    Feature record: CXX_FEATURE:1cxx_generalized_initializers
+    Feature record: CXX_FEATURE:1cxx_generic_lambdas
+    Feature record: CXX_FEATURE:1cxx_inheriting_constructors
+    Feature record: CXX_FEATURE:1cxx_inline_namespaces
+    Feature record: CXX_FEATURE:1cxx_lambdas
+    Feature record: CXX_FEATURE:1cxx_lambda_init_captures
+    Feature record: CXX_FEATURE:1cxx_local_type_template_args
+    Feature record: CXX_FEATURE:1cxx_long_long_type
+    Feature record: CXX_FEATURE:1cxx_noexcept
+    Feature record: CXX_FEATURE:1cxx_nonstatic_member_init
+    Feature record: CXX_FEATURE:1cxx_nullptr
+    Feature record: CXX_FEATURE:1cxx_override
+    Feature record: CXX_FEATURE:1cxx_range_for
+    Feature record: CXX_FEATURE:1cxx_raw_string_literals
+    Feature record: CXX_FEATURE:1cxx_reference_qualified_functions
+    Feature record: CXX_FEATURE:0cxx_relaxed_constexpr
+    Feature record: CXX_FEATURE:1cxx_return_type_deduction
+    Feature record: CXX_FEATURE:1cxx_right_angle_brackets
+    Feature record: CXX_FEATURE:1cxx_rvalue_references
+    Feature record: CXX_FEATURE:1cxx_sizeof_member
+    Feature record: CXX_FEATURE:1cxx_static_assert
+    Feature record: CXX_FEATURE:1cxx_strong_enums
+    Feature record: CXX_FEATURE:1cxx_template_template_parameters
+    Feature record: CXX_FEATURE:1cxx_thread_local
+    Feature record: CXX_FEATURE:1cxx_trailing_return_types
+    Feature record: CXX_FEATURE:1cxx_unicode_literals
+    Feature record: CXX_FEATURE:1cxx_uniform_initialization
+    Feature record: CXX_FEATURE:1cxx_unrestricted_unions
+    Feature record: CXX_FEATURE:1cxx_user_literals
+    Feature record: CXX_FEATURE:0cxx_variable_templates
+    Feature record: CXX_FEATURE:1cxx_variadic_macros
+    Feature record: CXX_FEATURE:1cxx_variadic_templates
+
+
+Detecting CXX [-std=c++11] compiler features compiled with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec2607926707/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec2607926707.dir/build.make CMakeFiles/cmTryCompileExec2607926707.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec2607926707.dir/feature_tests.cxx.o
+/usr/bin/c++    -std=c++11 -o CMakeFiles/cmTryCompileExec2607926707.dir/feature_tests.cxx.o -c /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/feature_tests.cxx
+Linking CXX executable cmTryCompileExec2607926707
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec2607926707.dir/link.txt --verbose=1
+/usr/bin/c++        CMakeFiles/cmTryCompileExec2607926707.dir/feature_tests.cxx.o  -o cmTryCompileExec2607926707 -rdynamic 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+    Feature record: CXX_FEATURE:0cxx_aggregate_default_initializers
+    Feature record: CXX_FEATURE:1cxx_alias_templates
+    Feature record: CXX_FEATURE:1cxx_alignas
+    Feature record: CXX_FEATURE:1cxx_alignof
+    Feature record: CXX_FEATURE:1cxx_attributes
+    Feature record: CXX_FEATURE:0cxx_attribute_deprecated
+    Feature record: CXX_FEATURE:1cxx_auto_type
+    Feature record: CXX_FEATURE:0cxx_binary_literals
+    Feature record: CXX_FEATURE:1cxx_constexpr
+    Feature record: CXX_FEATURE:0cxx_contextual_conversions
+    Feature record: CXX_FEATURE:1cxx_decltype
+    Feature record: CXX_FEATURE:0cxx_decltype_auto
+    Feature record: CXX_FEATURE:1cxx_decltype_incomplete_return_types
+    Feature record: CXX_FEATURE:1cxx_default_function_template_args
+    Feature record: CXX_FEATURE:1cxx_defaulted_functions
+    Feature record: CXX_FEATURE:1cxx_defaulted_move_initializers
+    Feature record: CXX_FEATURE:1cxx_delegating_constructors
+    Feature record: CXX_FEATURE:1cxx_deleted_functions
+    Feature record: CXX_FEATURE:0cxx_digit_separators
+    Feature record: CXX_FEATURE:1cxx_enum_forward_declarations
+    Feature record: CXX_FEATURE:1cxx_explicit_conversions
+    Feature record: CXX_FEATURE:1cxx_extended_friend_declarations
+    Feature record: CXX_FEATURE:1cxx_extern_templates
+    Feature record: CXX_FEATURE:1cxx_final
+    Feature record: CXX_FEATURE:1cxx_func_identifier
+    Feature record: CXX_FEATURE:1cxx_generalized_initializers
+    Feature record: CXX_FEATURE:0cxx_generic_lambdas
+    Feature record: CXX_FEATURE:1cxx_inheriting_constructors
+    Feature record: CXX_FEATURE:1cxx_inline_namespaces
+    Feature record: CXX_FEATURE:1cxx_lambdas
+    Feature record: CXX_FEATURE:0cxx_lambda_init_captures
+    Feature record: CXX_FEATURE:1cxx_local_type_template_args
+    Feature record: CXX_FEATURE:1cxx_long_long_type
+    Feature record: CXX_FEATURE:1cxx_noexcept
+    Feature record: CXX_FEATURE:1cxx_nonstatic_member_init
+    Feature record: CXX_FEATURE:1cxx_nullptr
+    Feature record: CXX_FEATURE:1cxx_override
+    Feature record: CXX_FEATURE:1cxx_range_for
+    Feature record: CXX_FEATURE:1cxx_raw_string_literals
+    Feature record: CXX_FEATURE:1cxx_reference_qualified_functions
+    Feature record: CXX_FEATURE:0cxx_relaxed_constexpr
+    Feature record: CXX_FEATURE:0cxx_return_type_deduction
+    Feature record: CXX_FEATURE:1cxx_right_angle_brackets
+    Feature record: CXX_FEATURE:1cxx_rvalue_references
+    Feature record: CXX_FEATURE:1cxx_sizeof_member
+    Feature record: CXX_FEATURE:1cxx_static_assert
+    Feature record: CXX_FEATURE:1cxx_strong_enums
+    Feature record: CXX_FEATURE:1cxx_template_template_parameters
+    Feature record: CXX_FEATURE:1cxx_thread_local
+    Feature record: CXX_FEATURE:1cxx_trailing_return_types
+    Feature record: CXX_FEATURE:1cxx_unicode_literals
+    Feature record: CXX_FEATURE:1cxx_uniform_initialization
+    Feature record: CXX_FEATURE:1cxx_unrestricted_unions
+    Feature record: CXX_FEATURE:1cxx_user_literals
+    Feature record: CXX_FEATURE:0cxx_variable_templates
+    Feature record: CXX_FEATURE:1cxx_variadic_macros
+    Feature record: CXX_FEATURE:1cxx_variadic_templates
+
+
+Detecting CXX [-std=c++98] compiler features compiled with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec3997083798/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec3997083798.dir/build.make CMakeFiles/cmTryCompileExec3997083798.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec3997083798.dir/feature_tests.cxx.o
+/usr/bin/c++    -std=c++98 -o CMakeFiles/cmTryCompileExec3997083798.dir/feature_tests.cxx.o -c /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/feature_tests.cxx
+Linking CXX executable cmTryCompileExec3997083798
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec3997083798.dir/link.txt --verbose=1
+/usr/bin/c++        CMakeFiles/cmTryCompileExec3997083798.dir/feature_tests.cxx.o  -o cmTryCompileExec3997083798 -rdynamic 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+    Feature record: CXX_FEATURE:0cxx_aggregate_default_initializers
+    Feature record: CXX_FEATURE:0cxx_alias_templates
+    Feature record: CXX_FEATURE:0cxx_alignas
+    Feature record: CXX_FEATURE:0cxx_alignof
+    Feature record: CXX_FEATURE:0cxx_attributes
+    Feature record: CXX_FEATURE:0cxx_attribute_deprecated
+    Feature record: CXX_FEATURE:0cxx_auto_type
+    Feature record: CXX_FEATURE:0cxx_binary_literals
+    Feature record: CXX_FEATURE:0cxx_constexpr
+    Feature record: CXX_FEATURE:0cxx_contextual_conversions
+    Feature record: CXX_FEATURE:0cxx_decltype
+    Feature record: CXX_FEATURE:0cxx_decltype_auto
+    Feature record: CXX_FEATURE:0cxx_decltype_incomplete_return_types
+    Feature record: CXX_FEATURE:0cxx_default_function_template_args
+    Feature record: CXX_FEATURE:0cxx_defaulted_functions
+    Feature record: CXX_FEATURE:0cxx_defaulted_move_initializers
+    Feature record: CXX_FEATURE:0cxx_delegating_constructors
+    Feature record: CXX_FEATURE:0cxx_deleted_functions
+    Feature record: CXX_FEATURE:0cxx_digit_separators
+    Feature record: CXX_FEATURE:0cxx_enum_forward_declarations
+    Feature record: CXX_FEATURE:0cxx_explicit_conversions
+    Feature record: CXX_FEATURE:0cxx_extended_friend_declarations
+    Feature record: CXX_FEATURE:0cxx_extern_templates
+    Feature record: CXX_FEATURE:0cxx_final
+    Feature record: CXX_FEATURE:0cxx_func_identifier
+    Feature record: CXX_FEATURE:0cxx_generalized_initializers
+    Feature record: CXX_FEATURE:0cxx_generic_lambdas
+    Feature record: CXX_FEATURE:0cxx_inheriting_constructors
+    Feature record: CXX_FEATURE:0cxx_inline_namespaces
+    Feature record: CXX_FEATURE:0cxx_lambdas
+    Feature record: CXX_FEATURE:0cxx_lambda_init_captures
+    Feature record: CXX_FEATURE:0cxx_local_type_template_args
+    Feature record: CXX_FEATURE:0cxx_long_long_type
+    Feature record: CXX_FEATURE:0cxx_noexcept
+    Feature record: CXX_FEATURE:0cxx_nonstatic_member_init
+    Feature record: CXX_FEATURE:0cxx_nullptr
+    Feature record: CXX_FEATURE:0cxx_override
+    Feature record: CXX_FEATURE:0cxx_range_for
+    Feature record: CXX_FEATURE:0cxx_raw_string_literals
+    Feature record: CXX_FEATURE:0cxx_reference_qualified_functions
+    Feature record: CXX_FEATURE:0cxx_relaxed_constexpr
+    Feature record: CXX_FEATURE:0cxx_return_type_deduction
+    Feature record: CXX_FEATURE:0cxx_right_angle_brackets
+    Feature record: CXX_FEATURE:0cxx_rvalue_references
+    Feature record: CXX_FEATURE:0cxx_sizeof_member
+    Feature record: CXX_FEATURE:0cxx_static_assert
+    Feature record: CXX_FEATURE:0cxx_strong_enums
+    Feature record: CXX_FEATURE:1cxx_template_template_parameters
+    Feature record: CXX_FEATURE:0cxx_thread_local
+    Feature record: CXX_FEATURE:0cxx_trailing_return_types
+    Feature record: CXX_FEATURE:0cxx_unicode_literals
+    Feature record: CXX_FEATURE:0cxx_uniform_initialization
+    Feature record: CXX_FEATURE:0cxx_unrestricted_unions
+    Feature record: CXX_FEATURE:0cxx_user_literals
+    Feature record: CXX_FEATURE:0cxx_variable_templates
+    Feature record: CXX_FEATURE:0cxx_variadic_macros
+    Feature record: CXX_FEATURE:0cxx_variadic_templates
+Determining if the function XOpenDisplay exists in the /usr/lib/x86_64-linux-gnu/libX11.so;/usr/lib/x86_64-linux-gnu/libXext.so passed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec4259478899/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec4259478899.dir/build.make CMakeFiles/cmTryCompileExec4259478899.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec4259478899.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=XOpenDisplay   -o CMakeFiles/cmTryCompileExec4259478899.dir/CheckFunctionExists.c.o   -c /usr/local/share/cmake-3.2/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec4259478899
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec4259478899.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=XOpenDisplay    CMakeFiles/cmTryCompileExec4259478899.dir/CheckFunctionExists.c.o  -o cmTryCompileExec4259478899 -rdynamic -lX11 -lXext 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+Determining if the function gethostbyname exists passed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec1071763766/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec1071763766.dir/build.make CMakeFiles/cmTryCompileExec1071763766.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec1071763766.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=gethostbyname   -o CMakeFiles/cmTryCompileExec1071763766.dir/CheckFunctionExists.c.o   -c /usr/local/share/cmake-3.2/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec1071763766
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec1071763766.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=gethostbyname    CMakeFiles/cmTryCompileExec1071763766.dir/CheckFunctionExists.c.o  -o cmTryCompileExec1071763766 -rdynamic 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+Determining if the function connect exists passed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec2351969143/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec2351969143.dir/build.make CMakeFiles/cmTryCompileExec2351969143.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec2351969143.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=connect   -o CMakeFiles/cmTryCompileExec2351969143.dir/CheckFunctionExists.c.o   -c /usr/local/share/cmake-3.2/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec2351969143
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec2351969143.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=connect    CMakeFiles/cmTryCompileExec2351969143.dir/CheckFunctionExists.c.o  -o cmTryCompileExec2351969143 -rdynamic 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+Determining if the function remove exists passed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec496513151/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec496513151.dir/build.make CMakeFiles/cmTryCompileExec496513151.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec496513151.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=remove   -o CMakeFiles/cmTryCompileExec496513151.dir/CheckFunctionExists.c.o   -c /usr/local/share/cmake-3.2/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec496513151
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec496513151.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=remove    CMakeFiles/cmTryCompileExec496513151.dir/CheckFunctionExists.c.o  -o cmTryCompileExec496513151 -rdynamic 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+Determining if the function shmat exists passed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec2229607528/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec2229607528.dir/build.make CMakeFiles/cmTryCompileExec2229607528.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec2229607528.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=shmat   -o CMakeFiles/cmTryCompileExec2229607528.dir/CheckFunctionExists.c.o   -c /usr/local/share/cmake-3.2/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec2229607528
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec2229607528.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=shmat    CMakeFiles/cmTryCompileExec2229607528.dir/CheckFunctionExists.c.o  -o cmTryCompileExec2229607528 -rdynamic 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+Determining if the function IceConnectionNumber exists in the ICE passed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec2344100207/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec2344100207.dir/build.make CMakeFiles/cmTryCompileExec2344100207.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec2344100207.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=IceConnectionNumber   -o CMakeFiles/cmTryCompileExec2344100207.dir/CheckFunctionExists.c.o   -c /usr/local/share/cmake-3.2/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec2344100207
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec2344100207.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=IceConnectionNumber    CMakeFiles/cmTryCompileExec2344100207.dir/CheckFunctionExists.c.o  -o cmTryCompileExec2344100207 -rdynamic -lICE 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+Determining if the function png_create_read_struct exists passed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec1241842658/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec1241842658.dir/build.make CMakeFiles/cmTryCompileExec1241842658.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec1241842658.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=png_create_read_struct   -o CMakeFiles/cmTryCompileExec1241842658.dir/CheckFunctionExists.c.o   -c /usr/local/share/cmake-3.2/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec1241842658
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec1241842658.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=png_create_read_struct    CMakeFiles/cmTryCompileExec1241842658.dir/CheckFunctionExists.c.o  -o cmTryCompileExec1241842658 -rdynamic -lpng 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+Determining if the function jpeg_read_header exists passed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec725700078/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec725700078.dir/build.make CMakeFiles/cmTryCompileExec725700078.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec725700078.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=jpeg_read_header   -o CMakeFiles/cmTryCompileExec725700078.dir/CheckFunctionExists.c.o   -c /usr/local/share/cmake-3.2/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec725700078
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec725700078.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=jpeg_read_header    CMakeFiles/cmTryCompileExec725700078.dir/CheckFunctionExists.c.o  -o cmTryCompileExec725700078 -rdynamic -ljpeg 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file sys/types.h exists passed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec180989780/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec180989780.dir/build.make CMakeFiles/cmTryCompileExec180989780.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec180989780.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTryCompileExec180989780.dir/CheckIncludeFile.c.o   -c /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTryCompileExec180989780
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec180989780.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTryCompileExec180989780.dir/CheckIncludeFile.c.o  -o cmTryCompileExec180989780 -rdynamic 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file stdint.h exists passed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec3662094971/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec3662094971.dir/build.make CMakeFiles/cmTryCompileExec3662094971.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec3662094971.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTryCompileExec3662094971.dir/CheckIncludeFile.c.o   -c /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTryCompileExec3662094971
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec3662094971.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTryCompileExec3662094971.dir/CheckIncludeFile.c.o  -o cmTryCompileExec3662094971 -rdynamic 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file stddef.h exists passed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec3269452100/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec3269452100.dir/build.make CMakeFiles/cmTryCompileExec3269452100.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec3269452100.dir/CheckIncludeFile.c.o
+/usr/bin/cc    -o CMakeFiles/cmTryCompileExec3269452100.dir/CheckIncludeFile.c.o   -c /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTryCompileExec3269452100
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec3269452100.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTryCompileExec3269452100.dir/CheckIncludeFile.c.o  -o cmTryCompileExec3269452100 -rdynamic 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+Determining size of void* passed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec3066481127/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec3066481127.dir/build.make CMakeFiles/cmTryCompileExec3066481127.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec3066481127.dir/SIZE_OF_VOID_PTR.c.o
+/usr/bin/cc    -o CMakeFiles/cmTryCompileExec3066481127.dir/SIZE_OF_VOID_PTR.c.o   -c /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CheckTypeSize/SIZE_OF_VOID_PTR.c
+Linking C executable cmTryCompileExec3066481127
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec3066481127.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTryCompileExec3066481127.dir/SIZE_OF_VOID_PTR.c.o  -o cmTryCompileExec3066481127 -rdynamic -ljpeg 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+Determining if the function cblas_ddot exists passed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec3366719158/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec3366719158.dir/build.make CMakeFiles/cmTryCompileExec3366719158.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec3366719158.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=cblas_ddot   -o CMakeFiles/cmTryCompileExec3366719158.dir/CheckFunctionExists.c.o   -c /usr/local/share/cmake-3.2/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec3366719158
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec3366719158.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=cblas_ddot    CMakeFiles/cmTryCompileExec3366719158.dir/CheckFunctionExists.c.o  -o cmTryCompileExec3366719158 -rdynamic -latlas -lcblas 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+Determining if the CXX compiler has std namespace passed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec435564858/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec435564858.dir/build.make CMakeFiles/cmTryCompileExec435564858.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec435564858.dir/TestForSTDNamespace.cxx.o
+/usr/bin/c++     -o CMakeFiles/cmTryCompileExec435564858.dir/TestForSTDNamespace.cxx.o -c /usr/local/share/cmake-3.2/Modules/TestForSTDNamespace.cxx
+Linking CXX executable cmTryCompileExec435564858
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec435564858.dir/link.txt --verbose=1
+/usr/bin/c++        CMakeFiles/cmTryCompileExec435564858.dir/TestForSTDNamespace.cxx.o  -o cmTryCompileExec435564858 -rdynamic 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file iostream exists passed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec702499978/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec702499978.dir/build.make CMakeFiles/cmTryCompileExec702499978.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec702499978.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++     -o CMakeFiles/cmTryCompileExec702499978.dir/CheckIncludeFile.cxx.o -c /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTryCompileExec702499978
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec702499978.dir/link.txt --verbose=1
+/usr/bin/c++        CMakeFiles/cmTryCompileExec702499978.dir/CheckIncludeFile.cxx.o  -o cmTryCompileExec702499978 -rdynamic 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+Determining if files pthread.h exist passed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec975237572/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec975237572.dir/build.make CMakeFiles/cmTryCompileExec975237572.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec975237572.dir/CheckIncludeFiles.c.o
+/usr/bin/cc    -o CMakeFiles/cmTryCompileExec975237572.dir/CheckIncludeFiles.c.o   -c /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CheckIncludeFiles.c
+Linking C executable cmTryCompileExec975237572
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec975237572.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTryCompileExec975237572.dir/CheckIncludeFiles.c.o  -o cmTryCompileExec975237572 -rdynamic 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+
+Determining if the function pthread_create exists in the pthread passed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec3302818510/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec3302818510.dir/build.make CMakeFiles/cmTryCompileExec3302818510.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec3302818510.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTryCompileExec3302818510.dir/CheckFunctionExists.c.o   -c /usr/local/share/cmake-3.2/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec3302818510
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec3302818510.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTryCompileExec3302818510.dir/CheckFunctionExists.c.o  -o cmTryCompileExec3302818510 -rdynamic -lpthread 
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+
+

@@ -1,0 +1,79 @@
+Determining if the pthread_create exist failed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec187562715/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec187562715.dir/build.make CMakeFiles/cmTryCompileExec187562715.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec187562715.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -o CMakeFiles/cmTryCompileExec187562715.dir/CheckSymbolExists.c.o   -c /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTryCompileExec187562715
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec187562715.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTryCompileExec187562715.dir/CheckSymbolExists.c.o  -o cmTryCompileExec187562715 -rdynamic 
+CMakeFiles/cmTryCompileExec187562715.dir/CheckSymbolExists.c.o: In function `main':
+CheckSymbolExists.c:(.text+0x16): undefined reference to `pthread_create'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTryCompileExec187562715.dir/build.make:88: recipe for target 'cmTryCompileExec187562715' failed
+make[1]: *** [cmTryCompileExec187562715] Error 1
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+Makefile:117: recipe for target 'cmTryCompileExec187562715/fast' failed
+make: *** [cmTryCompileExec187562715/fast] Error 2
+
+File /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec4194767043/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec4194767043.dir/build.make CMakeFiles/cmTryCompileExec4194767043.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec4194767043.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTryCompileExec4194767043.dir/CheckFunctionExists.c.o   -c /usr/local/share/cmake-3.2/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec4194767043
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec4194767043.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTryCompileExec4194767043.dir/CheckFunctionExists.c.o  -o cmTryCompileExec4194767043 -rdynamic -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTryCompileExec4194767043.dir/build.make:88: recipe for target 'cmTryCompileExec4194767043' failed
+make[1]: *** [cmTryCompileExec4194767043] Error 1
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+Makefile:117: recipe for target 'cmTryCompileExec4194767043/fast' failed
+make: *** [cmTryCompileExec4194767043/fast] Error 2
+
+
+Determining if the function sgetrf_single exists failed with the following output:
+Change Dir: /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec1229018267/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec1229018267.dir/build.make CMakeFiles/cmTryCompileExec1229018267.dir/build
+make[1]: Entering directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+/usr/local/bin/cmake -E cmake_progress_report /home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec1229018267.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=sgetrf_single   -o CMakeFiles/cmTryCompileExec1229018267.dir/CheckFunctionExists.c.o   -c /usr/local/share/cmake-3.2/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec1229018267
+/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec1229018267.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=sgetrf_single    CMakeFiles/cmTryCompileExec1229018267.dir/CheckFunctionExists.c.o  -o cmTryCompileExec1229018267 -rdynamic -lcblas 
+CMakeFiles/cmTryCompileExec1229018267.dir/CheckFunctionExists.c.o: In function `main':
+CheckFunctionExists.c:(.text+0x15): undefined reference to `sgetrf_single'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTryCompileExec1229018267.dir/build.make:89: recipe for target 'cmTryCompileExec1229018267' failed
+make[1]: Leaving directory '/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/CMakeTmp'
+make[1]: *** [cmTryCompileExec1229018267] Error 1
+Makefile:117: recipe for target 'cmTryCompileExec1229018267/fast' failed
+make: *** [cmTryCompileExec1229018267/fast] Error 2
+
+
