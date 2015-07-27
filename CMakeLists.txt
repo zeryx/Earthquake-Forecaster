@@ -1,6 +1,6 @@
 project(Earthquake_Forecaster)
 find_package(CUDA REQUIRED)
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 2.8)
 include(dlib/cmake)
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -gencode arch=compute_30,code=sm_30)
 CUDA_ADD_EXECUTABLE(${PROJECT_NAME} main.cpp)
