@@ -11,10 +11,7 @@ set(CMAKE_MAKEFILE_DEPENDS
   "CMakeFiles/3.2.1/CMakeCCompiler.cmake"
   "CMakeFiles/3.2.1/CMakeCXXCompiler.cmake"
   "CMakeFiles/3.2.1/CMakeSystem.cmake"
-  "../dlib/CMakeLists.txt"
-  "../dlib/cmake"
-  "../dlib/cmake_find_blas.txt"
-  "../dlib/release_build_by_default"
+  "CMakeFiles/Earthquake_Forecaster.dir/Earthquake_Forecaster_generated_test.cu.o.depend"
   "/usr/local/share/cmake-3.2/Modules/CMakeCInformation.cmake"
   "/usr/local/share/cmake-3.2/Modules/CMakeCXXInformation.cmake"
   "/usr/local/share/cmake-3.2/Modules/CMakeCommonLanguageInclude.cmake"
@@ -24,30 +21,18 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/usr/local/share/cmake-3.2/Modules/CMakeParseArguments.cmake"
   "/usr/local/share/cmake-3.2/Modules/CMakeSystemSpecificInformation.cmake"
   "/usr/local/share/cmake-3.2/Modules/CMakeSystemSpecificInitialize.cmake"
-  "/usr/local/share/cmake-3.2/Modules/CheckFunctionExists.c"
-  "/usr/local/share/cmake-3.2/Modules/CheckFunctionExists.cmake"
-  "/usr/local/share/cmake-3.2/Modules/CheckIncludeFile.cmake"
-  "/usr/local/share/cmake-3.2/Modules/CheckIncludeFileCXX.cmake"
-  "/usr/local/share/cmake-3.2/Modules/CheckLibraryExists.cmake"
-  "/usr/local/share/cmake-3.2/Modules/CheckTypeSize.cmake"
   "/usr/local/share/cmake-3.2/Modules/Compiler/GNU-C.cmake"
   "/usr/local/share/cmake-3.2/Modules/Compiler/GNU-CXX.cmake"
   "/usr/local/share/cmake-3.2/Modules/Compiler/GNU.cmake"
   "/usr/local/share/cmake-3.2/Modules/FindCUDA.cmake"
-  "/usr/local/share/cmake-3.2/Modules/FindJPEG.cmake"
-  "/usr/local/share/cmake-3.2/Modules/FindPNG.cmake"
+  "/usr/local/share/cmake-3.2/Modules/FindCUDA/run_nvcc.cmake"
   "/usr/local/share/cmake-3.2/Modules/FindPackageHandleStandardArgs.cmake"
   "/usr/local/share/cmake-3.2/Modules/FindPackageMessage.cmake"
-  "/usr/local/share/cmake-3.2/Modules/FindX11.cmake"
-  "/usr/local/share/cmake-3.2/Modules/FindZLIB.cmake"
   "/usr/local/share/cmake-3.2/Modules/Platform/Linux-GNU-C.cmake"
   "/usr/local/share/cmake-3.2/Modules/Platform/Linux-GNU-CXX.cmake"
   "/usr/local/share/cmake-3.2/Modules/Platform/Linux-GNU.cmake"
   "/usr/local/share/cmake-3.2/Modules/Platform/Linux.cmake"
   "/usr/local/share/cmake-3.2/Modules/Platform/UnixPaths.cmake"
-  "/usr/local/share/cmake-3.2/Modules/SelectLibraryConfigurations.cmake"
-  "/usr/local/share/cmake-3.2/Modules/TestForANSIStreamHeaders.cmake"
-  "/usr/local/share/cmake-3.2/Modules/TestForSTDNamespace.cmake"
   )
 
 # The corresponding makefile is:
@@ -58,12 +43,11 @@ set(CMAKE_MAKEFILE_OUTPUTS
 
 # Byproducts of CMake generate step:
 set(CMAKE_MAKEFILE_PRODUCTS
+  "CMakeFiles/Earthquake_Forecaster.dir/Earthquake_Forecaster_generated_test.cu.o.cmake"
   "CMakeFiles/CMakeDirectoryInformation.cmake"
-  "dlib_build/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/Earthquake_Forecaster.dir/DependInfo.cmake"
-  "dlib_build/CMakeFiles/dlib.dir/DependInfo.cmake"
   )

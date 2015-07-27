@@ -1,23 +1,38 @@
-#include "test.h"
-#include <thrust/device_vector.h>
-#include <thrust/reduce.h>
-#include <thrust/sequence.h>
+#include<stdio.h>
+#include<cuda.h>
+#include<cuda_runtime_api.h>
 
-template<typename T>
-struct Fun
+__global__ void AddIntsCUDA(int *a, int *b) //Kernel Definition
 {
-        __device__ T operator()(T t1, T t2)
-        {
-            auto result = t1+t2;
-            return result;
-        }
-};
+    *a = *a + *b;
+}
 
-int run()
+int main()
 {
-    const int N = 100;
-    thrust::device_vector<int> vec(N);
-    thrust::sequence(vec.begin(),vec.end());
-    auto op = Fun<int>();
-    return thrust::reduce(vec.begin(),vec.end(),0,op);
+    int a = 5, b = 9;
+    int *d_a, *d_b; //Device variable Declaration
+
+        //Allocation of Device Variables
+    cudaMalloc((void **)&d_a, sizeof(int));
+    cudaMalloc((void **)&d_b, sizeof(int));
+
+        //Copy Host Memory to Device Memory
+    cudaMemcpy(d_a, &a, sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_b, &b, sizeof(int), cudaMemcpyHostToDevice);
+
+
+        //Launch Kernel
+    AddIntsCUDA << <1, 1 >> >(d_a, d_b);
+
+        //Copy Device Memory to Host Memory
+    cudaMemcpy(&a, d_a, sizeof(int), cudaMemcpyDeviceToHost);
+
+    printf("The answer is ",a);
+
+
+        //Free Device Memory
+        cudaFree(d_a);
+    cudaFree(d_b);
+
+    return 0;
 }

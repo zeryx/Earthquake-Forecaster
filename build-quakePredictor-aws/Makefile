@@ -114,43 +114,6 @@ Earthquake_Forecaster/fast:
 	$(MAKE) -f CMakeFiles/Earthquake_Forecaster.dir/build.make CMakeFiles/Earthquake_Forecaster.dir/build
 .PHONY : Earthquake_Forecaster/fast
 
-#=============================================================================
-# Target rules for targets named dlib
-
-# Build rule for target.
-dlib: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 dlib
-.PHONY : dlib
-
-# fast build rule for target.
-dlib/fast:
-	$(MAKE) -f dlib_build/CMakeFiles/dlib.dir/build.make dlib_build/CMakeFiles/dlib.dir/build
-.PHONY : dlib/fast
-
-main.o: main.cpp.o
-.PHONY : main.o
-
-# target to build an object file
-main.cpp.o:
-	$(MAKE) -f CMakeFiles/Earthquake_Forecaster.dir/build.make CMakeFiles/Earthquake_Forecaster.dir/main.cpp.o
-.PHONY : main.cpp.o
-
-main.i: main.cpp.i
-.PHONY : main.i
-
-# target to preprocess a source file
-main.cpp.i:
-	$(MAKE) -f CMakeFiles/Earthquake_Forecaster.dir/build.make CMakeFiles/Earthquake_Forecaster.dir/main.cpp.i
-.PHONY : main.cpp.i
-
-main.s: main.cpp.s
-.PHONY : main.s
-
-# target to generate assembly for a file
-main.cpp.s:
-	$(MAKE) -f CMakeFiles/Earthquake_Forecaster.dir/build.make CMakeFiles/Earthquake_Forecaster.dir/main.cpp.s
-.PHONY : main.cpp.s
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -160,10 +123,6 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... Earthquake_Forecaster"
-	@echo "... dlib"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
 .PHONY : help
 
 

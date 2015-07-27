@@ -72,9 +72,9 @@ set(generated_cubin_file_internal "/home/james/Documents/TopCoder/Solutions/git/
 set(CUDA_NVCC_EXECUTABLE "/usr/local/cuda/bin/nvcc") # path
 set(CUDA_NVCC_FLAGS -gencode;arch=compute_30,code=sm_30 ;; ) # list
 # Build specific configuration flags
+set(CUDA_NVCC_FLAGS_RELEASE  ; )
 set(CUDA_NVCC_FLAGS_DEBUG  ; )
 set(CUDA_NVCC_FLAGS_MINSIZEREL  ; )
-set(CUDA_NVCC_FLAGS_RELEASE  ; )
 set(CUDA_NVCC_FLAGS_RELWITHDEBINFO  ; )
 set(nvcc_flags -m64) # list
 set(CUDA_NVCC_INCLUDE_ARGS "-I/usr/local/cuda/include;-I/usr/local/cuda/include") # list (needs to be in quotes to handle spaces properly).
@@ -86,10 +86,10 @@ endif()
 
 # This is the list of host compilation flags.  It C or CXX should already have
 # been chosen by FindCUDA.cmake.
-set(CMAKE_HOST_FLAGS  )
-set(CMAKE_HOST_FLAGS_DEBUG -g)
-set(CMAKE_HOST_FLAGS_MINSIZEREL -Os -DNDEBUG)
+set(CMAKE_HOST_FLAGS  -DDLIB_PNG_SUPPORT -DDLIB_JPEG_SUPPORT -DDLIB_USE_BLAS -DDLIB_USE_LAPACK )
 set(CMAKE_HOST_FLAGS_RELEASE -O3 -DNDEBUG)
+set(CMAKE_HOST_FLAGS_DEBUG -g -DENABLE_ASSERTS)
+set(CMAKE_HOST_FLAGS_MINSIZEREL -Os -DNDEBUG)
 set(CMAKE_HOST_FLAGS_RELWITHDEBINFO -O2 -g -DNDEBUG)
 
 # Take the compiler flags and package them up to be sent to the compiler via -Xcompiler
