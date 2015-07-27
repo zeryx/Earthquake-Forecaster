@@ -3,15 +3,17 @@
 #include <time.h>
 #include <iostream>
 #include <dlib/bayes_utils.h>
-
+#include <thrust/version.h>
 
 #include <iostream>
 #include "test.h"
 
 int main()
 {
-    std::cout << run() << std::endl;
-    return 0;
+    int major = THRUST_MAJOR_VERSION;
+    int minor = THRUST_MINOR_VERSION;
+
+    std::cout<<"Thrust V"<<major<<"."<<minor<<std::endl;
 }
 
 //int quakeInit(int sampleRate, int Sites, std::vector<double>sitesData){
