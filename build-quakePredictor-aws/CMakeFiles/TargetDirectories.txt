@@ -1,1 +1,0 @@
-/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/Earthquake_Forecaster.dir
