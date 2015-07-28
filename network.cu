@@ -29,7 +29,7 @@ struct genRand{
 NetworkGenetic::NetworkGenetic(){}
 
 NetworkGenetic::NetworkGenetic(const int &numInNeurons, const int &numHiddenNeurons,
-                               const int &numOutNeurons, std::map<int, int> &connections){
+                               const int &numOutNeurons, std::map<const int, int> &connections){
     _constantNNParams.push_back(numInNeurons);
     _constantNNParams.push_back(numHiddenNeurons);
     _constantNNParams.push_back(numOutNeurons);
