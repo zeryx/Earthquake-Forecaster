@@ -6,7 +6,7 @@
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/system_error.h>
 #include <cuda.h>
-#include <vector>
+#include <ctime>
 #include <cuda_runtime.h>
 
 struct genRand: thrust::unary_function<Individual, int>{
@@ -42,9 +42,7 @@ NetworkGenetic::NetworkGenetic(const int &numInNeurons, const int &numHiddenNeur
 }
 
 bool NetworkGenetic::generatePop(int popsize){
-    cudaEvent_t start, stop;
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
+    double start = 0;
     thrust::device_vector<Individual> testing;
     for(int i=0; i<popsize; i++){
         Individual obj(_neuronsTotalNum);
@@ -52,22 +50,18 @@ bool NetworkGenetic::generatePop(int popsize){
     }
 
     try{
-        cudaEventRecord(start);
+        start = (double) std::time(0);
         thrust::transform(testing.begin(),
                           testing.end(), testing.begin(), genRand(_neuronsTotalNum));
-        cudaDeviceSynchronize();
     }
     catch(thrust::system_error &err){
         std::cerr<<"error transforming: "<<err.what()<<std::endl;
         return false;
     }
-    cudaEventRecord(stop);
-    float miliseconds = 0;
-    cudaError_t err = cudaEventElapsedTime(&miliseconds, start, stop);
-    if(err != cudaSuccess){
-        std::cout<<"\n\n 1. Error: "<<cudaGetErrorString(err)<<std::endl<<std::endl;
-    }
-    std::cout<<miliseconds<<" ms"<<std::endl;
+    cudaDeviceSynchronize();
+
+    start = ((double) std::time(0) - start)/(double)CLOCKS_PER_SEC;
+    std::cout<<start<<" sec"<<std::endl;
 
     return true;
 }
