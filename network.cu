@@ -6,7 +6,7 @@
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/system_error.h>
 #include <cuda.h>
-#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
 
 struct genRand{
  __host__ __device__
@@ -30,8 +30,13 @@ NetworkGenetic::NetworkGenetic(const int &numInNeurons, const int &numHiddenNeur
 }
 
 bool NetworkGenetic::generatePop(int popsize){
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+
     thrust::device_vector<float> testing(popsize);
     try{
+        cudaEventRecord(start);
         thrust::transform(thrust::counting_iterator<int>(0),
                           thrust::counting_iterator<int>(popsize), testing.begin(), genRand());
     }
@@ -39,9 +44,12 @@ bool NetworkGenetic::generatePop(int popsize){
         std::cerr<<"error transforming: "<<err.what()<<std::endl;
         return false;
     }
+cudaEventRecord(stop);
+float miliseconds = 0;
     for(int i=0; i<popsize; i++){
         std::cout<<testing[i]<<std::endl;
     }
+    cudaEventElapsedTime(&miliseconds, start, stop);
 
     return true;
 }
