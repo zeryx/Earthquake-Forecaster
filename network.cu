@@ -6,19 +6,21 @@
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/system_error.h>
 #include <cuda.h>
-#include <ctime>
+#include <vector>
 #include <cuda_runtime.h>
 
-struct genRand: thrust::unary_function<Individual, int>{
+struct genWeights: thrust::unary_function<Individual, int>{
 
     int numWeights;
 
-    genRand(int _numWeights) : numWeights(_numWeights){}
+    genWeights(int _numWeights) : numWeights(_numWeights){
+    }
 
-    __host__ __device__
+    __device__
     Individual operator()(Individual n) const{
         unsigned int idx= threadIdx.x*blockDim.x;
-
+        float *weights = new float[numWeights];
+        n._weights = weights;
         for(int i=0; i<numWeights; i++){
             idx = idx +i;
             thrust::default_random_engine randEng;
@@ -29,6 +31,13 @@ struct genRand: thrust::unary_function<Individual, int>{
         return n;
     }};
 
+struct delWeights{
+    __device__ __host__
+    Individual operator()(Individual n) const{
+        delete[] n._weights;
+        return n;
+    }
+};
 
 NetworkGenetic::NetworkGenetic(){}
 
@@ -42,26 +51,29 @@ NetworkGenetic::NetworkGenetic(const int &numInNeurons, const int &numHiddenNeur
 }
 
 bool NetworkGenetic::generatePop(int popsize){
-    double start = 0;
-    thrust::device_vector<Individual> testing;
-    for(int i=0; i<popsize; i++){
-        Individual obj(_neuronsTotalNum);
-        testing.push_back(obj);
-    }
-
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+    thrust::device_vector<Individual> testing(popsize);
     try{
-        start = (double) std::time(0);
+        cudaEventRecord(start, 0);
         thrust::transform(testing.begin(),
-                          testing.end(), testing.begin(), genRand(_neuronsTotalNum));
+                          testing.end(), testing.begin(), genWeights(_neuronsTotalNum));
     }
     catch(thrust::system_error &err){
         std::cerr<<"error transforming: "<<err.what()<<std::endl;
         return false;
     }
     cudaDeviceSynchronize();
-
-    start = ((double) std::time(0) - start)/(double)CLOCKS_PER_SEC;
-    std::cout<<start<<" sec"<<std::endl;
+    thrust::transform(testing.begin(), testing.end(), testing.begin(), delWeights());
+    cudaDeviceSynchronize();
+    cudaEventRecord(stop, 0);
+    float miliseconds = 0;
+    cudaError_t err = cudaEventElapsedTime(&miliseconds, start, stop);
+    if(err != cudaSuccess){
+        std::cout<<"\n\n 1. Error: "<<cudaGetErrorString(err)<<std::endl<<std::endl;
+    }
+    std::cout<<miliseconds<<" ms"<<std::endl;
 
     return true;
 }

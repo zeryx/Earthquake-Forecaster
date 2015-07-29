@@ -6,15 +6,11 @@
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 
-class Individual{//stores the weights and its fitness values
-public:
-    Individual(int numWeights){cudaMalloc((void**) &_weights, numWeights*sizeof(float));}
-    float* _weights;
+struct Individual{//stores the weights and its fitness values
+    float *_weights;
     float _absoluteFitness, _relativeFitness;
 };
-
 class  NetworkGenetic{
-
 public:
     NetworkGenetic();
     NetworkGenetic(const int &numInNeurons, const int &numHiddenNeurons,
