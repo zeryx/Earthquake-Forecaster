@@ -7,7 +7,7 @@
 #include <thrust/system_error.h>
 #include <cuda.h>
 #include <vector>
-#include <cuda_runtime_api.h>
+#include <cuda_runtime.h>
 
 struct genRand: thrust::unary_function<Individual, int>{
 
@@ -63,7 +63,10 @@ bool NetworkGenetic::generatePop(int popsize){
     }
     cudaEventRecord(stop);
     float miliseconds = 0;
-    cudaEventElapsedTime(&miliseconds, start, stop);
+    cudaError_t err = cudaEventElapsedTime(&miliseconds, start, stop);
+    if(err != cudaSuccess){
+        std::cout<<"\n\n 1. Error: "<<cudaGetErrorString(err)<<std::endl<<std::endl;
+    }
     std::cout<<miliseconds<<" ms"<<std::endl;
 
     return true;
