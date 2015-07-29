@@ -19,8 +19,6 @@ struct genRand: thrust::unary_function<Individual, int>{
     Individual operator()(Individual n) const{
         unsigned int idx= threadIdx.x*blockDim.x;
 
-        n._weights = new float[numWeights];
-
         for(int i=0; i<numWeights; i++){
             idx = idx +i;
             thrust::default_random_engine randEng;
@@ -48,12 +46,16 @@ bool NetworkGenetic::generatePop(int popsize){
     cudaEventCreate(&start);
     cudaEventCreate(&stop);
     thrust::device_vector<Individual> testing;
-    testing.resize(popsize);
+    for(int i=0; i<popsize; i++){
+        Individual obj(_neuronsTotalNum);
+        testing.push_back(obj);
+    }
 
     try{
         cudaEventRecord(start);
         thrust::transform(testing.begin(),
                           testing.end(), testing.begin(), genRand(_neuronsTotalNum));
+        cudaDeviceSynchronize();
     }
     catch(thrust::system_error &err){
         std::cerr<<"error transforming: "<<err.what()<<std::endl;
@@ -61,16 +63,8 @@ bool NetworkGenetic::generatePop(int popsize){
     }
     cudaEventRecord(stop);
     float miliseconds = 0;
-    std::vector<Individual> printer(testing.size());
-    for(int i=0; i<popsize; i++){
-        thrust::copy(testing.begin(), testing.end(),printer.begin());
-        }
-    for(int i=0; i<popsize; i++){
-        for(int k=0; k<_neuronsTotalNum; k++){
-            std::cout<< printer[k]._weights[k]<<std::endl;
-        }
-    }
     cudaEventElapsedTime(&miliseconds, start, stop);
+    std::cout<<miliseconds<<" ms"<<std::endl;
 
     return true;
 }

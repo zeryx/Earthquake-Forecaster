@@ -9,7 +9,7 @@ int main(void){
     int outputs = 1;
     std::map<const int, int> connections;
     NetworkGenetic ConstructedNetwork(inputs, hidden, outputs, connections);
-    ConstructedNetwork.generatePop(5000);
+    ConstructedNetwork.generatePop(15000);
 
     return 0;
 }
