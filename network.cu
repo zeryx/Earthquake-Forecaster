@@ -18,7 +18,7 @@ __global__ void genWeights( DataArray<T> ref, long in, int numWeights){
         thrust::default_random_engine randEng;
         thrust::uniform_real_distribution<double> uniDist(0,1);
         randEng.discard(seed);
-        ref._array[idx*numWeights*2+i] = uniDist(randEng);
+        ref._array[idx*numWeights+i] = uniDist(randEng);
     }
 }
 
@@ -39,27 +39,20 @@ thrust::device_vector<double> NetworkGenetic::generatePop(int popsize){
     int minGridSize; //the minimum grid size needed to achive max occupancy
     int gridSize; // the actual grid size needed
 
-    thrust::device_vector<double> result(popsize*_neuronsTotalNum*2);
+    thrust::device_vector<double> result(popsize*_neuronsTotalNum);
     long time = std::clock();
     cudaEventRecord(start, 0);
     cudaDeviceSynchronize();
     cudaOccupancyMaxPotentialBlockSize( &minGridSize, &blocksize, (void*)genWeights<double>, 0, popsize);
     gridSize = (popsize + blocksize -1)/blocksize;
+    std::cout<< blocksize << minGridSize << gridSize<<std::endl;
     genWeights<double><<<gridSize, blocksize>>>(convertToKernel<double>(result), time, _neuronsTotalNum);
-    //    cudaDeviceSynchronize();
-    //    thrust::transform(_data.begin(),
-    //                      _data.end(), testing.begin(), calcAvg(_neuronsTotalNum));
     cudaDeviceSynchronize();
     float miliseconds = 0;
     cudaEventRecord(stop, 0);
     cudaDeviceSynchronize();
     cudaEventElapsedTime(&miliseconds, start, stop);
-    for(int i=0; i<popsize; i++){
-        std::cout<<"for "<<i<<std::endl;
-        for(int k=0; k<_neuronsTotalNum; k++){
-            std::cout<<"weight #"<<k<<": "<<result[i*_neuronsTotalNum*2 + k]<<std::endl;
-        }
-    }
     std::cout<<"total compute time: "<<miliseconds<<" ms"<<std::endl;
+
     return result;
 }

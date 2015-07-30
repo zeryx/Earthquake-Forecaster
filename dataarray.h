@@ -10,7 +10,7 @@ struct DataArray{
 template <typename T>
 DataArray<T> convertToKernel(thrust::device_vector<T>& dVect){
     DataArray<T> kArray;
-    kArray._array = thrust::raw_pointer_cast(&dVect[0]);
+    kArray._array = thrust::raw_pointer_cast(dVect.data());
     kArray._size  = (int) dVect.size();
     return kArray;
 }
