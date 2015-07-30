@@ -62,16 +62,19 @@ void NetworkGenetic::loadFromFile(std::string file){
 
 }
 
-void NetworkGenetic::allocateHostAndGPUObjects(float hostMemory, float deviceMemory,
+void NetworkGenetic::allocateHostAndGPUObjects(int hostMemory, int deviceMemory,
                                                std::map<const std::string, float> pHostRam,  std::map<const std::string, float> pDeviceRam){
+    std::cout<<"device memory: "<<deviceMemory<<std::endl;
+    std::cout<<"genetics percentage"<<pDeviceRam.at("genetics")<<std::endl;
+    int test = (int)(deviceMemory*pDeviceRam.at("genetics"))/sizeof(double);
     int hostGeneticsAlloc = hostMemory*pHostRam.at("genetics")/sizeof(double); //since these are doubles, divide bytes by 8
     int hostTrainingAlloc = hostMemory*pHostRam.at("input & training")/(sizeof(double)+2);//half for training, half for input I think?
     int hostInputsAlloc = hostMemory*pHostRam.at("input & training")/(sizeof(float)+2); // their either floats or ints, same amount of bytes.
-    int deviceGeneticsAlloc = (int)(deviceMemory*pDeviceRam.at("genetics")/(sizeof(double)));
+    int deviceGeneticsAlloc = test;
     int deviceTrainingAlloc = deviceMemory*pDeviceRam.at("input & training")/(sizeof(double)+2);
     int deviceInputsAlloc = deviceMemory*pDeviceRam.at("input & training")/(sizeof(double)+2);
     int devicePMAIAlloc = 2160*80/sizeof(double); //1.4 mb worth of planetary magnetic activity index for all tests, can store outside of container with other constants.
-std::cout<<deviceMemory*pDeviceRam.at("genetics")/sizeof(double)<<" doubles"<<std::endl;
+std::cout<<test<<std::endl;
 //initialize all vectors
 //    this->_HGeneticsData.resize(hostGeneticsAlloc);
 //    this->_HTrainingData.resize(hostTrainingAlloc);
