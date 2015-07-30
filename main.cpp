@@ -18,7 +18,7 @@ int main(void){
     deviceRamPercentageMap["genetics"] = 0.75; //the bulk of the GPU should contain the genetics data
     deviceRamPercentageMap["input & training"] = 0.25;
     NetworkGenetic ConstructedNetwork(inputs, hidden, memory, outputs, connections);
-    ConstructedNetwork.allocateHostAndGPUObjects(hostMem, deviceMem, hostRamPercentageMap, deviceRamPercentageMap);
+    ConstructedNetwork.allocateHostAndGPUObjects((float)hostMem, (float)deviceMem, hostRamPercentageMap, deviceRamPercentageMap);
     ConstructedNetwork.initializeWeights();
     return 0;
 }

@@ -24,7 +24,7 @@ __global__ void genWeights( DataArray<T> ref, long in, int nRegWeights, int indL
 
 NetworkGenetic::NetworkGenetic(const int &numInNeurons, const int &numHiddenNeurons, const int &numMemoryNeurons,
                                const int &numOutNeurons,  const std::map<const int, int> &connections){
-    this->_NNParams.resize(15); // room to grow
+    this->_NNParams.resize(15, 0); // room to grow
     _NNParams[1] = numInNeurons + numHiddenNeurons + numMemoryNeurons + numOutNeurons;
     _NNParams[2] = numInNeurons + numHiddenNeurons + numOutNeurons;
     _NNParams[3] = numInNeurons;
@@ -48,7 +48,7 @@ void NetworkGenetic::initializeWeights(){
     cudaDeviceSynchronize();
     CUDA_SAFE_CALL (cudaOccupancyMaxPotentialBlockSize( &minGridSize, &blocksize, (void*)genWeights<double>, 0, _initialPopsize));
     gridSize = (_initialPopsize + blocksize -1)/blocksize;
-    genWeights<double><<<gridSize, blocksize>>>(convertToKernel<double>(_DGeneticsData), time, _NNParams[2], _initialPopsize);
+    genWeights<double><<<gridSize, blocksize>>>(convertToKernel<double>(_DGeneticsData), time, _NNParams[2], individualSize);
     cudaDeviceSynchronize();
     float miliseconds = 0;
     CUDA_SAFE_CALL (cudaEventRecord(stop, 0));
@@ -62,22 +62,24 @@ void NetworkGenetic::loadFromFile(std::string file){
 
 }
 
-void NetworkGenetic::allocateHostAndGPUObjects(int hostMemory, int deviceMemory,
+void NetworkGenetic::allocateHostAndGPUObjects(float hostMemory, float deviceMemory,
                                                std::map<const std::string, float> pHostRam,  std::map<const std::string, float> pDeviceRam){
     int hostGeneticsAlloc = hostMemory*pHostRam.at("genetics")/sizeof(double); //since these are doubles, divide bytes by 8
-    int hostTrainingAlloc = hostMemory*pHostRam.at("input & training")/sizeof(double)/2;//half for training, half for input I think?
-    int hostInputsAlloc = hostMemory*pHostRam.at("input & training")/sizeof(float)/2; // their either floats or ints, same amount of bytes.
-    int deviceGeneticsAlloc = deviceMemory*pDeviceRam.at("genetics")/sizeof(double);
-    int deviceTrainingAlloc = deviceMemory*pDeviceRam.at("input & trianing")/sizeof(double)/2;
+    int hostTrainingAlloc = hostMemory*pHostRam.at("input & training")/(sizeof(double)+2);//half for training, half for input I think?
+    int hostInputsAlloc = hostMemory*pHostRam.at("input & training")/(sizeof(float)+2); // their either floats or ints, same amount of bytes.
+    int deviceGeneticsAlloc = (int)(deviceMemory*pDeviceRam.at("genetics")/(sizeof(double)));
+    int deviceTrainingAlloc = deviceMemory*pDeviceRam.at("input & training")/(sizeof(double)+2);
+    int deviceInputsAlloc = deviceMemory*pDeviceRam.at("input & training")/(sizeof(double)+2);
     int devicePMAIAlloc = 2160*80/sizeof(double); //1.4 mb worth of planetary magnetic activity index for all tests, can store outside of container with other constants.
-
+std::cout<<deviceMemory*pDeviceRam.at("genetics")/sizeof(double)<<" doubles"<<std::endl;
 //initialize all vectors
-    this->_HGeneticsData.resize(hostGeneticsAlloc);
-    this->_HTrainingData.resize(hostTrainingAlloc);
-    this->_HInputData.resize(hostInputsAlloc);
+//    this->_HGeneticsData.resize(hostGeneticsAlloc);
+//    this->_HTrainingData.resize(hostTrainingAlloc);
+//    this->_HInputData.resize(hostInputsAlloc);
     this->_DGeneticsData.resize(deviceGeneticsAlloc);
-    this->_DTrainingData.resize(deviceTrainingAlloc);
-    this->_DPMAIndex.resize(devicePMAIAlloc);
+//    this->_DTrainingData.resize(deviceTrainingAlloc);
+//    this->_DInputData.resize(deviceInputsAlloc);
+//    this->_DPMAIndex.resize(devicePMAIAlloc);
 }
 
 void NetworkGenetic::errorFunc(){
