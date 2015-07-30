@@ -23,7 +23,7 @@ public:
     void errorFunc();
     void initializeWeights(); //initializes _data array and fills with random numbers
     void loadFromFile(std::string file);
-    void allocateHostAndGPUObjects(int hostMemory, int deviceMemory,
+    void allocateHostAndGPUObjects(unsigned int hostMemory, unsigned int deviceMemory,
                                    std::map<const std::string, float> pHostRam,  std::map<const std::string, float> pDeviceRam);
 private:
     thrust::device_vector<int> _NNParams;//1.

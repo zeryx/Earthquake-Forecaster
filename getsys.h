@@ -29,10 +29,10 @@ int GetHostRamInBytes(void)
 }
 
 
-int GetDeviceRamInBytes(void){
+unsigned int GetDeviceRamInBytes(void){
     size_t free, total;
     cudaMemGetInfo(&free, &total);
-    return (int) free;
+    return free;
 }
 
 #endif

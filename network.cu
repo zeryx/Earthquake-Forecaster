@@ -62,7 +62,7 @@ void NetworkGenetic::loadFromFile(std::string file){
 
 }
 
-void NetworkGenetic::allocateHostAndGPUObjects(int hostMemory, int deviceMemory,
+void NetworkGenetic::allocateHostAndGPUObjects(unsigned int hostMemory, unsigned int deviceMemory,
                                                std::map<const std::string, float> pHostRam,  std::map<const std::string, float> pDeviceRam){
     std::cout<<"device memory: "<<deviceMemory<<std::endl;
     std::cout<<"genetics percentage"<<pDeviceRam.at("genetics")<<std::endl;
