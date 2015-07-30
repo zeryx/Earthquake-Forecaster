@@ -5,14 +5,20 @@
 
 
 int main(void){
-    int inputs = 2; // half of the gpu contains training data, the other half contains
+    int inputs = 2;
     int hidden = 4;
+    int memory = 1; //SFTM neurons
     int outputs = 1;
-    int mem = GetRamInKB();
-    std::cout<<"total ram in KB: "<<mem<<std::endl;
-    int popcount = 1e6; // max size is = 50% of ram, remainder is training data & input data
-    std::map<const int, int> connections;
-    NetworkGenetic ConstructedNetwork(inputs, hidden, outputs, connections, popcount);
+    std::map<const int, int> connections; // I'll actually populate this at some point
+    int hostMem = GetHostRamInBytes()*0.75; //make a host memory container, this is the max
+    int deviceMem = GetDeviceRamInBytes()*0.85; //dito for gpu
+    std::map<const std::string, float> hostRamPercentageMap, deviceRamPercentageMap;
+    hostRamPercentageMap["genetics"] = 0.25;
+    hostRamPercentageMap["input & training"] = 0.75; // the bulk of the host memory should contain input & training data.
+    deviceRamPercentageMap["genetics"] = 0.75; //the bulk of the GPU should contain the genetics data
+    deviceRamPercentageMap["input & training"] = 0.25;
+    NetworkGenetic ConstructedNetwork(inputs, hidden, memory, outputs, connections);
+    ConstructedNetwork.allocateHostAndGPUObjects(hostMem, deviceMem, hostRamPercentageMap, deviceRamPercentageMap);
     ConstructedNetwork.initializeWeights();
     return 0;
 }

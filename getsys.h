@@ -4,7 +4,8 @@
 
 #include <iostream>
 #include <fstream>
-int GetRamInKB(void)
+#include <cuda_runtime_api.h>
+int GetHostRamInBytes(void)
 {
     FILE *meminfo = fopen("/proc/meminfo", "r");
     if(meminfo == NULL)
@@ -14,10 +15,10 @@ int GetRamInKB(void)
     while(fgets(line, sizeof(line), meminfo))
     {
         int ram;
-        if(sscanf(line, "MemTotal: %d kB", &ram) == 1)
+        if(sscanf(line, "memFree: %d kB", &ram) == 1)
         {
             fclose(meminfo);
-            return ram;
+            return ram*1000;
         }
     }
 
@@ -25,6 +26,13 @@ int GetRamInKB(void)
     // do something appropriate like return an error code, throw an exception, etc.
     fclose(meminfo);
     return -1;
+}
+
+
+int GetDeviceRamInBytes(void){
+    size_t free, total;
+    cudaMemGetInfo(&free, &total);
+    return (int) free;
 }
 
 #endif
