@@ -4,42 +4,23 @@
 #include <thrust/random.h>
 #include <thrust/execution_policy.h>
 #include <thrust/iterator/counting_iterator.h>
-#include <thrust/system_error.h>
+#include <ctime>
 #include <cuda.h>
 #include <vector>
 #include <cuda_runtime.h>
 
-struct genWeights: thrust::unary_function<Individual, int>{
-
-    int numWeights;
-
-    genWeights(int _numWeights) : numWeights(_numWeights){
+template <typename T>
+__global__ void genWeights( DataArray<T> ref, long in, int numWeights){
+    long idx = blockDim.x*blockIdx.x + threadIdx.x;
+    long seed= idx+in;
+    for(int i=0; i<numWeights; i++){
+        seed = idx +i;
+        thrust::default_random_engine randEng;
+        thrust::uniform_real_distribution<double> uniDist(0,1);
+        randEng.discard(seed);
+        ref._array[idx*numWeights*2+i] = uniDist(randEng);
     }
-
-    __device__
-    Individual operator()(Individual n) const{
-        unsigned int idx= threadIdx.x*blockDim.x;
-        float *weights = new float[numWeights];
-        n._weights = weights;
-        for(int i=0; i<numWeights; i++){
-            idx = idx +i;
-            thrust::default_random_engine randEng;
-            thrust::uniform_real_distribution<float> uniDist(0,1);
-            randEng.discard(idx);
-            n._weights[i] =  uniDist(randEng);
-        }
-        return n;
-    }};
-
-struct delWeights{
-    __device__ __host__
-    Individual operator()(Individual n) const{
-        delete[] n._weights;
-        return n;
-    }
-};
-
-NetworkGenetic::NetworkGenetic(){}
+}
 
 NetworkGenetic::NetworkGenetic(const int &numInNeurons, const int &numHiddenNeurons,
                                const int &numOutNeurons, std::map<const int, int> &connections){
@@ -50,30 +31,35 @@ NetworkGenetic::NetworkGenetic(const int &numInNeurons, const int &numHiddenNeur
     _connections = connections;
 }
 
-bool NetworkGenetic::generatePop(int popsize){
+thrust::device_vector<double> NetworkGenetic::generatePop(int popsize){
     cudaEvent_t start, stop;
     cudaEventCreate(&start);
     cudaEventCreate(&stop);
-    thrust::device_vector<Individual> testing(popsize);
-    try{
-        cudaEventRecord(start, 0);
-        thrust::transform(testing.begin(),
-                          testing.end(), testing.begin(), genWeights(_neuronsTotalNum));
-    }
-    catch(thrust::system_error &err){
-        std::cerr<<"error transforming: "<<err.what()<<std::endl;
-        return false;
-    }
-    cudaDeviceSynchronize();
-    thrust::transform(testing.begin(), testing.end(), testing.begin(), delWeights());
-    cudaDeviceSynchronize();
-    cudaEventRecord(stop, 0);
-    float miliseconds = 0;
-    cudaError_t err = cudaEventElapsedTime(&miliseconds, start, stop);
-    if(err != cudaSuccess){
-        std::cout<<"\n\n 1. Error: "<<cudaGetErrorString(err)<<std::endl<<std::endl;
-    }
-    std::cout<<miliseconds<<" ms"<<std::endl;
+    int blocksize; //the blocksize defined by the configurator
+    int minGridSize; //the minimum grid size needed to achive max occupancy
+    int gridSize; // the actual grid size needed
 
-    return true;
+    thrust::device_vector<double> result(popsize*_neuronsTotalNum*2);
+    long time = std::clock();
+    cudaEventRecord(start, 0);
+    cudaDeviceSynchronize();
+    cudaOccupancyMaxPotentialBlockSize( &minGridSize, &blocksize, (void*)genWeights<double>, 0, popsize);
+    gridSize = (popsize + blocksize -1)/blocksize;
+    genWeights<double><<<gridSize, blocksize>>>(convertToKernel<double>(result), time, _neuronsTotalNum);
+    //    cudaDeviceSynchronize();
+    //    thrust::transform(_data.begin(),
+    //                      _data.end(), testing.begin(), calcAvg(_neuronsTotalNum));
+    cudaDeviceSynchronize();
+    float miliseconds = 0;
+    cudaEventRecord(stop, 0);
+    cudaDeviceSynchronize();
+    cudaEventElapsedTime(&miliseconds, start, stop);
+    for(int i=0; i<popsize; i++){
+        std::cout<<"for "<<i<<std::endl;
+        for(int k=0; k<_neuronsTotalNum; k++){
+            std::cout<<"weight #"<<k<<": "<<result[i*_neuronsTotalNum*2 + k]<<std::endl;
+        }
+    }
+    std::cout<<"total compute time: "<<miliseconds<<" ms"<<std::endl;
+    return result;
 }
