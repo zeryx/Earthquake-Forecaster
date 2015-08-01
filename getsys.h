@@ -5,17 +5,17 @@
 #include <iostream>
 #include <fstream>
 #include <cuda_runtime_api.h>
-unsigned int GetHostRamInBytes(void)
+long GetHostRamInBytes(void)
 {
     FILE *meminfo = fopen("/proc/meminfo", "r");
     if(meminfo == NULL)
-        return 0;
+        exit(1);
 
     char line[256];
     while(fgets(line, sizeof(line), meminfo))
     {
-        unsigned int ram;
-        if(sscanf(line, "memFree: %d kB", &ram) == 1)
+        int ram;
+        if(sscanf(line, "MemFree: %d kB", &ram) == 1)
         {
             fclose(meminfo);
             return ram*1000;
@@ -25,14 +25,15 @@ unsigned int GetHostRamInBytes(void)
     // If we got here, then we couldn't find the proper line in the meminfo file:
     // do something appropriate like return an error code, throw an exception, etc.
     fclose(meminfo);
-    return -1;
+    std::cerr<<"cannot find line in meminfo file, please doublecheck."<<std::endl;
+    exit(1);
 }
 
-
-unsigned int GetDeviceRamInBytes(void){
+long GetDeviceRamInBytes(void){
     size_t free, total;
     cudaMemGetInfo(&free, &total);
-    return free;
+    long ret = free;
+    return ret;
 }
 
 #endif

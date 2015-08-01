@@ -45,8 +45,10 @@ dataArray<float> MemManager::kpIndex(){
 int MemManager::memoryAlloc(std::map<const std::string, float> pHostRam,
                             std::map<const std::string, float> pDeviceRam,
                             int individualLength, float pMaxHost, float pMaxDevice){
-    unsigned int hostMem = GetHostRamInBytes()*pMaxHost; //make a host memory container, this is the max
-    unsigned int deviceMem = GetDeviceRamInBytes()*pMaxDevice; //dito for gpu
+    long hostMem = GetHostRamInBytes()*pMaxHost; //make a host memory container, this is the max
+    long deviceMem = GetDeviceRamInBytes()*pMaxDevice; //dito for gpu
+    std::cout<<"allocated space in device RAM: "<<deviceMem<<std::endl;
+    std::cout<<"allocated space in host RAM: "<<hostMem<<std::endl;
     _hostGeneticsAlloc = hostMem*pHostRam.at("genetics")/sizeof(double); //since these are doubles, divide bytes by 8
     _hostTrainingAlloc = hostMem*pHostRam.at("input & training")/(sizeof(double)+2);//half for training, half for input I think?
     _hostInputAlloc = hostMem*pHostRam.at("input & training")/(sizeof(float)+2); // their either floats or ints, same amount of bytes.
@@ -62,17 +64,29 @@ int MemManager::memoryAlloc(std::map<const std::string, float> pHostRam,
     this->_HGenetics.setMax(_hostGeneticsAlloc);
     this->_HTraining.setMax(_hostTrainingAlloc);
     this->_HInput.setMax(_hostInputAlloc);
-    this->_DGenetics.resize(_deviceGeneticsAlloc);
-    this->_DTraining.resize(_deviceTrainingAlloc);
-    this->_DInput.resize(_deviceInputAlloc);
     }
     catch(thrust::system_error &e){
         std::cerr<<"Error resizing vector Element: "<<e.what()<<std::endl;
-        return false;
+        exit(1);
     }
-    std::cout<<"free host ram: "<<GetHostRamInBytes()<<std::endl;
-    std::cout<<"allocated space in host RAM: "<<hostMem<<std::endl;
-    std::cout<<"allocated space in device RAM: "<<deviceMem<<std::endl;
+    catch(std::bad_alloc &e){
+        std::cerr<<"Ran out of space due to : "<<"host"<<std::endl;
+        exit(1);
+    }
+    try{
+        this->_DGenetics.resize(_deviceGeneticsAlloc);
+        this->_DTraining.resize(_deviceTrainingAlloc);
+        this->_DInput.resize(_deviceInputAlloc);
+    }
+    catch(thrust::system_error &e){
+        std::cerr<<"Error resizing vector Element: "<<e.what()<<std::endl;
+        exit(1);
+    }
+    catch(std::bad_alloc &e){
+        std::cerr<<"Ran out of space due to : "<<"device"<<std::endl;
+        std::cout<<GetDeviceRamInBytes()<<std::cout;
+        exit(1);
+    }
     return true;
 }
 int MemManager::geneticsBufferSwap(dataArray<double> dGen){
