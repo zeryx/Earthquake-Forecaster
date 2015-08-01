@@ -5,7 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <cuda_runtime_api.h>
-int GetHostRamInBytes(void)
+unsigned int GetHostRamInBytes(void)
 {
     FILE *meminfo = fopen("/proc/meminfo", "r");
     if(meminfo == NULL)
@@ -14,7 +14,7 @@ int GetHostRamInBytes(void)
     char line[256];
     while(fgets(line, sizeof(line), meminfo))
     {
-        int ram;
+        unsigned int ram;
         if(sscanf(line, "memFree: %d kB", &ram) == 1)
         {
             fclose(meminfo);

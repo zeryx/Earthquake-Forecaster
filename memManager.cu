@@ -70,6 +70,9 @@ int MemManager::memoryAlloc(std::map<const std::string, float> pHostRam,
         std::cerr<<"Error resizing vector Element: "<<e.what()<<std::endl;
         return false;
     }
+    std::cout<<"free host ram: "<<GetHostRamInBytes()<<std::endl;
+    std::cout<<"allocated space in host RAM: "<<hostMem<<std::endl;
+    std::cout<<"allocated space in device RAM: "<<deviceMem<<std::endl;
     return true;
 }
 int MemManager::geneticsBufferSwap(dataArray<double> dGen){
