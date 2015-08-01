@@ -48,8 +48,6 @@ int MemManager::memoryAlloc(std::map<const std::string, float> pHostRam,
     long hostMem = GetHostRamInBytes()*pMaxHost; //make a host memory container, this is the max
     long deviceMem = GetDeviceRamInBytes()*pMaxDevice; //dito for gpu
     int dub = 8, integer = 4;
-    std::cout<<"current planned host ram to allocate:  "<<hostMem<<std::endl;
-    std::cout<<"current planned device ram to allocate: "<<deviceMem<<std::endl;
     _hostGeneticsAlloc = hostMem*pHostRam.at("genetics")/dub; //since these are doubles, divide bytes by 8
     _hostTrainingAlloc = hostMem*pHostRam.at("input & training")/(dub*2);//half for training, half for input I think?
     _hostInputAlloc = hostMem*pHostRam.at("input & training")/(integer*2); // their either floats or ints, same amount of bytes.
