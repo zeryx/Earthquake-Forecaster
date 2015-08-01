@@ -1,6 +1,7 @@
 #ifndef dataArray_H
 #define dataArray_H
 #include <thrust/device_vector.h>
+#include <thrust/host_vector.h>
 template <typename T>
 struct dataArray{
     thrust::device_ptr<T> _array;
@@ -11,12 +12,12 @@ template <typename T>
 class hVector{
 public:
     void setMax(unsigned int maxLen){
-        _dVect.resize(maxLen);
+        _hVect.resize(maxLen);
         _itr = 0;
         _maxLen = maxLen;
     }
 public:
-    thrust::device_vector<T> _dVect;
+    thrust::host_vector<T> _hVect;
     int _itr;
     int _maxLen;
 };

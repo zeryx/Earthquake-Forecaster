@@ -47,18 +47,22 @@ int MemManager::memoryAlloc(std::map<const std::string, float> pHostRam,
                             int individualLength, float pMaxHost, float pMaxDevice){
     long hostMem = GetHostRamInBytes()*pMaxHost; //make a host memory container, this is the max
     long deviceMem = GetDeviceRamInBytes()*pMaxDevice; //dito for gpu
-    std::cout<<"space attempting to allocate in device RAM: "<<deviceMem<<std::endl;
-    std::cout<<"space attempting to allocate in host RAM: "<<hostMem<<std::endl;
-    _hostGeneticsAlloc = hostMem*pHostRam.at("genetics")/sizeof(double); //since these are doubles, divide bytes by 8
-    _hostTrainingAlloc = hostMem*pHostRam.at("input & training")/(sizeof(double)+2);//half for training, half for input I think?
-    _hostInputAlloc = hostMem*pHostRam.at("input & training")/(sizeof(int)+2); // their either floats or ints, same amount of bytes.
-    _deviceGeneticsAlloc = deviceMem*pDeviceRam.at("genetics")/sizeof(double);
-    _deviceTrainingAlloc = deviceMem*pDeviceRam.at("input & training")/(sizeof(double)+2);
-    _deviceInputAlloc = deviceMem*pDeviceRam.at("input & training")/(sizeof(int)+2);
+    int dub = 8, integer = 4;
+    std::cout<<"current planned host ram to allocate:  "<<hostMem<<std::endl;
+    std::cout<<"current planned device ram to allocate: "<<deviceMem<<std::endl;
+    _hostGeneticsAlloc = hostMem*pHostRam.at("genetics")/dub; //since these are doubles, divide bytes by 8
+    _hostTrainingAlloc = hostMem*pHostRam.at("input & training")/(dub*2);//half for training, half for input I think?
+    _hostInputAlloc = hostMem*pHostRam.at("input & training")/(integer*2); // their either floats or ints, same amount of bytes.
+    _deviceGeneticsAlloc = deviceMem*pDeviceRam.at("genetics")/dub;
+    _deviceTrainingAlloc = deviceMem*pDeviceRam.at("input & training")/(dub*2);
+    _deviceInputAlloc = deviceMem*pDeviceRam.at("input & training")/(integer*2);
     //round the genetics allocators to whole individuals.
     _hostGeneticsAlloc = (_hostGeneticsAlloc/individualLength)*individualLength;
     _deviceGeneticsAlloc = (_deviceGeneticsAlloc/individualLength)*individualLength;
-
+    long hostAlloced = _hostGeneticsAlloc*dub + _hostTrainingAlloc*dub + _hostInputAlloc*integer;
+    long deviceAlloced = _deviceGeneticsAlloc*dub + _deviceTrainingAlloc*dub + _deviceInputAlloc*integer;
+    std::cout<<hostAlloced<<std::endl;
+    std::cout<<deviceAlloced<<std::endl;
     //initialize all large vectors (everything not from an xml file)
     try{
     this->_HGenetics.setMax(_hostGeneticsAlloc);
@@ -71,6 +75,8 @@ int MemManager::memoryAlloc(std::map<const std::string, float> pHostRam,
     }
     catch(std::bad_alloc &e){
         std::cerr<<"Ran out of space due to : "<<"host"<<std::endl;
+        std::cerr<<e.what()<<std::endl;
+        std::cout<<GetHostRamInBytes()<<std::endl;
         exit(1);
     }
     try{
@@ -84,7 +90,8 @@ int MemManager::memoryAlloc(std::map<const std::string, float> pHostRam,
     }
     catch(std::bad_alloc &e){
         std::cerr<<"Ran out of space due to : "<<"device"<<std::endl;
-        std::cout<<GetDeviceRamInBytes()<<std::cout;
+        std::cerr<<e.what()<<std::endl;
+        std::cout<<GetDeviceRamInBytes()<<std::endl;
         exit(1);
     }
     return true;
@@ -96,19 +103,19 @@ int MemManager::geneticsBufferSwap(dataArray<double> dGen){
 int MemManager::GeneticsPushToHost(dataArray<double> dGen){
     int dGenLength = dGen._size;
     if(_HGenetics._itr + dGenLength*2 > _HGenetics._maxLen){
-        thrust::copy(dGen._array, dGen._array + dGenLength, _HGenetics._dVect.begin()+_HGenetics._itr);
+        thrust::copy(dGen._array, dGen._array + dGenLength, _HGenetics._hVect.begin()+_HGenetics._itr);
         _HGenetics._itr = _HGenetics._itr + dGenLength; //set the iterator  to the new position.
         return 0; //continue making more weights at the current length
 
     }
     else if(_HGenetics._itr + dGenLength*2 <= _HGenetics._maxLen){//dGen length can only be adjusted from MemManager, so this is ok
-        thrust::copy(dGen._array, dGen._array + dGenLength, _HGenetics._dVect.begin()+_HGenetics._itr);
+        thrust::copy(dGen._array, dGen._array + dGenLength, _HGenetics._hVect.begin()+_HGenetics._itr);
         _HGenetics._itr = _HGenetics._itr + dGenLength;
         _DGenetics.resize(_HGenetics._maxLen - _HGenetics._itr);// the device_vector for genetics was resized to fit the remaining host mem container.
         return 1; //continue making more weights, but at a new length.
     }
     else if(_HGenetics._itr+dGenLength == _HGenetics._maxLen){
-        thrust::copy(dGen._array, dGen._array + dGenLength, _HGenetics._dVect.begin()+_HGenetics._itr);
+        thrust::copy(dGen._array, dGen._array + dGenLength, _HGenetics._hVect.begin()+_HGenetics._itr);
         _HGenetics._itr = 0;
         _DGenetics.resize(_deviceGeneticsAlloc);
         return 2; //make one more batch of weights, but don't push to host.

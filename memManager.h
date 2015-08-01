@@ -42,12 +42,12 @@ private:
     hVector<int> _HInput; //overflow of input Data that cannot fit in GPU memory due to resource limitations.
     hVector<double> _HTraining; //overflow of training data
 
-    int _deviceGeneticsAlloc;
-    int _deviceInputAlloc;
-    int _deviceTrainingAlloc;
-    int _hostGeneticsAlloc;
-    int _hostInputAlloc;
-    int _hostTrainingAlloc;
+    long _deviceGeneticsAlloc;
+    long _deviceInputAlloc;
+    long _deviceTrainingAlloc;
+    long _hostGeneticsAlloc;
+    long _hostInputAlloc;
+    long _hostTrainingAlloc;
 
 };
 #endif
