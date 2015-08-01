@@ -44,7 +44,7 @@ __global__ void genWeights( DataArray<T> ref, long in, int nRegWeights, int indL
 
 
 NetworkGenetic::NetworkGenetic(const int &numInNeurons, const int &numHiddenNeurons, const int &numMemoryNeurons,
-                               const int &numOutNeurons, const int &numHiddenLayers,  const std::map<const int, int> &connections){
+                               const int &numOutNeurons, const int &numHiddenLayers,  const thrust::pair<int, int> &connections){
     this->_NNParams.resize(15, 0); // room to grow
     _NNParams[1] = numInNeurons + numHiddenNeurons + numMemoryNeurons + numOutNeurons;
     _NNParams[2] = numInNeurons + numHiddenNeurons + numOutNeurons;
@@ -83,15 +83,18 @@ void NetworkGenetic::initializeWeights(){
 
 
 
-void NetworkGenetic::init(std::string siteInfo){
+void NetworkGenetic::importSitesData(std::string siteInfo){
     int dataSet, SLEN;
     tinyxml2::XMLDocument doc;
+    _DInitData.clear(); //empty any previous data located in array, both are small enough to be of no consquence
+    _DInitData.shrink_to_fit();
+    _DSitesData.clear();
+    _DSitesData.shrink_to_fit();
     doc.LoadFile(siteInfo.c_str());
-
     tinyxml2::XMLNode * pRoot = doc.FirstChild();
     if(pRoot == NULL) exit(tinyxml2::XML_ERROR_FILE_READ_ERROR);
-    tinyxml2::XMLElement * pElement = pRoot->FirstChildElement("Sites");
-    if(pRoot == NULL) exit(tinyxml2::XML_ERROR_PARSING_ELEMENT);
+    tinyxml2::XMLElement * pElement = pRoot->NextSiblingElement("Sites");
+    if(pElement == NULL) exit(tinyxml2::XML_ERROR_PARSING_ELEMENT);
     tinyxml2::XMLError eResult = pElement->QueryIntAttribute("data_set", &dataSet);
     XMLCheckResult(eResult);
 
@@ -99,12 +102,11 @@ void NetworkGenetic::init(std::string siteInfo){
     XMLCheckResult(eResult);
     _DInitData.push_back(SLEN);
     _DInitData.push_back(dataSet);
-    tinyxml2::XMLElement *SitesList = pRoot->FirstChildElement("Site");
+    tinyxml2::XMLElement *SitesList = pRoot->NextSiblingElement("Site");
 
     while(SitesList != NULL){
         int sampleData;
         double longitude, latitude;
-
         eResult = SitesList->QueryIntAttribute("sample_rate", &sampleData);
         XMLCheckResult(eResult);
         _DInitData.push_back(sampleData);
@@ -116,8 +118,31 @@ void NetworkGenetic::init(std::string siteInfo){
         _DSitesData.push_back(longitude);
         SitesList = SitesList->NextSiblingElement("Site");
     }
+}
 
+void NetworkGenetic::importKpData(std::string Kp){
+    tinyxml2::XMLDocument doc;
+    tinyxml2::XMLError eResult;
+    _DKpIndex.clear();
+    _DKpIndex.shrink_to_fit();
+    doc.LoadFile(Kp.c_str());
+    tinyxml2::XMLNode *pRoot = doc.FirstChild();
+    if(pRoot == NULL) exit(tinyxml2::XML_ERROR_FILE_READ_ERROR);
+    tinyxml2::XMLElement * pElement = pRoot->NextSiblingElement("Kp");
+    if(pElement == NULL) exit(tinyxml2::XML_ERROR_PARSING_ELEMENT);
+    tinyxml2::XMLElement * KpList = pElement->FirstChildElement("Kp_hr");
+    while(KpList != NULL){
+        int seconds;
+        float magnitude;
+        eResult = KpList->QueryIntAttribute("secs", &seconds);
+        XMLCheckResult(eResult);
+        _DKpIndex.push_back(seconds);
+        eResult = KpList->QueryFloatText(&magnitude);
+        XMLCheckResult(eResult);
+        _DKpIndex.push_back(magnitude);
 
+        KpList = KpList->NextSiblingElement("Kp_hr");
+    }
 
 }
 
@@ -127,22 +152,17 @@ void NetworkGenetic::allocateHostAndGPUObjects(unsigned int hostMemory, unsigned
     unsigned int hostGeneticsAlloc = hostMemory*pHostRam.at("genetics")/sizeof(double); //since these are doubles, divide bytes by 8
     unsigned int hostTrainingAlloc = hostMemory*pHostRam.at("input & training")/(sizeof(double)+2);//half for training, half for input I think?
     unsigned int hostInputsAlloc = hostMemory*pHostRam.at("input & training")/(sizeof(float)+2); // their either floats or ints, same amount of bytes.
-    unsigned int DeviceInitDataAlloc = (9*2+2)/sizeof(double); //sample rates, number of sites, and dataset #
-    unsigned int DeviceSitesDataAlloc = (9*2)/sizeof(double); //contains longitudes/latitudes of each site
     unsigned int deviceGeneticsAlloc = deviceMemory*pDeviceRam.at("genetics")/sizeof(double);
     unsigned int deviceTrainingAlloc = deviceMemory*pDeviceRam.at("input & training")/(sizeof(double)+2);
     unsigned int deviceInputsAlloc = deviceMemory*pDeviceRam.at("input & training")/(sizeof(double)+2);
-    unsigned int devicePMAIAlloc = 2160*80/sizeof(double); //1.4 mb worth of planetary magnetic activity index for all tests, can store outside of container with other constants.
-    //initialize all vectors
-    this->_DSitesData.resize(DeviceSitesDataAlloc);
-    this->_DInitData.resize(DeviceInitDataAlloc);
+    //initialize all vectors except ones initialized by xml docs (small enough to fit outside of the memory container and on the device)
+
     this->_HGeneticsData.resize(hostGeneticsAlloc);
     this->_HTrainingData.resize(hostTrainingAlloc);
     this->_HInputData.resize(hostInputsAlloc);
     this->_DGeneticsData.resize(deviceGeneticsAlloc);
     this->_DTrainingData.resize(deviceTrainingAlloc);
     this->_DInputData.resize(deviceInputsAlloc);
-    this->_DPMAIndex.resize(devicePMAIAlloc);
 }
 
 void NetworkGenetic::errorFunc(){

@@ -10,7 +10,7 @@ int main(int argc, char** arg){
     int memory = 2; //LSTM neurons
     int hidden_layers = 2;
     int outputs = 3;
-    std::map<const int, int> connections; // I'll actually populate this at some point
+    thrust::pair<int, int> connections; // I'll actually populate this at some point
     unsigned int hostMem = GetHostRamInBytes()*0.75; //make a host memory container, this is the max
     unsigned int deviceMem = GetDeviceRamInBytes()*0.90; //dito for gpu
     std::map<const std::string, float> hostRamPercentageMap, deviceRamPercentageMap;
@@ -19,7 +19,8 @@ int main(int argc, char** arg){
     deviceRamPercentageMap["genetics"] = 0.80; //the bulk of the GPU should contain the genetics data
     deviceRamPercentageMap["input & training"] = 0.20;
     NetworkGenetic ConstructedNetwork(inputs, hidden, memory, outputs, hidden_layers,  connections);
-    ConstructedNetwork.init("../mount/data/105/SiteInfo.xml");
+    ConstructedNetwork.importSitesData("../mount/data/105/SiteInfo.xml");
+    ConstructedNetwork.importKpData("../mount/data/105/Kp.xml");
     ConstructedNetwork.allocateHostAndGPUObjects(hostMem, deviceMem, hostRamPercentageMap, deviceRamPercentageMap);
     ConstructedNetwork.initializeWeights();
     return 0;
