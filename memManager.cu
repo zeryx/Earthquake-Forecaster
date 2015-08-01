@@ -47,14 +47,14 @@ int MemManager::memoryAlloc(std::map<const std::string, float> pHostRam,
                             int individualLength, float pMaxHost, float pMaxDevice){
     long hostMem = GetHostRamInBytes()*pMaxHost; //make a host memory container, this is the max
     long deviceMem = GetDeviceRamInBytes()*pMaxDevice; //dito for gpu
-    std::cout<<"allocated space in device RAM: "<<deviceMem<<std::endl;
-    std::cout<<"allocated space in host RAM: "<<hostMem<<std::endl;
+    std::cout<<"space attempting to allocate in device RAM: "<<deviceMem<<std::endl;
+    std::cout<<"space attempting to allocate in host RAM: "<<hostMem<<std::endl;
     _hostGeneticsAlloc = hostMem*pHostRam.at("genetics")/sizeof(double); //since these are doubles, divide bytes by 8
     _hostTrainingAlloc = hostMem*pHostRam.at("input & training")/(sizeof(double)+2);//half for training, half for input I think?
-    _hostInputAlloc = hostMem*pHostRam.at("input & training")/(sizeof(float)+2); // their either floats or ints, same amount of bytes.
+    _hostInputAlloc = hostMem*pHostRam.at("input & training")/(sizeof(int)+2); // their either floats or ints, same amount of bytes.
     _deviceGeneticsAlloc = deviceMem*pDeviceRam.at("genetics")/sizeof(double);
     _deviceTrainingAlloc = deviceMem*pDeviceRam.at("input & training")/(sizeof(double)+2);
-    _deviceInputAlloc = deviceMem*pDeviceRam.at("input & training")/(sizeof(double)+2);
+    _deviceInputAlloc = deviceMem*pDeviceRam.at("input & training")/(sizeof(int)+2);
     //round the genetics allocators to whole individuals.
     _hostGeneticsAlloc = (_hostGeneticsAlloc/individualLength)*individualLength;
     _deviceGeneticsAlloc = (_deviceGeneticsAlloc/individualLength)*individualLength;
