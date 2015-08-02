@@ -15,7 +15,7 @@ long long GetHostRamInBytes(void)
     while(fgets(line, sizeof(line), meminfo))
     {
         long long  ram;
-        if(sscanf(line, "MemFree: %lu kB", &ram) == 1)
+        if(sscanf(line, "MemFree: %lli kB", &ram) == 1)
         {
             fclose(meminfo);
             return ram*1000;

@@ -98,7 +98,7 @@ bool MemManager::geneticsBufferSwap(dataArray<double> *dGen){
 
 bool MemManager::GeneticsPushToHost(dataArray<double> *dGen){
     long long dGenLength = dGen->_size;
-    float percentage =  dGenLength/_HGenetics._maxLen*100;
+    double percentage =  dGenLength/_HGenetics._maxLen;
     std::cout<<"length of device vector: "<<dGenLength<<std::endl;
     std::cout<<"% of host Mem for this iteration: "<<percentage<<std::endl;
     std::cout<<"host vector max length: "<<_HGenetics._maxLen<<std::endl;
@@ -113,7 +113,7 @@ bool MemManager::GeneticsPushToHost(dataArray<double> *dGen){
         thrust::copy(dGen->_array, dGen->_array + dGenLength, _HGenetics._hVect.begin()+_HGenetics._itr);
         _HGenetics._itr = _HGenetics._itr + dGenLength;
         _DGenetics.resize(_HGenetics._maxLen - _HGenetics._itr);// the device_vector for genetics was resized to fit the remaining host mem container.
-        std::cout<<"resized genetics to: "<<_HGenetics._maxLen - _HGenetics._itr<<" "<<_DGenetics.size()<<std::endl;
+        std::cout<<"resized genetics to: "<<_HGenetics._maxLen - _HGenetics._itr<<std::endl;
         dGen->_size = _DGenetics.size();
         std::cout<<"#2"<<std::endl;
         return true;
