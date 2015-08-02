@@ -69,7 +69,7 @@ void NetworkGenetic::initializeWeights(){
         long seed = std::clock();
         genWeights<double><<<gridSize, blocksize>>>(_genetics, seed, _NNParams[2], _NNParams[8]);
         cudaDeviceSynchronize();
-    }while(_memVirtualizer.GeneticsPushToHost(&_genetics) || _NNParams[9] != 0);
+    }while(_memVirtualizer.GeneticsPushToHost(&_genetics) && _NNParams[9] != 0);
     std::cout<<"finished making weights, total # of individuals made is: "<<cumulative<<std::endl;
 }
 
