@@ -108,17 +108,15 @@ bool MemManager::GeneticsPushToHost(dataArray<double> *dGen){
         return true;
     }
     else if(currpos*2 > _HGenetics._maxLen && currpos < _HGenetics._maxLen){//if _HGenetics can only take 1 or exactly 2 at current size, resize dgen to fit
-        _HGenetics.lazyResize(currpos && dGenLength !=0);
         thrust::copy(dGen->_array, dGen->_array + dGenLength, _HGenetics._hVect.begin()+_HGenetics._itr);
-        _HGenetics._itr = currpos;
-        _DGenetics.resize(_HGenetics._maxLen - _HGenetics._itr);// the device_vector for genetics was resized to fit the remaining host mem container.
+        _DGenetics.resize(_HGenetics._maxLen - currpos);// the device_vector for genetics was resized to fit the remaining host mem container.
         std::cout<<"resized genetics to: "<<_HGenetics._maxLen - _HGenetics._itr<<std::endl;
         dGen->_size = _DGenetics.size();
+        _HGenetics._itr = currpos;
         std::cout<<"#2"<<std::endl;
         return true;
     }
     else if(currpos == _HGenetics._maxLen && dGenLength !=0){//if the _HGenetics vector is full, tell the GPU
-        _HGenetics.lazyResize(currpos);
         thrust::copy(dGen->_array, dGen->_array + dGenLength, _HGenetics._hVect.begin()+_HGenetics._itr);
         _HGenetics._itr = 0;
         _DGenetics.resize(_deviceGeneticsAlloc);
@@ -127,7 +125,6 @@ bool MemManager::GeneticsPushToHost(dataArray<double> *dGen){
         return false;
     }
     else if(currpos > _HGenetics._maxLen){
-        _HGenetics.lazyResize(_HGenetics._maxLen);
         std::cout<<"#4"<<std::endl;
         return false;
     }

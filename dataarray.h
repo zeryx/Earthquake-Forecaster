@@ -12,13 +12,9 @@ template <typename T>
 class hVector{
 public:
     void setMax(long long maxLen){
-        _hVect.reserve(maxLen);
+        _hVect.resize(maxLen);
         _itr = 0;
         _maxLen = maxLen;
-    }
-    void lazyResize(long long newDims){
-        if(newDims <= _maxLen)
-            _hVect.resize(newDims);
     }
 
 public:

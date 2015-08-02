@@ -60,6 +60,7 @@ void NetworkGenetic::initializeWeights(){
     int cumulative = 0;
     _NNParams[9] = _genetics._size/(_NNParams[8]); // number of individuals on device.
     do{
+
         _NNParams[9] = _genetics._size/(_NNParams[8]); // number of individuals on device.
         cumulative = cumulative + _NNParams[9];
         std::cout<<"population on device: "<<_NNParams[9]<<std::endl;
@@ -70,6 +71,17 @@ void NetworkGenetic::initializeWeights(){
         genWeights<double><<<gridSize, blocksize>>>(_genetics, seed, _NNParams[2], _NNParams[8]);
         cudaDeviceSynchronize();
     }while(_memVirtualizer.GeneticsPushToHost(&_genetics));
+
+    _NNParams[9] = _genetics._size/(_NNParams[8]); // number of individuals on device.
+    cumulative = cumulative + _NNParams[9];
+    std::cout<<"population on device: "<<_NNParams[9]<<std::endl;
+    std::cout<<"cumulative population: "<<cumulative<<std::endl;
+    CUDA_SAFE_CALL (cudaOccupancyMaxPotentialBlockSize( &minGridSize, &blocksize, (void*)genWeights<double>, 0, _NNParams[9]));
+    gridSize = (_NNParams[9] + blocksize -1)/blocksize;
+    long seed = std::clock();
+    genWeights<double><<<gridSize, blocksize>>>(_genetics, seed, _NNParams[2], _NNParams[8]);
+    cudaDeviceSynchronize();
+
     std::cout<<"finished making weights, total # of individuals made is: "<<cumulative<<std::endl;
 }
 
