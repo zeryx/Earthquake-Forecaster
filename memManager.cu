@@ -42,9 +42,9 @@ dataArray<float> MemManager::kpIndex(){
 
 
 
-int MemManager::memoryAlloc(std::map<const std::string, float> pHostRam,
-                            std::map<const std::string, float> pDeviceRam,
-                            int individualLength, float pMaxHost, float pMaxDevice){
+bool MemManager::memoryAlloc(std::map<const std::string, float> pHostRam,
+                             std::map<const std::string, float> pDeviceRam,
+                             int individualLength, float pMaxHost, float pMaxDevice){
     long hostMem = GetHostRamInBytes()*pMaxHost; //make a host memory container, this is the max
     long deviceMem = GetDeviceRamInBytes()*pMaxDevice; //dito for gpu
     int dub = 8, integer = 4;
@@ -57,15 +57,12 @@ int MemManager::memoryAlloc(std::map<const std::string, float> pHostRam,
     //round the genetics allocators to whole individuals.
     _hostGeneticsAlloc = (_hostGeneticsAlloc/individualLength)*individualLength;
     _deviceGeneticsAlloc = (_deviceGeneticsAlloc/individualLength)*individualLength;
-    long hostAlloced = _hostGeneticsAlloc*dub + _hostTrainingAlloc*dub + _hostInputAlloc*integer;
-    long deviceAlloced = _deviceGeneticsAlloc*dub + _deviceTrainingAlloc*dub + _deviceInputAlloc*integer;
-    std::cout<<hostAlloced<<std::endl;
-    std::cout<<deviceAlloced<<std::endl;
+    std::cout<<"allocating..."<<std::endl;
     //initialize all large vectors (everything not from an xml file)
     try{
-    this->_HGenetics.setMax(_hostGeneticsAlloc);
-    this->_HTraining.setMax(_hostTrainingAlloc);
-    this->_HInput.setMax(_hostInputAlloc);
+        this->_HGenetics.setMax(_hostGeneticsAlloc);
+        this->_HTraining.setMax(_hostTrainingAlloc);
+        this->_HInput.setMax(_hostInputAlloc);
     }
     catch(thrust::system_error &e){
         std::cerr<<"Error resizing vector Element: "<<e.what()<<std::endl;
@@ -92,6 +89,7 @@ int MemManager::memoryAlloc(std::map<const std::string, float> pHostRam,
         std::cout<<GetDeviceRamInBytes()<<std::endl;
         exit(1);
     }
+    std::cout<<"allocated."<<std::endl;
     return true;
 }
 bool MemManager::geneticsBufferSwap(dataArray<double> *dGen){
@@ -103,15 +101,16 @@ bool MemManager::GeneticsPushToHost(dataArray<double> *dGen){
     if(_HGenetics._itr + dGenLength*2 < _HGenetics._maxLen){ //if _HGenetics can take 2 more at the current size, keep going
         thrust::copy(dGen->_array, dGen->_array + dGenLength, _HGenetics._hVect.begin()+_HGenetics._itr);
         _HGenetics._itr = _HGenetics._itr + dGenLength; //set the iterator  to the new position.
-        std::cout<<"#1"<<std::cout;
+        std::cout<<"#1"<<std::endl;
         return true;
     }
-    else if(_HGenetics._itr + dGenLength*2 >= _HGenetics._maxLen){//if _HGenetics can only take 1 or exactly 2 at current size, resize dgen to fit
+    else if(_HGenetics._itr + dGenLength*2 <= _HGenetics._maxLen && dGenLength + _HGenetics._itr <= _HGenetics._maxLen){//if _HGenetics can only take 1 or exactly 2 at current size, resize dgen to fit
         thrust::copy(dGen->_array, dGen->_array + dGenLength, _HGenetics._hVect.begin()+_HGenetics._itr);
         _HGenetics._itr = _HGenetics._itr + dGenLength;
         _DGenetics.resize(_HGenetics._maxLen - _HGenetics._itr);// the device_vector for genetics was resized to fit the remaining host mem container.
+        std::cout<<"resized genetics to: "<<_HGenetics._maxLen - _HGenetics._itr<<" "<<_DGenetics.size()<<std::endl;
         dGen->_size = _DGenetics.size();
-        std::cout<<"#2"<<std::cout;
+        std::cout<<"#2"<<std::endl;
         return true;
     }
     else if(_HGenetics._itr+dGenLength == _HGenetics._maxLen){//if the _HGenetics vector is full, tell the GPU
@@ -119,12 +118,12 @@ bool MemManager::GeneticsPushToHost(dataArray<double> *dGen){
         _HGenetics._itr = 0;
         _DGenetics.resize(_deviceGeneticsAlloc);
         dGen->_size =_DGenetics.size();
-        std::cout<<"#3"<<std::cout;
+        std::cout<<"#3"<<std::endl;
         return false;
     }
-    else{ // not sure how you got here
+    else if(_HGenetics._itr + dGenLength > _HGenetics._maxLen){
         std::cerr<<"how did you get here? not sure!"<<std::endl;
-        std::cout<<"#4"<<std::cout;
+        std::cout<<"#4"<<std::endl;
         return false;
     }
 }
@@ -133,12 +132,12 @@ void MemManager::importSitesData(std::string siteInfo){
     int dataSet, SLEN;
     tinyxml2::XMLDocument doc;
     if(_DInit.size()>0){ //empty any previous data located in array, both are small enough to be of no consquence
-    _DInit.clear();
-    _DInit.shrink_to_fit();
+        _DInit.clear();
+        _DInit.shrink_to_fit();
     }
     if(_DSites.size()>0){
-    _DSites.clear();
-    _DSites.shrink_to_fit();
+        _DSites.clear();
+        _DSites.shrink_to_fit();
     }
     doc.LoadFile(siteInfo.c_str());
     tinyxml2::XMLNode * pRoot = doc.FirstChild();
@@ -171,26 +170,26 @@ void MemManager::importSitesData(std::string siteInfo){
 }
 
 void MemManager::importKpData(std::string Kp){
-            tinyxml2::XMLDocument doc;
-        tinyxml2::XMLError eResult;
-        _DKpIndex.clear();
-        _DKpIndex.shrink_to_fit();
-        doc.LoadFile(Kp.c_str());
-        tinyxml2::XMLNode *pRoot = doc.FirstChild();
-        if(pRoot == NULL) exit(tinyxml2::XML_ERROR_FILE_READ_ERROR);
-        tinyxml2::XMLElement * pElement = pRoot->NextSiblingElement("Kp");
-        if(pElement == NULL) exit(tinyxml2::XML_ERROR_PARSING_ELEMENT);
-        tinyxml2::XMLElement * KpList = pElement->FirstChildElement("Kp_hr");
-        while(KpList != NULL){
-            int seconds;
-            float magnitude;
-            eResult = KpList->QueryIntAttribute("secs", &seconds);
-            XMLCheckResult(eResult);
-            _DKpIndex.push_back(seconds);
-            eResult = KpList->QueryFloatText(&magnitude);
-            XMLCheckResult(eResult);
-            _DKpIndex.push_back(magnitude);
-            KpList = KpList->NextSiblingElement("Kp_hr");
+    tinyxml2::XMLDocument doc;
+    tinyxml2::XMLError eResult;
+    _DKpIndex.clear();
+    _DKpIndex.shrink_to_fit();
+    doc.LoadFile(Kp.c_str());
+    tinyxml2::XMLNode *pRoot = doc.FirstChild();
+    if(pRoot == NULL) exit(tinyxml2::XML_ERROR_FILE_READ_ERROR);
+    tinyxml2::XMLElement * pElement = pRoot->NextSiblingElement("Kp");
+    if(pElement == NULL) exit(tinyxml2::XML_ERROR_PARSING_ELEMENT);
+    tinyxml2::XMLElement * KpList = pElement->FirstChildElement("Kp_hr");
+    while(KpList != NULL){
+        int seconds;
+        float magnitude;
+        eResult = KpList->QueryIntAttribute("secs", &seconds);
+        XMLCheckResult(eResult);
+        _DKpIndex.push_back(seconds);
+        eResult = KpList->QueryFloatText(&magnitude);
+        XMLCheckResult(eResult);
+        _DKpIndex.push_back(magnitude);
+        KpList = KpList->NextSiblingElement("Kp_hr");
     }
 
 }
