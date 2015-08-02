@@ -18,10 +18,10 @@ public:
     dataArray<double> sites();
 
 public:
-    int geneticsBufferSwap(dataArray<double> dGen);
-    int GeneticsPushToHost(dataArray<double> dGen);
-    int InputandTrainingRefresh(dataArray<int> input,
-                                 dataArray<double> training);
+    bool geneticsBufferSwap(dataArray<double> *dGen);
+    bool GeneticsPushToHost(dataArray<double> *dGen);
+    bool InputandTrainingRefresh(dataArray<int> *input,
+                                 dataArray<double> *training);
 
 public:
     void importSitesData(std::string);
