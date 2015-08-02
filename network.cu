@@ -25,9 +25,10 @@ __global__ void genWeights( dataArray<T> ref, long in, int nRegWeights, int indL
     long idx = blockDim.x*blockIdx.x + threadIdx.x;
     long seed= idx+in;
     thrust::default_random_engine randEng;
+    randEng.seed(seed);
     for(int i=0; i<nRegWeights; i++){
         thrust::uniform_real_distribution<double> uniDist(0,1);
-        randEng.discard(seed);
+        randEng.discard(i);
         ref._array[idx*indLength+i] = uniDist(randEng);
     }
 }
@@ -46,7 +47,7 @@ NetworkGenetic::NetworkGenetic(const int &numInNeurons, const int &numHiddenNeur
     _NNParams[5] = numMemoryNeurons;
     _NNParams[6] = numOutNeurons;
     _NNParams[7] = numHiddenLayers;
-    _NNParams[8] = numInNeurons + numHiddenLayers + numMemoryNeurons + numOutNeurons + 1 + 9; //1 for fitness, 9 for community output
+    _NNParams[8] = numInNeurons + numHiddenLayers + numMemoryNeurons + numOutNeurons + 1 + 1; //1 for fitness, 1 for community output composite vector
     _connections = connections;
 }
 
@@ -57,32 +58,27 @@ void NetworkGenetic::initializeWeights(){
     int blocksize; //the blocksize defined by the configurator
     int minGridSize; //the minimum grid size needed to achive max occupancy
     int gridSize; // the actual grid size needed
-    int cumulative = 0;
+    int seedItr = 0;
     _NNParams[9] = _genetics._size/(_NNParams[8]); // number of individuals on device.
     do{
-
-        _NNParams[9] = _genetics._size/(_NNParams[8]); // number of individuals on device.
-        cumulative = cumulative + _NNParams[9];
-        std::cout<<"population on device: "<<_NNParams[9]<<std::endl;
-        std::cout<<"cumulative population: "<<cumulative<<std::endl;
+        std::srand(std::clock());
         CUDA_SAFE_CALL (cudaOccupancyMaxPotentialBlockSize( &minGridSize, &blocksize, (void*)genWeights<double>, 0, _NNParams[9]));
         gridSize = (_NNParams[9] + blocksize -1)/blocksize;
-        long seed = std::clock();
-        genWeights<double><<<gridSize, blocksize>>>(_genetics, seed, _NNParams[2], _NNParams[8]);
+        genWeights<double><<<gridSize, blocksize>>>(_genetics, rand() + seedItr++, _NNParams[2], _NNParams[8]);
         cudaDeviceSynchronize();
     }while(_memVirtualizer.GeneticsPushToHost(&_genetics));
-
-    _NNParams[9] = _genetics._size/(_NNParams[8]); // number of individuals on device.
-    cumulative = cumulative + _NNParams[9];
-    std::cout<<"population on device: "<<_NNParams[9]<<std::endl;
-    std::cout<<"cumulative population: "<<cumulative<<std::endl;
+    std::srand(std::clock());
     CUDA_SAFE_CALL (cudaOccupancyMaxPotentialBlockSize( &minGridSize, &blocksize, (void*)genWeights<double>, 0, _NNParams[9]));
     gridSize = (_NNParams[9] + blocksize -1)/blocksize;
-    long seed = std::clock();
-    genWeights<double><<<gridSize, blocksize>>>(_genetics, seed, _NNParams[2], _NNParams[8]);
+    genWeights<double><<<gridSize, blocksize>>>(_genetics, rand() + seedItr++, _NNParams[2], _NNParams[8]);
     cudaDeviceSynchronize();
 
-    std::cout<<"finished making weights, total # of individuals made is: "<<cumulative<<std::endl;
+    for(int i=0; i<40; i++){
+        std::cout<<"for individual: "<<i<<std::endl;
+        for (int k=0; k<_NNParams[8]; k++){
+            std::cout<<_genetics._array[k]<<std::endl;
+        }
+    }
 }
 
 
