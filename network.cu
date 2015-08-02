@@ -1,4 +1,4 @@
-#include "network.h"
+﻿#include "network.h"
 #include "dataarray.h"
 #include <thrust/device_vector.h>
 #include <thrust/random.h>
@@ -57,13 +57,19 @@ void NetworkGenetic::initializeWeights(){
     int blocksize; //the blocksize defined by the configurator
     int minGridSize; //the minimum grid size needed to achive max occupancy
     int gridSize; // the actual grid size needed
-    _NNParams[9] = _genetics._size/(_NNParams[8]); // number of individuals on device is 9
-    std::cout<<"initial population: "<<_NNParams[9]<<std::endl;
-    CUDA_SAFE_CALL (cudaOccupancyMaxPotentialBlockSize( &minGridSize, &blocksize, (void*)genWeights<double>, 0, _NNParams[9]));
-    gridSize = (_NNParams[9] + blocksize -1)/blocksize;
-    long seed = std::clock();
-    genWeights<double><<<gridSize, blocksize>>>(_genetics, seed, _NNParams[2], _NNParams[8]);
-    cudaDeviceSynchronize();
+    int cumulative = 0;
+    _NNParams[9] = _genetics._size/(_NNParams[8]); // number of individuals on device.
+    do{
+        _NNParams[9] = _genetics._size/(_NNParams[8]); // number of individuals on device.
+        cumulative = cumulative + _NNParams[9];
+        std::cout<<"population on device: "<<_NNParams[9]<<std::endl;
+        std::cout<<"cumulative population: "<<cumulative<<std::endl;
+        CUDA_SAFE_CALL (cudaOccupancyMaxPotentialBlockSize( &minGridSize, &blocksize, (void*)genWeights<double>, 0, _NNParams[9]));
+        gridSize = (_NNParams[9] + blocksize -1)/blocksize;
+        long seed = std::clock();
+        genWeights<double><<<gridSize, blocksize>>>(_genetics, seed, _NNParams[2], _NNParams[8]);
+        cudaDeviceSynchronize();
+    }while(_memVirtualizer.GeneticsPushToHost(_genetics));
 }
 
 

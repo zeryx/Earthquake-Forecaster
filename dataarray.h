@@ -18,8 +18,8 @@ public:
     }
 public:
     thrust::host_vector<T> _hVect;
-    int _itr;
-    int _maxLen;
+    long _itr;
+    long _maxLen;
 };
 
 template <typename T>

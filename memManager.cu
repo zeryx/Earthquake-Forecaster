@@ -100,26 +100,27 @@ int MemManager::geneticsBufferSwap(dataArray<double> dGen){
 
 int MemManager::GeneticsPushToHost(dataArray<double> dGen){
     int dGenLength = dGen._size;
-    if(_HGenetics._itr + dGenLength*2 > _HGenetics._maxLen){
+    if(_HGenetics._itr + dGenLength*2 > _HGenetics._maxLen){ //if _HGenetics can take 2 more at the current size, keep going
         thrust::copy(dGen._array, dGen._array + dGenLength, _HGenetics._hVect.begin()+_HGenetics._itr);
         _HGenetics._itr = _HGenetics._itr + dGenLength; //set the iterator  to the new position.
-        return 0; //continue making more weights at the current length
-
+        return true;
     }
-    else if(_HGenetics._itr + dGenLength*2 <= _HGenetics._maxLen){//dGen length can only be adjusted from MemManager, so this is ok
+    else if(_HGenetics._itr + dGenLength*2 <= _HGenetics._maxLen){//if _HGenetics can only take 1 or exactly 2 at current size, resize dgen to fit
         thrust::copy(dGen._array, dGen._array + dGenLength, _HGenetics._hVect.begin()+_HGenetics._itr);
         _HGenetics._itr = _HGenetics._itr + dGenLength;
         _DGenetics.resize(_HGenetics._maxLen - _HGenetics._itr);// the device_vector for genetics was resized to fit the remaining host mem container.
-        return 1; //continue making more weights, but at a new length.
+        return true;
     }
-    else if(_HGenetics._itr+dGenLength == _HGenetics._maxLen){
+    else if(_HGenetics._itr+dGenLength == _HGenetics._maxLen){//if the _HGenetics vector is full, tell the GPU
         thrust::copy(dGen._array, dGen._array + dGenLength, _HGenetics._hVect.begin()+_HGenetics._itr);
         _HGenetics._itr = 0;
         _DGenetics.resize(_deviceGeneticsAlloc);
-        return 2; //make one more batch of weights, but don't push to host.
+        return false;
     }
-    else
-        return 3; //error, somehow we accidentally pushed too many doubles!? you probably want to exit.
+    else{ // not sure how you got here
+        std::cerr<<"how did you get here? not sure!"<<std::endl;
+        return false;
+    }
 }
 
 void MemManager::importSitesData(std::string siteInfo){
