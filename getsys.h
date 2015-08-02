@@ -5,7 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <cuda_runtime_api.h>
-unsigned long GetHostRamInBytes(void)
+long long GetHostRamInBytes(void)
 {
     FILE *meminfo = fopen("/proc/meminfo", "r");
     if(meminfo == NULL)
@@ -14,7 +14,7 @@ unsigned long GetHostRamInBytes(void)
     char line[256];
     while(fgets(line, sizeof(line), meminfo))
     {
-        unsigned long  ram;
+        long long  ram;
         if(sscanf(line, "MemFree: %lu kB", &ram) == 1)
         {
             fclose(meminfo);
@@ -29,7 +29,7 @@ unsigned long GetHostRamInBytes(void)
     exit(1);
 }
 
-long GetDeviceRamInBytes(void){
+long long GetDeviceRamInBytes(void){
     size_t free, total;
     cudaMemGetInfo(&free, &total);
     long ret = free;

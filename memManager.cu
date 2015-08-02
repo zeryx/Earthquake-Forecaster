@@ -45,8 +45,8 @@ dataArray<float> MemManager::kpIndex(){
 bool MemManager::memoryAlloc(std::map<const std::string, float> pHostRam,
                              std::map<const std::string, float> pDeviceRam,
                              int individualLength, float pMaxHost, float pMaxDevice){
-    long hostMem = GetHostRamInBytes()*pMaxHost; //make a host memory container, this is the max
-    long deviceMem = GetDeviceRamInBytes()*pMaxDevice; //dito for gpu
+    long long hostMem = GetHostRamInBytes()*pMaxHost; //make a host memory container, this is the max
+    long long deviceMem = GetDeviceRamInBytes()*pMaxDevice; //dito for gpu
     int dub = 8, integer = 4;
     _hostGeneticsAlloc = hostMem*pHostRam.at("genetics")/dub; //since these are doubles, divide bytes by 8
     _hostTrainingAlloc = hostMem*pHostRam.at("input & training")/(dub*2);//half for training, half for input I think?
