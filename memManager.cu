@@ -102,13 +102,14 @@ bool MemManager::GeneticsPushToHost(dataArray<double> *dGen){
     std::cout<<"length of device vector: "<<dGenLength<<std::endl;
     std::cout<<"% of host Mem for this iteration: "<<percentage<<std::endl;
     std::cout<<"host vector max length: "<<_HGenetics._maxLen<<std::endl;
-    if(_HGenetics._itr + dGenLength*2 < _HGenetics._maxLen){ //if _HGenetics can take 2 more at the current size, keep going
+    if(_HGenetics._itr + dGenLength*2 <= _HGenetics._maxLen){ //if _HGenetics can take 2 more at the current size, keep going
         thrust::copy(dGen->_array, dGen->_array + dGenLength, _HGenetics._hVect.begin()+_HGenetics._itr);
         _HGenetics._itr = _HGenetics._itr + dGenLength; //set the iterator  to the new position.
         std::cout<<"#1"<<std::endl;
         return true;
     }
-    else if(_HGenetics._itr + dGenLength*2 <= _HGenetics._maxLen){//if _HGenetics can only take 1 or exactly 2 at current size, resize dgen to fit
+    else if(_HGenetics._itr + dGenLength*2 > _HGenetics._maxLen){//if _HGenetics can only take 1 or exactly 2 at current size, resize dgen to fit
+        _HGenetics.lazyResize(_HGenetics._itr + dGenLength);
         thrust::copy(dGen->_array, dGen->_array + dGenLength, _HGenetics._hVect.begin()+_HGenetics._itr);
         _HGenetics._itr = _HGenetics._itr + dGenLength;
         _DGenetics.resize(_HGenetics._maxLen - _HGenetics._itr);// the device_vector for genetics was resized to fit the remaining host mem container.
@@ -118,6 +119,7 @@ bool MemManager::GeneticsPushToHost(dataArray<double> *dGen){
         return true;
     }
     else if(_HGenetics._itr + dGenLength == _HGenetics._maxLen){//if the _HGenetics vector is full, tell the GPU
+        _HGenetics.lazyResize(_HGenetics._itr + dGenLength);
         thrust::copy(dGen->_array, dGen->_array + dGenLength, _HGenetics._hVect.begin()+_HGenetics._itr);
         _HGenetics._itr = 0;
         _DGenetics.resize(_deviceGeneticsAlloc);
@@ -126,9 +128,11 @@ bool MemManager::GeneticsPushToHost(dataArray<double> *dGen){
         return false;
     }
     else if(_HGenetics._itr + dGenLength > _HGenetics._maxLen){
+        _HGenetics.lazyResize(_HGenetics._itr + dGenLength);
         std::cout<<"#4"<<std::endl;
         return false;
     }
+
     return false;
 }
 
@@ -137,11 +141,9 @@ void MemManager::importSitesData(std::string siteInfo){
     tinyxml2::XMLDocument doc;
     if(_DInit.size()>0){ //empty any previous data located in array, both are small enough to be of no consquence
         _DInit.clear();
-        _DInit.shrink_to_fit();
     }
     if(_DSites.size()>0){
         _DSites.clear();
-        _DSites.shrink_to_fit();
     }
     doc.LoadFile(siteInfo.c_str());
     tinyxml2::XMLNode * pRoot = doc.FirstChild();
@@ -177,7 +179,6 @@ void MemManager::importKpData(std::string Kp){
     tinyxml2::XMLDocument doc;
     tinyxml2::XMLError eResult;
     _DKpIndex.clear();
-    _DKpIndex.shrink_to_fit();
     doc.LoadFile(Kp.c_str());
     tinyxml2::XMLNode *pRoot = doc.FirstChild();
     if(pRoot == NULL) exit(tinyxml2::XML_ERROR_FILE_READ_ERROR);
