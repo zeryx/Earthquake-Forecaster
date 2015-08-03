@@ -24,7 +24,7 @@ public:
 };
 
 template <typename T>
-dataArray<T> convertToKernel(thrust::device_vector<T>& dVect){
+dataArray<T> convertToKernel(thrust::device_vector<T> dVect){
     dataArray<T> kArray;
     kArray._array = thrust::raw_pointer_cast(&dVect[0]);
     kArray._size  = dVect.size();

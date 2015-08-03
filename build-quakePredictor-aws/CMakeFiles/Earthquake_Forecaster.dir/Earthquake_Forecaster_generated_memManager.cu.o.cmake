@@ -70,7 +70,7 @@ set(generated_file_internal "/home/james/Documents/TopCoder/Solutions/git/earthq
 set(generated_cubin_file_internal "/home/james/Documents/TopCoder/Solutions/git/earthquake_forcaster/build-quakePredictor-aws/CMakeFiles/Earthquake_Forecaster.dir//./Earthquake_Forecaster_generated_memManager.cu.o.cubin.txt") # path
 
 set(CUDA_NVCC_EXECUTABLE "/usr/local/cuda/bin/nvcc") # path
-set(CUDA_NVCC_FLAGS -gencode;arch=compute_35,code=sm_35 ;; ) # list
+set(CUDA_NVCC_FLAGS -gencode;arch=compute_30,code=sm_30 ;; ) # list
 # Build specific configuration flags
 set(CUDA_NVCC_FLAGS_DEBUG  ; )
 set(CUDA_NVCC_FLAGS_MINSIZEREL  ; )
