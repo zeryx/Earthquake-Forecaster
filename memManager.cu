@@ -1,5 +1,11 @@
 #include "memManager.h"
 #include "getsys.h"
+#include "datediff.h"
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <vector>
+#include <fstream>
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
 #include <thrust/swap.h>
@@ -20,23 +26,19 @@ dataArray<double> MemManager::genetics(){
     return convertToKernel(_DGenetics);
 }
 
-dataArray<int> MemManager::init(){
-    return convertToKernel(_DInit);
-}
-
 dataArray<int> MemManager::input(){
     return convertToKernel(_DInput);
 }
 
-dataArray<double> MemManager::training(){
+dataArray<Answers> MemManager::training(){
     return convertToKernel(_DTraining);
 }
 
-dataArray<double> MemManager::sites(){
+dataArray<SiteInfo> MemManager::sites(){
     return convertToKernel(_DSites);
 }
 
-dataArray<float> MemManager::kpIndex(){
+dataArray<Kp> MemManager::kpIndex(){
     return convertToKernel(_DKpIndex);
 }
 
@@ -44,16 +46,14 @@ dataArray<float> MemManager::kpIndex(){
 
 bool MemManager::memoryAlloc(std::map<const std::string, float> pHostRam,
                              std::map<const std::string, float> pDeviceRam,
-                             int individualLength, float pMaxHost, float pMaxDevice){
+                             int individualLength, float pMaxHost, float pMaxDevice){//allocates memory for genetis & input vectors
     long long hostMem = GetHostRamInBytes()*pMaxHost; //make a host memory container, this is the max
     long long deviceMem = GetDeviceRamInBytes()*pMaxDevice; //dito for gpu
     int dub = 8, integer = 4;
     _hostGeneticsAlloc = hostMem*pHostRam.at("genetics")/dub; //since these are doubles, divide bytes by 8
-    _hostTrainingAlloc = hostMem*pHostRam.at("input & training")/(dub*2);//half for training, half for input I think?
-    _hostInputAlloc = hostMem*pHostRam.at("input & training")/(integer*2); // their either floats or ints, same amount of bytes.
+    _hostInputAlloc = hostMem*pHostRam.at("input & training")/(integer); // their either floats or ints, same amount of bytes.
     _deviceGeneticsAlloc = deviceMem*pDeviceRam.at("genetics")/dub;
-    _deviceTrainingAlloc = deviceMem*pDeviceRam.at("input & training")/(dub*2);
-    _deviceInputAlloc = deviceMem*pDeviceRam.at("input & training")/(integer*2);
+    _deviceInputAlloc = deviceMem*pDeviceRam.at("input & training")/(integer);
     //round the genetics allocators to whole individuals.
     _hostGeneticsAlloc = (_hostGeneticsAlloc/individualLength)*individualLength;
     _deviceGeneticsAlloc = (_deviceGeneticsAlloc/individualLength)*individualLength;
@@ -61,7 +61,6 @@ bool MemManager::memoryAlloc(std::map<const std::string, float> pHostRam,
     //initialize all large vectors (everything not from an xml file)
     try{
         this->_HGenetics.setMax(_hostGeneticsAlloc);
-        this->_HTraining.setMax(_hostTrainingAlloc);
         this->_HInput.setMax(_hostInputAlloc);
     }
     catch(thrust::system_error &e){
@@ -76,7 +75,6 @@ bool MemManager::memoryAlloc(std::map<const std::string, float> pHostRam,
     }
     try{
         this->_DGenetics.resize(_deviceGeneticsAlloc);
-        this->_DTraining.resize(_deviceTrainingAlloc);
         this->_DInput.resize(_deviceInputAlloc);
     }
     catch(thrust::system_error &e){
@@ -132,50 +130,60 @@ bool MemManager::GeneticsPushToHost(dataArray<double> *dGen){
     return false;
 }
 
-void MemManager::importSitesData(std::string siteInfo){
-    int dataSet, SLEN;
+
+bool MemManager::InputRefresh(dataArray<int> *input){
+    return false;
+}
+void MemManager::setPath(std::string pathToData){
+    this->_dataDirectory = pathToData;
+}
+
+void MemManager::setTest(int testNum){
+    this->_testDirectory = _dataDirectory.append("/"+testNum);
+}
+
+void MemManager::importSitesData(){
     tinyxml2::XMLDocument doc;
-    if(_DInit.size()>0){ //empty any previous data located in array, both are small enough to be of no consquence
-        _DInit.clear();
-    }
-    if(_DSites.size()>0){
+    tinyxml2::XMLError eResult;
         _DSites.clear();
-    }
-    doc.LoadFile(siteInfo.c_str());
+        _DSites.shrink_to_fit();
+    std::string siteInfoStr = this->_testDirectory.append("/SiteInfo.xml");
+    doc.LoadFile(siteInfoStr.c_str());
     tinyxml2::XMLNode * pRoot = doc.FirstChild();
     if(pRoot == NULL) exit(tinyxml2::XML_ERROR_FILE_READ_ERROR);
     tinyxml2::XMLElement * pElement = pRoot->NextSiblingElement("Sites");
     if(pElement == NULL) exit(tinyxml2::XML_ERROR_PARSING_ELEMENT);
-    tinyxml2::XMLError eResult = pElement->QueryIntAttribute("data_set", &dataSet);
-    XMLCheckResult(eResult);
 
-    eResult = pElement->QueryIntAttribute("num_sites", &SLEN);
-    XMLCheckResult(eResult);
-    _DInit.push_back(SLEN);
-    _DInit.push_back(dataSet);
     tinyxml2::XMLElement *SitesList = pRoot->NextSiblingElement("Site");
 
     while(SitesList != NULL){
-        int sampleData;
-        double longitude, latitude;
-        eResult = SitesList->QueryIntAttribute("sample_rate", &sampleData);
+        int sampleRate, siteNumber;
+        float longitude, latitude;
+        eResult = SitesList->QueryIntAttribute("sample_rate", &sampleRate);
         XMLCheckResult(eResult);
-        _DInit.push_back(sampleData);
-        eResult = SitesList->QueryDoubleAttribute("latitude", &latitude);
+        eResult = SitesList->QueryFloatAttribute("latitude", &latitude);
         XMLCheckResult(eResult);
-        _DSites.push_back(latitude);
-        eResult = SitesList->QueryDoubleAttribute("longitude", &longitude);
+        eResult = SitesList->QueryFloatAttribute("longitude", &longitude);
         XMLCheckResult(eResult);
-        _DSites.push_back(longitude);
+        eResult = SitesList->QueryIntText(&siteNumber);
+        XMLCheckResult(eResult);
+        SiteInfo tmp;
+        tmp.siteNumber = siteNumber;
+        tmp.sampleRate = sampleRate;
+        tmp.latitude = latitude;
+        tmp.longitude = longitude;
+        _DSites.push_back(tmp);
         SitesList = SitesList->NextSiblingElement("Site");
     }
 }
 
-void MemManager::importKpData(std::string Kp){
+void MemManager::importKpData(){
     tinyxml2::XMLDocument doc;
     tinyxml2::XMLError eResult;
     _DKpIndex.clear();
-    doc.LoadFile(Kp.c_str());
+    _DKpIndex.shrink_to_fit();
+    std::string KpStr = this->_testDirectory.append("/Kp.xml");
+    doc.LoadFile(KpStr.c_str());
     tinyxml2::XMLNode *pRoot = doc.FirstChild();
     if(pRoot == NULL) exit(tinyxml2::XML_ERROR_FILE_READ_ERROR);
     tinyxml2::XMLElement * pElement = pRoot->NextSiblingElement("Kp");
@@ -186,11 +194,75 @@ void MemManager::importKpData(std::string Kp){
         float magnitude;
         eResult = KpList->QueryIntAttribute("secs", &seconds);
         XMLCheckResult(eResult);
-        _DKpIndex.push_back(seconds);
         eResult = KpList->QueryFloatText(&magnitude);
         XMLCheckResult(eResult);
-        _DKpIndex.push_back(magnitude);
+        Kp tmp;
+        tmp.seconds = seconds;
+        tmp.magnitude = magnitude;
+        _DKpIndex.push_back(tmp);
         KpList = KpList->NextSiblingElement("Kp_hr");
+    }
+}
+
+void MemManager::importGQuakes(){
+    tinyxml2::XMLDocument doc;
+    tinyxml2::XMLError eResult;
+    _DGQuakes.clear();
+    _DGQuakes.shrink_to_fit();
+    std::string QuakesStr = this->_testDirectory.append("/Quakes.xml");
+    doc.LoadFile(QuakesStr.c_str());
+    tinyxml2::XMLNode *pRoot = doc.FirstChild();
+    if(pRoot == NULL) exit(tinyxml2::XML_ERROR_FILE_READ_ERROR);
+    tinyxml2::XMLElement * pElement = pRoot->NextSiblingElement("Quakes");
+    if(pElement == NULL) exit(tinyxml2::XML_ERROR_PARSING_ELEMENT);
+    tinyxml2::XMLElement * quakeList = pElement->FirstChildElement("Quake");
+    while(quakeList != NULL){
+        int seconds;
+        float latitude, longitude, magnitude, depth;
+        eResult = quakeList->QueryIntAttribute("secs", &seconds);
+        XMLCheckResult(eResult);
+        eResult = quakeList->QueryFloatAttribute("latitude", &latitude);
+        XMLCheckResult(eResult);
+        eResult = quakeList->QueryFloatAttribute("longitude", &longitude);
+        XMLCheckResult(eResult);
+        eResult = quakeList->QueryFloatAttribute("magnitude", &magnitude);
+        XMLCheckResult(eResult);
+        eResult = quakeList->QueryFloatAttribute("depth", &depth);
+        GQuakes tmp;
+        tmp.seconds = seconds;
+        tmp.latitude = latitude;
+        tmp.longitude = longitude;
+        tmp.magnitude = magnitude;
+        tmp.depth = depth;
+        _DGQuakes.push_back(tmp);
+        quakeList = quakeList->NextSiblingElement("Quake");
+    }
+}
+
+void MemManager::importTrainingData(){ // this is only called once for the entire life of the program, also uses CSV so it's done with fopen
+    std::string answerStr = this->_dataDirectory.append("/gtf.csv");
+    std::ifstream answerfile(answerStr.c_str());
+    std::string line;
+    std::getline(answerfile, line);
+    int numOfTests;
+    std::istringstream(line) >> numOfTests;
+    while(std::getline(answerfile, line)){
+        std::vector<std::string> token;
+        std::string item;
+        std::stringstream ss(line);
+        while(std::getline(ss,  item, ',')){
+            token.push_back(item);
+        }
+        Answers tmp;
+        std::istringstream(token[0]) >> tmp.setID;
+        std::string startTime = token[1];
+        std::string EqTime = token[2];
+        tmp.hrOfQuake = timeDifferenceCalculation(startTime, EqTime);
+        std::istringstream(token[3]) >> tmp.magnitude;
+        std::istringstream(token[4]) >> tmp.latitude;
+        std::istringstream(token[5]) >> tmp.longitude;
+        std::istringstream(token[6]) >> tmp.siteNum;
+        std::istringstream(token[7]) >> tmp.distToQuake;
     }
 
 }

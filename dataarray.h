@@ -4,7 +4,7 @@
 #include <thrust/host_vector.h>
 template <typename T>
 struct dataArray{
-    thrust::device_ptr<T> _array;
+    T *_array;
     int _size;
 };
 
@@ -26,8 +26,8 @@ public:
 template <typename T>
 dataArray<T> convertToKernel(thrust::device_vector<T>& dVect){
     dataArray<T> kArray;
-    kArray._array = thrust::device_pointer_cast(dVect.data());
-    kArray._size  = (int) dVect.size();
+    kArray._array = thrust::raw_pointer_cast(&dVect[0]);
+    kArray._size  = dVect.size();
     return kArray;
 }
 

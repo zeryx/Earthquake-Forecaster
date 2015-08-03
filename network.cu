@@ -3,8 +3,6 @@
 #include <thrust/device_vector.h>
 #include <thrust/random.h>
 #include <ctime>
-#include <cuda.h>
-#include <cuda_runtime.h>
 #include <tinyxml2.h>
 
 //macros
@@ -22,14 +20,14 @@
 
 template <typename T>
 __global__ void genWeights( dataArray<T> ref, long in, int nRegWeights, int indLength){
-    long idx = blockDim.x*blockIdx.x + threadIdx.x;
-    long seed= idx+in;
-    thrust::default_random_engine randEng;
-    randEng.seed(seed);
+    long idx = blockIdx.x * blockDim.x + threadIdx.x;
+    thrust::minstd_rand0 randEng;
+    randEng.seed(idx);
+    long seed = idx+ref._size*in;
     for(int i=0; i<nRegWeights; i++){
         thrust::uniform_real_distribution<double> uniDist(0,1);
-        randEng.discard(i);
-        ref._array[idx*indLength+i] = uniDist(randEng);
+        randEng.discard(seed);
+        ref._array[idx*indLength + i] = uniDist(randEng);
     }
 }
 
@@ -38,7 +36,7 @@ __global__ void genWeights( dataArray<T> ref, long in, int nRegWeights, int indL
 
 NetworkGenetic::NetworkGenetic(const int &numInNeurons, const int &numHiddenNeurons, const int &numMemoryNeurons,
                                const int &numOutNeurons, const int &numHiddenLayers,
-                               const thrust::pair<int, int> &connections, std::string dataFolder){
+                               const thrust::pair<int, int> &connections){
     this->_NNParams.resize(15, 0); // room to grow
     _NNParams[1] = numInNeurons + numHiddenNeurons + numMemoryNeurons + numOutNeurons;
     _NNParams[2] = numInNeurons + numHiddenNeurons + numOutNeurons;
@@ -55,29 +53,28 @@ void NetworkGenetic::initializeWeights(){
     cudaEvent_t start, stop;
     CUDA_SAFE_CALL (cudaEventCreate(&start));
     CUDA_SAFE_CALL (cudaEventCreate(&stop));
-    int blocksize; //the blocksize defined by the configurator
-    int minGridSize; //the minimum grid size needed to achive max occupancy
-    int gridSize; // the actual grid size needed
+    int blocksPerGrid; //the blocksize defined by the configurator
+    int threadsblock = 512; // the actual grid size needed
     int seedItr = 0;
-    _NNParams[9] = _genetics._size/(_NNParams[8]); // number of individuals on device.
     do{
-        std::srand(std::clock());
-        CUDA_SAFE_CALL (cudaOccupancyMaxPotentialBlockSize( &minGridSize, &blocksize, (void*)genWeights<double>, 0, _NNParams[9]));
-        gridSize = (_NNParams[9] + blocksize -1)/blocksize;
-        genWeights<double><<<gridSize, blocksize>>>(_genetics, rand() + seedItr++, _NNParams[2], _NNParams[8]);
+        _NNParams[9] = _genetics._size/(_NNParams[8]); // number of individuals on device.
+        long seed = std::clock() + std::clock()*seedItr++;
+        std::cout<<"seed: "<<seed<<std::endl;
+        blocksPerGrid=(_NNParams[9]+threadsblock-1)/threadsblock;
+        genWeights<double><<<blocksPerGrid, threadsblock>>>(_genetics, seed, _NNParams[2], _NNParams[8]);
         cudaDeviceSynchronize();
     }while(_memVirtualizer.GeneticsPushToHost(&_genetics));
-    std::srand(std::clock());
-    CUDA_SAFE_CALL (cudaOccupancyMaxPotentialBlockSize( &minGridSize, &blocksize, (void*)genWeights<double>, 0, _NNParams[9]));
-    gridSize = (_NNParams[9] + blocksize -1)/blocksize;
-    genWeights<double><<<gridSize, blocksize>>>(_genetics, rand() + seedItr++, _NNParams[2], _NNParams[8]);
+    _NNParams[9] = _genetics._size/(_NNParams[8]); // number of individuals on device.
+    long seed = std::clock() + std::clock()*seedItr++;
+    std::cout<<"seed: "<<seed<<std::endl;
+    blocksPerGrid=(_NNParams[9]+threadsblock-1)/threadsblock;
+    genWeights<double><<< blocksPerGrid, threadsblock>>>(_genetics, seed, _NNParams[2], _NNParams[8]);
     cudaDeviceSynchronize();
 
-    for(int i=0; i<40; i++){
+    for(int i=0; i<100; i++){
         std::cout<<"for individual: "<<i<<std::endl;
-        for (int k=0; k<_NNParams[8]; k++){
-            std::cout<<_genetics._array[k]<<std::endl;
-        }
+        std::cout<<_genetics._array[i*_NNParams[8]]<<std::endl;
+        std::cout<<_genetics._array[i*_NNParams[8]+1]<<std::endl;
     }
 }
 
@@ -89,10 +86,20 @@ void NetworkGenetic::allocateHostAndGPUObjects(std::map<const std::string, float
     _memVirtualizer.memoryAlloc(pHostRam, pDeviceRam, _NNParams[8], pMaxHost, pMaxDevice);
     _genetics = _memVirtualizer.genetics();
     _input = _memVirtualizer.input();
-    _init = _memVirtualizer.init();
     _sites = _memVirtualizer.sites();
     _kpIndex = _memVirtualizer.kpIndex();
     _training = _memVirtualizer.training();
+}
+void NetworkGenetic::getTestInfo(std::string dataFolder){
+    _memVirtualizer.setPath(dataFolder);
+    _memVirtualizer.importSitesData();
+    _memVirtualizer.importKpData();
+    _memVirtualizer.importGQuakes();
+    _memVirtualizer.importTrainingData();
+    for(int i=0; i<75; i++){
+        std::cout<<_training._array[i].setID<<std::endl;
+        std::cout<<_training._array[i].hrOfQuake<<std::endl;
+    }
 }
 
 void NetworkGenetic::errorFunc(){

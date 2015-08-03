@@ -15,9 +15,10 @@ int main(int argc, char** arg){
     hostRamPercentageMap["input & training"] = 0.60; // the bulk of the host memory should contain input & training data.
     deviceRamPercentageMap["genetics"] = 0.80; //the bulk of the GPU should contain the genetics data
     deviceRamPercentageMap["input & training"] = 0.20;
-    NetworkGenetic ConstructedNetwork(inputs, hidden, memory, outputs, hidden_layers,  connections, "../mount/data");
-    ConstructedNetwork.allocateHostAndGPUObjects(hostRamPercentageMap, deviceRamPercentageMap, 0.85, 0.85);
+    NetworkGenetic ConstructedNetwork(inputs, hidden, memory, outputs, hidden_layers,  connections);
+    ConstructedNetwork.allocateHostAndGPUObjects(hostRamPercentageMap, deviceRamPercentageMap, 0.85, 0.75);
     ConstructedNetwork.initializeWeights();
+    ConstructedNetwork.getTestInfo("../mount/data");
     std::cin.get();
     return 0;
 }
