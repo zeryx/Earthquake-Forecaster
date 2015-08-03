@@ -101,9 +101,10 @@ void NetworkGenetic::getTestInfo(std::string dataFolder){
     _memVirtualizer.importGQuakes();
     std::cout<<"importing Answers to GPU"<<std::endl;
     _memVirtualizer.importTrainingData();
+    Answers* test = _training._array.get();
     for(int i=0; i<75; i++){
-        std::cout<<_training._array[i].setID<<std::endl;
-        std::cout<<_training._array[i].hrOfQuake<<std::endl;
+        std::cout<<test[i].setID<<std::endl;
+        std::cout<<test[i].hrOfQuake<<std::endl;
     }
 }
 
