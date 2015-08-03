@@ -3,6 +3,7 @@
 #include <thrust/device_vector.h>
 #include <thrust/random.h>
 #include <ctime>
+#include <thrust/host_vector.h>
 #include <tinyxml2.h>
 
 //macros
@@ -77,6 +78,11 @@ void NetworkGenetic::initializeWeights(){
         std::cout<<_genetics._array[i*_NNParams[8]]<<std::endl;
         std::cout<<_genetics._array[i*_NNParams[8]+1]<<std::endl;
     }
+    std::cout<<"training struct vect size is: "<<_training._size<<std::endl;
+    thrust::host_vector<Answers> tmp(_training._size);
+    thrust::copy_n(_training._array, _training._size,  tmp.begin());
+    std::cout<<"we copied it"<<std::endl;
+    std::cout<<tmp[0].setID<<std::endl;
 }
 
 
@@ -101,11 +107,6 @@ void NetworkGenetic::getTestInfo(std::string dataFolder){
     _memVirtualizer.importGQuakes();
     std::cout<<"importing Answers to GPU"<<std::endl;
     _memVirtualizer.importTrainingData();
-    Answers* test = _training._array.get();
-    for(int i=0; i<75; i++){
-        std::cout<<test[i].setID<<std::endl;
-        std::cout<<test[i].hrOfQuake<<std::endl;
-    }
 }
 
 void NetworkGenetic::errorFunc(){

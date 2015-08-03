@@ -263,6 +263,7 @@ void MemManager::importTrainingData(){ // this is only called once for the entir
         std::istringstream(token[5]) >> tmp.longitude;
         std::istringstream(token[6]) >> tmp.siteNum;
         std::istringstream(token[7]) >> tmp.distToQuake;
+        _DTraining.push_back(tmp);
     }
 
 }
