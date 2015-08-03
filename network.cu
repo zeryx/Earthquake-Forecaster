@@ -33,8 +33,6 @@ __global__ void genWeights( dataArray<T> ref, long in, int nRegWeights, int indL
 }
 
 
-
-
 NetworkGenetic::NetworkGenetic(const int &numInNeurons, const int &numHiddenNeurons, const int &numMemoryNeurons,
                                const int &numOutNeurons, const int &numHiddenLayers,
                                const thrust::pair<int, int> &connections){
@@ -72,19 +70,7 @@ void NetworkGenetic::initializeWeights(){
     blocksPerGrid=(_NNParams[9]+threadsblock-1)/threadsblock;
     genWeights<double><<< blocksPerGrid, threadsblock>>>(_genetics, seed, _NNParams[2], _NNParams[8]);
     cudaDeviceSynchronize();
-
-    for(int i=0; i<100; i++){
-        std::cout<<"for individual: "<<i<<std::endl;
-        std::cout<<_genetics._array[i*_NNParams[8]]<<std::endl;
-        std::cout<<_genetics._array[i*_NNParams[8]+1]<<std::endl;
-    }
-    std::cout<<"training struct vect size is: "<<_training._size<<std::endl;
-    thrust::host_vector<Answers> tmp(_training._size);
-    thrust::copy_n(_training._array, _training._size,  tmp.begin());
-    std::cout<<"we copied it"<<std::endl;
-    std::cout<<tmp[0].setID<<std::endl;
 }
-
 
 
 void NetworkGenetic::allocateHostAndGPUObjects(std::map<const std::string, float> pHostRam,
@@ -97,6 +83,7 @@ void NetworkGenetic::allocateHostAndGPUObjects(std::map<const std::string, float
     _kpIndex = _memVirtualizer.kpIndex();
     _training = _memVirtualizer.training();
 }
+
 void NetworkGenetic::getTestInfo(std::string dataFolder){
     _memVirtualizer.setPath(dataFolder);
     _memVirtualizer.setTest(105);

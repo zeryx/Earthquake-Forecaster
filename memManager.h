@@ -2,7 +2,6 @@
 #define MEMMANAGER_H
 #include <thrust/device_vector.h>
 #include "dataarray.h"
-#include "xmlstructs.h"
 #include <map>
 using thrust::device_vector;
 class MemManager{
@@ -13,9 +12,9 @@ public:
                     int individualLength, float pMaxHost, float pMaxDevice);
     dataArray<double> genetics();
     dataArray<int> input();
-    dataArray<Answers> training();
-    dataArray<Kp> kpIndex();
-    dataArray<SiteInfo> sites();
+    dataArray<int64_t> training();
+    dataArray<int64_t> kpIndex();
+    dataArray<int64_t> sites();
 
 public:
     bool geneticsBufferSwap(dataArray<double> *dGen);
@@ -36,10 +35,10 @@ public:
 private:
     device_vector<double> _DGenetics; //device loaded memory object containing the training weights & fitness data.
     device_vector<int> _DInput; //device loaded memory object containing the site input data.that cannot fit in GPU memory due to resource limitations.
-    device_vector<Answers> _DTraining; //device loaded memory object containing the answer key for all tests (never changes)
-    device_vector<Kp> _DKpIndex; //device loaded memory object containing the planetary magnetic activity index. (all of it should fit)
-    device_vector<SiteInfo> _DSites; //site info (loc, sample rate) update for each test
-    device_vector<GQuakes> _DGQuakes; //global quakes, updated for each test run
+    device_vector<int64_t> _DTraining; //device loaded memory object containing the answer key for all tests (never changes)
+    device_vector<int64_t> _DKpIndex; //device loaded memory object containing the planetary magnetic activity index. (all of it should fit)
+    device_vector<int64_t> _DSites; //site info (loc, sample rate) update for each test
+    device_vector<int64_t> _DGQuakes; //global quakes, updated for each test run
     hVector<double> _HGenetics; //overflow of Genetics Data, updated constantly.
     hVector<int> _HInput; //overflow of input Data, updated constantly.
 

@@ -15,15 +15,16 @@ public:
     void allocateHostAndGPUObjects(std::map<const std::string, float> pHostRam,
                                    std::map<const std::string, float> pDeviceRam,
                                    float pMaxHost, float pMaxDevice);
+
 private:
     MemManager _memVirtualizer; // component that handles memory virtualization and transfer
     thrust::pair<int, int> _connections;
     thrust::device_vector<int> _NNParams; // only vector that stays on here
     dataArray<double> _genetics;
     dataArray<int> _input;
-    dataArray<Answers> _training;
-    dataArray<Kp> _kpIndex;
-    dataArray<SiteInfo> _sites;
+    dataArray<int64_t> _training;
+    dataArray<int64_t> _kpIndex;
+    dataArray<int64_t> _sites;
 };
 
 

@@ -30,15 +30,15 @@ dataArray<int> MemManager::input(){
     return convertToKernel(_DInput);
 }
 
-dataArray<Answers> MemManager::training(){
+dataArray<int64_t> MemManager::training(){
     return convertToKernel(_DTraining);
 }
 
-dataArray<SiteInfo> MemManager::sites(){
+dataArray<int64_t> MemManager::sites(){
     return convertToKernel(_DSites);
 }
 
-dataArray<Kp> MemManager::kpIndex(){
+dataArray<int64_t> MemManager::kpIndex(){
     return convertToKernel(_DKpIndex);
 }
 
@@ -149,8 +149,8 @@ void MemManager::setTest(int testNum){
 void MemManager::importSitesData(){
     tinyxml2::XMLDocument doc;
     tinyxml2::XMLError eResult;
-        _DSites.clear();
-        _DSites.shrink_to_fit();
+    _DSites.clear();
+    _DSites.shrink_to_fit();
     std::string siteInfoStr = this->_testDirectory;
     siteInfoStr.append("/SiteInfo.xml");
     eResult = doc.LoadFile(siteInfoStr.c_str());
@@ -178,12 +178,10 @@ void MemManager::importSitesData(){
         XMLCheckResult(eResult);
         eResult = SitesList->QueryIntText(&siteNumber);
         XMLCheckResult(eResult);
-        SiteInfo tmp;
-        tmp.siteNumber = siteNumber;
-        tmp.sampleRate = sampleRate;
-        tmp.latitude = latitude;
-        tmp.longitude = longitude;
-        _DSites.push_back(tmp);
+        _DSites.push_back(siteNumber);
+        _DSites.push_back(sampleRate);
+        _DSites.push_back(latitude);
+        _DSites.push_back(longitude);
         SitesList = SitesList->NextSiblingElement("Site");
     }
 }
@@ -216,10 +214,8 @@ void MemManager::importKpData(){
         XMLCheckResult(eResult);
         eResult = KpList->QueryFloatText(&magnitude);
         XMLCheckResult(eResult);
-        Kp tmp;
-        tmp.seconds = seconds;
-        tmp.magnitude = magnitude;
-        _DKpIndex.push_back(tmp);
+        _DKpIndex.push_back(seconds);
+        _DKpIndex.push_back(magnitude);
         KpList = KpList->NextSiblingElement("Kp_hr");
     }
 }
@@ -256,13 +252,11 @@ void MemManager::importGQuakes(){
         eResult = quakeList->QueryFloatAttribute("magnitude", &magnitude);
         XMLCheckResult(eResult);
         eResult = quakeList->QueryFloatAttribute("depth", &depth);
-        GQuakes tmp;
-        tmp.seconds = seconds;
-        tmp.latitude = latitude;
-        tmp.longitude = longitude;
-        tmp.magnitude = magnitude;
-        tmp.depth = depth;
-        _DGQuakes.push_back(tmp);
+        _DGQuakes.push_back(seconds);
+        _DGQuakes.push_back(latitude);
+        _DGQuakes.push_back(longitude);
+        _DGQuakes.push_back(magnitude);
+        _DGQuakes.push_back(depth);
         quakeList = quakeList->NextSiblingElement("Quake");
     }
 }
@@ -275,6 +269,7 @@ void MemManager::importTrainingData(){ // this is only called once for the entir
     std::getline(answerfile, line);
     int numOfTests;
     std::istringstream(line) >> numOfTests;
+    _DTraining.push_back(numOfTests);
     while(std::getline(answerfile, line)){
         std::vector<std::string> token;
         std::string item;
@@ -282,17 +277,14 @@ void MemManager::importTrainingData(){ // this is only called once for the entir
         while(std::getline(ss,  item, ',')){
             token.push_back(item);
         }
-        Answers tmp;
-        std::istringstream(token[0]) >> tmp.setID;
+        _DTraining.push_back(std::atoi(token[0].c_str())); // setID
         std::string startTime = token[1];
         std::string EqTime = token[2];
-        tmp.hrOfQuake = timeDifferenceCalculation(startTime, EqTime);
-        std::istringstream(token[3]) >> tmp.magnitude;
-        std::istringstream(token[4]) >> tmp.latitude;
-        std::istringstream(token[5]) >> tmp.longitude;
-        std::istringstream(token[6]) >> tmp.siteNum;
-        std::istringstream(token[7]) >> tmp.distToQuake;
-        _DTraining.push_back(tmp);
+        _DTraining.push_back(timeDifferenceCalculation(startTime, EqTime));
+        _DTraining.push_back(std::atoi(token[3].c_str())); // magnitude
+        _DTraining.push_back(std::atoi(token[4].c_str())); // latitude
+        _DTraining.push_back(std::atoi(token[5].c_str())); // longitude
+        _DTraining.push_back(std::atoi(token[6].c_str())); // siteNumber
+        _DTraining.push_back(std::atoi(token[7].c_str())); // distance to quake
     }
-
 }
