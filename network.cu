@@ -99,13 +99,10 @@ void NetworkGenetic::allocateHostAndGPUObjects(std::map<const std::string, float
 }
 void NetworkGenetic::getTestInfo(std::string dataFolder){
     _memVirtualizer.setPath(dataFolder);
-    std::cout<<"importing sitesData to GPU"<<std::endl;
+    _memVirtualizer.setTest(105);
     _memVirtualizer.importSitesData();
-    std::cout<<"importing Kp to GPU"<<std::endl;
     _memVirtualizer.importKpData();
-    std::cout<<"importing GQuakes to GPU"<<std::endl;
     _memVirtualizer.importGQuakes();
-    std::cout<<"importing Answers to GPU"<<std::endl;
     _memVirtualizer.importTrainingData();
 }
 

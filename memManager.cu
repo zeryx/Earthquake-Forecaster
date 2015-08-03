@@ -139,7 +139,13 @@ void MemManager::setPath(std::string pathToData){
 }
 
 void MemManager::setTest(int testNum){
-    this->_testDirectory = _dataDirectory.append("/"+testNum);
+    _testDirectory = _dataDirectory;
+    std::ostringstream oss;
+    oss << "/" << testNum;
+    _testDirectory.append(oss.str());
+    std::cout<<_testDirectory<<std::endl;
+
+
 }
 
 void MemManager::importSitesData(){
@@ -147,13 +153,21 @@ void MemManager::importSitesData(){
     tinyxml2::XMLError eResult;
         _DSites.clear();
         _DSites.shrink_to_fit();
-    std::string siteInfoStr = this->_testDirectory.append("/SiteInfo.xml");
-    doc.LoadFile(siteInfoStr.c_str());
+    std::string siteInfoStr = this->_testDirectory;
+    siteInfoStr.append("/SiteInfo.xml");
+    std::cout<<siteInfoStr<<std::endl;
+    eResult = doc.LoadFile(siteInfoStr.c_str());
+    XMLCheckResult(eResult);
     tinyxml2::XMLNode * pRoot = doc.FirstChild();
-    if(pRoot == NULL) exit(tinyxml2::XML_ERROR_FILE_READ_ERROR);
+    if(pRoot == NULL){
+        std::cout<<"file read error"<<std::endl;
+        exit(tinyxml2::XML_ERROR_FILE_READ_ERROR);
+    }
     tinyxml2::XMLElement * pElement = pRoot->NextSiblingElement("Sites");
-    if(pElement == NULL) exit(tinyxml2::XML_ERROR_PARSING_ELEMENT);
-
+    if(pElement == NULL){
+        std::cout<<"error parsing element"<<std::endl;
+        exit(tinyxml2::XML_ERROR_PARSING_ELEMENT);
+    }
     tinyxml2::XMLElement *SitesList = pRoot->NextSiblingElement("Site");
 
     while(SitesList != NULL){
@@ -182,12 +196,21 @@ void MemManager::importKpData(){
     tinyxml2::XMLError eResult;
     _DKpIndex.clear();
     _DKpIndex.shrink_to_fit();
-    std::string KpStr = this->_testDirectory.append("/Kp.xml");
-    doc.LoadFile(KpStr.c_str());
+    std::string KpStr = this->_testDirectory;
+    KpStr.append("/Kp.xml");
+    eResult = doc.LoadFile(KpStr.c_str());
+    XMLCheckResult(eResult);
+
     tinyxml2::XMLNode *pRoot = doc.FirstChild();
-    if(pRoot == NULL) exit(tinyxml2::XML_ERROR_FILE_READ_ERROR);
+    if(pRoot == NULL){
+        std::cout<<"file read error"<<std::endl;
+        exit(tinyxml2::XML_ERROR_FILE_READ_ERROR);
+    }
     tinyxml2::XMLElement * pElement = pRoot->NextSiblingElement("Kp");
-    if(pElement == NULL) exit(tinyxml2::XML_ERROR_PARSING_ELEMENT);
+    if(pElement == NULL){
+        std::cout<<"error parsing element"<<std::endl;
+        exit(tinyxml2::XML_ERROR_PARSING_ELEMENT);
+    }
     tinyxml2::XMLElement * KpList = pElement->FirstChildElement("Kp_hr");
     while(KpList != NULL){
         int seconds;
@@ -209,12 +232,20 @@ void MemManager::importGQuakes(){
     tinyxml2::XMLError eResult;
     _DGQuakes.clear();
     _DGQuakes.shrink_to_fit();
-    std::string QuakesStr = this->_testDirectory.append("/Quakes.xml");
-    doc.LoadFile(QuakesStr.c_str());
+    std::string QuakesStr = this->_testDirectory;
+    QuakesStr.append("/Quakes.xml");
+    eResult = doc.LoadFile(QuakesStr.c_str());
+    XMLCheckResult(eResult);
     tinyxml2::XMLNode *pRoot = doc.FirstChild();
-    if(pRoot == NULL) exit(tinyxml2::XML_ERROR_FILE_READ_ERROR);
+    if(pRoot == NULL){
+        std::cout<<"file read error"<<std::endl;
+        exit(tinyxml2::XML_ERROR_FILE_READ_ERROR);
+    }
     tinyxml2::XMLElement * pElement = pRoot->NextSiblingElement("Quakes");
-    if(pElement == NULL) exit(tinyxml2::XML_ERROR_PARSING_ELEMENT);
+    if(pElement == NULL){
+        std::cout<<"error parsing element"<<std::endl;
+        exit(tinyxml2::XML_ERROR_PARSING_ELEMENT);
+    }
     tinyxml2::XMLElement * quakeList = pElement->FirstChildElement("Quake");
     while(quakeList != NULL){
         int seconds;
@@ -240,7 +271,8 @@ void MemManager::importGQuakes(){
 }
 
 void MemManager::importTrainingData(){ // this is only called once for the entire life of the program, also uses CSV so it's done with fopen
-    std::string answerStr = this->_dataDirectory.append("/gtf.csv");
+    std::string answerStr = this->_dataDirectory;
+    answerStr.append("/gtf.csv");
     std::ifstream answerfile(answerStr.c_str());
     std::string line;
     std::getline(answerfile, line);

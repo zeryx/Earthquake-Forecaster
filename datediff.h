@@ -40,7 +40,6 @@ int timeDifferenceCalculation(std::string startStr, std::string stopStr){
     time_t start_time = std::mktime(&start);
     time_t stop_time = std::mktime(&stop);
     long diff_time = stop_time - start_time;
-    std::cout<<diff_time<<std::endl;
     return diff_time;
 
 }
