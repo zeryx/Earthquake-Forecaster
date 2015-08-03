@@ -143,8 +143,6 @@ void MemManager::setTest(int testNum){
     std::ostringstream oss;
     oss << "/" << testNum;
     _testDirectory.append(oss.str());
-    std::cout<<_testDirectory<<std::endl;
-
 
 }
 
@@ -155,7 +153,6 @@ void MemManager::importSitesData(){
         _DSites.shrink_to_fit();
     std::string siteInfoStr = this->_testDirectory;
     siteInfoStr.append("/SiteInfo.xml");
-    std::cout<<siteInfoStr<<std::endl;
     eResult = doc.LoadFile(siteInfoStr.c_str());
     XMLCheckResult(eResult);
     tinyxml2::XMLNode * pRoot = doc.FirstChild();
