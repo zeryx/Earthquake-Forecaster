@@ -51,9 +51,9 @@ bool MemManager::memoryAlloc(std::map<const std::string, float> pHostRam,
     long long deviceMem = GetDeviceRamInBytes()*pMaxDevice; //dito for gpu
     int dub = 8, integer = 4;
     _hostGeneticsAlloc = hostMem*pHostRam.at("genetics")/dub; //since these are doubles, divide bytes by 8
-    _hostInputAlloc = hostMem*pHostRam.at("input & training")/(integer); // their either floats or ints, same amount of bytes.
+    _hostInputAlloc = hostMem*pHostRam.at("input & training")/integer; // their either floats or ints, same amount of bytes.
     _deviceGeneticsAlloc = deviceMem*pDeviceRam.at("genetics")/dub;
-    _deviceInputAlloc = deviceMem*pDeviceRam.at("input & training")/(integer*2); // a half of the alloced space is goign to XML data
+    _deviceInputAlloc = deviceMem*pDeviceRam.at("input & training")/(integer*2); // a half of the alloced input is goign to XML data
     //round the genetics allocators to whole individuals.
     _hostGeneticsAlloc = (_hostGeneticsAlloc/individualLength)*individualLength;
     _deviceGeneticsAlloc = (_deviceGeneticsAlloc/individualLength)*individualLength;

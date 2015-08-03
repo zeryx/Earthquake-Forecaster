@@ -53,6 +53,7 @@ void NetworkGenetic::initializeWeights(){
     cudaEvent_t start, stop;
     CUDA_SAFE_CALL (cudaEventCreate(&start));
     CUDA_SAFE_CALL (cudaEventCreate(&stop));
+    std::cout<<"about to initialize weights"<<std::endl;
     int blocksPerGrid; //the blocksize defined by the configurator
     int threadsblock = 512; // the actual grid size needed
     int seedItr = 0;
