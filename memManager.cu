@@ -229,8 +229,7 @@ void MemManager::importKpData(){
 void MemManager::importGQuakes(){
     tinyxml2::XMLDocument doc;
     tinyxml2::XMLError eResult;
-    _DGQuakes.clear();
-    _DGQuakes.shrink_to_fit();
+    thrust::fill(_DGQuakes.begin(), _DGQuakes.end(), 0);
     std::string QuakesStr = this->_testDirectory;
     QuakesStr.append("/Quakes.xml");
     eResult = doc.LoadFile(QuakesStr.c_str());
