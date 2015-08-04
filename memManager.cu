@@ -264,23 +264,24 @@ void MemManager::importGQuakes(){
         numQuakes++;
         quakeList = quakeList->NextSiblingElement("Quake");
     }
-    for(int hour=0; hour<2610; hour++){
-        _DGQuakes.resize(tmp.size(), 0.0);
+    for(int hour=0; hour<=2610; hour++){
+        _DGQuakes.resize(2160*5, 0.0);
         int accVal=0;
-        _DGQuakes[hour*4] = hour;
+        _DGQuakes[hour*5] = hour;
         for (int i=0; i<numQuakes; i++){
-            if(tmp[i*4]>= hour && tmp[i*4]< hour+1){
+            if(tmp[i*5]>= hour-1 && tmp[i*5]< hour){
                 for(int k=1; k<5; k++){//don't start at 0 because 0 is time.
-                    _DGQuakes[hour*4+k] += tmp[i*4 +k];
+                    _DGQuakes[hour*5+k] += tmp[i*5 +k];
                     accVal++;
                 }
             }
-            for(int k=1; k<5; k++){
-                _DGQuakes[hour*4+k] = _DGQuakes[hour*4+k]/accVal; // push the hourly average into _DGQuakes for all parameters.
-            }
-            for(int k=0; k<5; k++){
-                std::cout<<_DGQuakes[hour*4+k]<<std::endl;
-            }
+        }
+        for(int k=1; k<5; k++){
+            if(_DGQuakes[hour*5+k] !=0)
+                _DGQuakes[hour*5+k] = _DGQuakes[hour*5+k]/accVal; // push the hourly average into _DGQuakes for all parameters.
+        }
+        for(int k=0; k<5; k++){
+            std::cout<<_DGQuakes[hour*5+k]<<std::endl;
         }
     }
 }
