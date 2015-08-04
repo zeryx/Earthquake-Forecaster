@@ -283,9 +283,6 @@ void MemManager::importGQuakes(){
             if(_DGQuakes[hour*5+k] !=0)
                 _DGQuakes[hour*5+k] = _DGQuakes[hour*5+k]/accVal; // push the hourly average into _DGQuakes for all parameters.
         }
-        for(int k=0; k<5; k++){
-            std::cout<<_DGQuakes[hour*5+k]<<std::endl;
-        }
     }
 }
 
