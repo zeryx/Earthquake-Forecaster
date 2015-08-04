@@ -80,6 +80,7 @@ void NetworkGenetic::allocateHostAndGPUObjects(std::map<const std::string, float
     _genetics = _memVirtualizer.genetics();
     _input = _memVirtualizer.input();
     _sites = _memVirtualizer.sites();
+    _gquakes = _memVirtualizer.gquakes();
     _kpIndex = _memVirtualizer.kpIndex();
     _training = _memVirtualizer.training();
 }

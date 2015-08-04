@@ -25,6 +25,7 @@ private:
     dataArray<double> _training;
     dataArray<double> _kpIndex;
     dataArray<double> _sites;
+    dataArray<double> _gquakes;
 };
 
 

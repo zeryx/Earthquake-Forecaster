@@ -34,6 +34,10 @@ dataArray<double> MemManager::training(){
     return convertToKernel(_DTraining);
 }
 
+dataArray<double> MemManager::gquakes(){
+    return convertToKernel(_DGQuakes);
+}
+
 dataArray<double> MemManager::sites(){
     return convertToKernel(_DSites);
 }
@@ -76,6 +80,7 @@ bool MemManager::memoryAlloc(std::map<const std::string, float> pHostRam,
     try{
         this->_DGenetics.resize(_deviceGeneticsAlloc);
         this->_DInput.resize(_deviceInputAlloc);
+        this-> _DGQuakes.resize(2160*5);
     }
     catch(thrust::system_error &e){
         std::cerr<<"Error resizing vector Element: "<<e.what()<<std::endl;
@@ -264,7 +269,6 @@ void MemManager::importGQuakes(){
         numQuakes++;
         quakeList = quakeList->NextSiblingElement("Quake");
     }
-    _DGQuakes.resize(2160*5, 0.0);
     for(int hour=0; hour<2610; hour++){
         int accVal=0;
         _DGQuakes[hour*5] = hour+1;
@@ -284,6 +288,7 @@ void MemManager::importGQuakes(){
             std::cout<<_DGQuakes[hour*5+k]<<std::endl;
         }
     }
+    std::cout<<"loop finished.."<<std::endl;
 }
 
 void MemManager::importTrainingData(){ // this is only called once for the entire life of the program, also uses CSV so it's done with fopen

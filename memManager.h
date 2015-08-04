@@ -14,6 +14,7 @@ public:
     dataArray<int> input();
     dataArray<double> training();
     dataArray<double> kpIndex();
+    dataArray<double> gquakes();
     dataArray<double> sites();
 
 public:
