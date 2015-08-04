@@ -22,9 +22,9 @@ private:
     thrust::device_vector<int> _NNParams; // only vector that stays on here
     dataArray<double> _genetics;
     dataArray<int> _input;
-    dataArray<int64_t> _training;
-    dataArray<int64_t> _kpIndex;
-    dataArray<int64_t> _sites;
+    dataArray<double> _training;
+    dataArray<double> _kpIndex;
+    dataArray<double> _sites;
 };
 
 

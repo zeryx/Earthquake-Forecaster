@@ -30,15 +30,15 @@ dataArray<int> MemManager::input(){
     return convertToKernel(_DInput);
 }
 
-dataArray<int64_t> MemManager::training(){
+dataArray<double> MemManager::training(){
     return convertToKernel(_DTraining);
 }
 
-dataArray<int64_t> MemManager::sites(){
+dataArray<double> MemManager::sites(){
     return convertToKernel(_DSites);
 }
 
-dataArray<int64_t> MemManager::kpIndex(){
+dataArray<double> MemManager::kpIndex(){
     return convertToKernel(_DKpIndex);
 }
 
@@ -241,14 +241,14 @@ void MemManager::importGQuakes(){
         exit(tinyxml2::XML_ERROR_PARSING_ELEMENT);
     }
     tinyxml2::XMLElement * quakeList = pElement->FirstChildElement("Quake");
-    std::vector<int64_t> tmp;
+    std::vector<float> tmp;//don't store this yet, we need to reduce resolution for the network.
     int numQuakes=0;
     while(quakeList != NULL){
-        float time;
-        float latitude, longitude, magnitude, depth;
-        eResult = quakeList->QueryFloatAttribute("secs", &time);
+        int seconds;
+        float latitude, longitude, magnitude, depth, hours;
+        eResult = quakeList->QueryIntAttribute("secs", &seconds);
         XMLCheckResult(eResult);
-        time = time/3600;
+        hours = seconds/3600;
         eResult = quakeList->QueryFloatAttribute("latitude", &latitude);
         XMLCheckResult(eResult);
         eResult = quakeList->QueryFloatAttribute("longitude", &longitude);
@@ -256,7 +256,7 @@ void MemManager::importGQuakes(){
         eResult = quakeList->QueryFloatAttribute("magnitude", &magnitude);
         XMLCheckResult(eResult);
         eResult = quakeList->QueryFloatAttribute("depth", &depth);
-        tmp.push_back(time);
+        tmp.push_back(hours);
         tmp.push_back(latitude);
         tmp.push_back(longitude);
         tmp.push_back(magnitude);
@@ -265,7 +265,7 @@ void MemManager::importGQuakes(){
         quakeList = quakeList->NextSiblingElement("Quake");
     }
     for(int hour=0; hour<2610; hour++){
-        _DGQuakes.resize(tmp.size(), 0);
+        _DGQuakes.resize(tmp.size(), 0.0);
         int accVal=0;
         _DGQuakes[hour*4] = hour;
         for (int i=0; i<numQuakes; i++){
