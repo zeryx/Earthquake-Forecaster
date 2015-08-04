@@ -268,7 +268,7 @@ void MemManager::importGQuakes(){
         numQuakes++;
         quakeList = quakeList->NextSiblingElement("Quake");
     }
-    for(int hour=0; hour<2610; hour++){
+    for(int hour=0; hour<2160; hour++){
         int accVal=0;
         _DGQuakes[hour*5] = hour+1;
         for (int i=0; i<numQuakes; i++){
@@ -287,7 +287,6 @@ void MemManager::importGQuakes(){
             std::cout<<_DGQuakes[hour*5+k]<<std::endl;
         }
     }
-    std::cout<<"loop finished.."<<std::endl;
 }
 
 void MemManager::importTrainingData(){ // this is only called once for the entire life of the program, also uses CSV so it's done with fopen
