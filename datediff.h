@@ -18,8 +18,6 @@ int timeDifferenceCalculation(std::string startStr, std::string stopStr){
     std::istringstream(val) >> start.tm_hour;
     std::getline(sstart, val, ':');
     std::istringstream(val) >> start.tm_min;
-    std::getline(sstart, val, ':');
-    std::istringstream(val) >> start.tm_sec;
 
     std::getline(sstop, val, '-');
     std::istringstream(val) >> stop.tm_year;
@@ -31,8 +29,7 @@ int timeDifferenceCalculation(std::string startStr, std::string stopStr){
     std::istringstream(val) >> stop.tm_hour;
     std::getline(sstop, val, ':');
     std::istringstream(val) >> stop.tm_min;
-    std::getline(sstop, val);
-    std::istringstream(val) >> stop.tm_sec;
+
     time_t start_time = std::mktime(&start);
     time_t stop_time = std::mktime(&stop);
     int diff_time = stop_time - start_time;

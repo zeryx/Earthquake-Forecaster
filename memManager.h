@@ -27,8 +27,8 @@ public:
     void importKpData();
     void importTrainingData();
     void importGQuakes();
-
-    void setPath(std::string);
+    void loadHour(int hr);
+    void setPaths(std::string);
     void setTest(int testNum);
 
 
@@ -50,5 +50,6 @@ private:
 
     std::string _dataDirectory;
     std::string _testDirectory;
+    int _testnum;
 };
 #endif

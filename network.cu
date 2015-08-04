@@ -86,14 +86,13 @@ void NetworkGenetic::allocateHostAndGPUObjects(std::map<const std::string, float
 }
 
 void NetworkGenetic::getTestInfo(std::string dataFolder){
-    _memVirtualizer.setPath(dataFolder);
+    _memVirtualizer.setPaths(dataFolder);
     _memVirtualizer.setTest(105);
     _memVirtualizer.importSitesData();
     _memVirtualizer.importKpData();
-    std::cout<<"preparing to import gquakes"<<std::endl;
     _memVirtualizer.importGQuakes();
-    std::cout<<"import quakes complete"<<std::endl;
     _memVirtualizer.importTrainingData();
+    _memVirtualizer.loadHour(0);
 }
 
 void NetworkGenetic::errorFunc(){

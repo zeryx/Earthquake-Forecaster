@@ -135,20 +135,40 @@ bool MemManager::GeneticsPushToHost(dataArray<double> *dGen){
     return false;
 }
 
+void MemManager::loadHour(int hr){
+    std::string stringfname = _testDirectory;
+    std::ostringstream oss;
+    oss << "/" << "test" << _testnum << "_"<<hr<<".bin";
+    stringfname.append(oss.str());
+    std::vector<int> tmp;
+    int val;
+    std::ifstream file;
+    file.open(stringfname.c_str(), std::ios_base::binary | std::ios_base::in);
+    while(!file.eof()){
+        file.read(reinterpret_cast<char*>(&val), sizeof(int));
+        if(file.fail()){
+            std::cout<<"file read failed"<<std::endl;
+            exit(1);
+        }
+        std::cout<<val<<std::endl;
+    }
+
+}
 
 bool MemManager::InputRefresh(dataArray<int> *input){
     return false;
 }
-void MemManager::setPath(std::string pathToData){
+void MemManager::setPaths(std::string pathToData){
     this->_dataDirectory = pathToData;
+
 }
 
-void MemManager::setTest(int testNum){
-    _testDirectory = _dataDirectory;
-    std::ostringstream oss;
-    oss << "/" << testNum;
-    _testDirectory.append(oss.str());
-
+void MemManager::setTest(int testnum){
+           _testnum = testnum;
+           _testDirectory = _dataDirectory;
+           std::ostringstream oss;
+           oss << "/" << _testnum;
+           _testDirectory.append(oss.str());
 }
 
 void MemManager::importSitesData(){
@@ -303,6 +323,7 @@ void MemManager::importTrainingData(){ // this is only called once for the entir
         while(std::getline(ss,  item, ',')){
             token.push_back(item);
         }
+        std::cout<<atoi(token[0].c_str())<<std::endl;
         _DTraining.push_back(std::atoi(token[0].c_str())); // setID
         std::string startTime = token[1];
         std::string EqTime = token[2];
@@ -313,4 +334,5 @@ void MemManager::importTrainingData(){ // this is only called once for the entir
         _DTraining.push_back(std::atoi(token[6].c_str())); // siteNumber
         _DTraining.push_back(std::atoi(token[7].c_str())); // distance to quake
     }
+    answerfile.close();
 }
