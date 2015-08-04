@@ -140,19 +140,45 @@ void MemManager::loadHour(int hr){
     std::ostringstream oss;
     oss << "/" << "test" << _testnum << "_"<<hr<<".bin";
     stringfname.append(oss.str());
-    std::vector<int> tmp;
-    int val;
+    std::vector<int> tmp(_DSites[0]*_DSites[1]*3*3600);//sample rate for site#0, num of sites, num channels, per hour
+    int prev = -1, diff;
     std::ifstream file;
     file.open(stringfname.c_str(), std::ios_base::binary | std::ios_base::in);
-    while(!file.eof()){
-        file.read(reinterpret_cast<char*>(&val), sizeof(int));
-        if(file.fail()){
-            std::cout<<"file read failed"<<std::endl;
-            exit(1);
+    if(file){
+        int val1, val2, val3, val4;
+        for(int i=0; i<tmp.size(); i++){
+            file.read(reinterpret_cast<char*>(&val1), 1);
+            if(val1<0) val1 += 256;
+            if((val1&3)==1){
+                diff = (val1>>2)-(1<<5);
+                tmp[i] =prev+diff;
+            }
+            else if((val1&3)==2){
+                file.read(reinterpret_cast<char*>(&val2), 1);
+                if(val2<0) val2+=256;
+                diff = ((val1+(val2<<8))>>2)-(1<<13);
+                tmp[i] = prev+diff;
+            }
+            else if((val1&3)==3){
+                file.read(reinterpret_cast<char*>(&val2),1);
+                if(val2<0) val2+=256;
+                file.read(reinterpret_cast<char*>(&val3), 1);
+                if(val3<0) val3+=256;
+                diff = ((val1+(val2<<8)+(val3<<16))>>2)-(1<<21);
+                tmp[i] = prev + diff;
+            }
+            else{
+                file.read(reinterpret_cast<char*>(&val2),1);
+                if(val2<0) val2+=256;
+                file.read(reinterpret_cast<char*>(&val3), 1);
+                if(val3<0) val3+=256;
+                file.read(reinterpret_cast<char*>(&val4),1);
+                if(val4<0) val2+=256;
+                tmp[i] = ((val1+(val2<<8)+(val3<<16)+(val4<<24))>>2)-1;
+            }
+            std::cout<<tmp[i]<<std::endl;
         }
-        std::cout<<val<<std::endl;
     }
-
 }
 
 bool MemManager::InputRefresh(dataArray<int> *input){
@@ -164,11 +190,11 @@ void MemManager::setPaths(std::string pathToData){
 }
 
 void MemManager::setTest(int testnum){
-           _testnum = testnum;
-           _testDirectory = _dataDirectory;
-           std::ostringstream oss;
-           oss << "/" << _testnum;
-           _testDirectory.append(oss.str());
+    _testnum = testnum;
+    _testDirectory = _dataDirectory;
+    std::ostringstream oss;
+    oss << "/" << _testnum;
+    _testDirectory.append(oss.str());
 }
 
 void MemManager::importSitesData(){
@@ -190,8 +216,12 @@ void MemManager::importSitesData(){
         std::cout<<"error parsing element"<<std::endl;
         exit(tinyxml2::XML_ERROR_PARSING_ELEMENT);
     }
-    tinyxml2::XMLElement *SitesList = pRoot->NextSiblingElement("Site");
+    int numsites;
+    eResult = pElement->QueryIntAttribute("num_sites", &numsites);
 
+    tinyxml2::XMLElement *SitesList = pRoot->NextSiblingElement("Site");
+    XMLCheckResult(eResult);
+    _DSites.push_back(numsites);
     while(SitesList != NULL){
         int sampleRate, siteNumber;
         float longitude, latitude;
@@ -203,8 +233,8 @@ void MemManager::importSitesData(){
         XMLCheckResult(eResult);
         eResult = SitesList->QueryIntText(&siteNumber);
         XMLCheckResult(eResult);
-        _DSites.push_back(siteNumber);
         _DSites.push_back(sampleRate);
+        _DSites.push_back(siteNumber);
         _DSites.push_back(latitude);
         _DSites.push_back(longitude);
         SitesList = SitesList->NextSiblingElement("Site");
