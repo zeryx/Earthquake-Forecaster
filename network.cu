@@ -90,6 +90,7 @@ void NetworkGenetic::getTestInfo(std::string dataFolder){
     _memVirtualizer.importSitesData();
     _memVirtualizer.importKpData();
     _memVirtualizer.importGQuakes();
+    std::cout<<"import quakes complete"<<std::endl;
     _memVirtualizer.importTrainingData();
 }
 

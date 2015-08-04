@@ -264,12 +264,12 @@ void MemManager::importGQuakes(){
         numQuakes++;
         quakeList = quakeList->NextSiblingElement("Quake");
     }
-    for(int hour=0; hour<=2610; hour++){
-        _DGQuakes.resize(2160*5, 0.0);
+    _DGQuakes.resize(2160*5, 0.0);
+    for(int hour=0; hour<2610; hour++){
         int accVal=0;
-        _DGQuakes[hour*5] = hour;
+        _DGQuakes[hour*5] = hour+1;
         for (int i=0; i<numQuakes; i++){
-            if(tmp[i*5]>= hour-1 && tmp[i*5]< hour){
+            if(tmp[i*5]>= hour && tmp[i*5]< hour+1){
                 for(int k=1; k<5; k++){//don't start at 0 because 0 is time.
                     _DGQuakes[hour*5+k] += tmp[i*5 +k];
                     accVal++;
@@ -292,8 +292,9 @@ void MemManager::importTrainingData(){ // this is only called once for the entir
     std::ifstream answerfile(answerStr.c_str());
     std::string line;
     std::getline(answerfile, line);
-    int numOfTests;
+    float numOfTests;
     std::istringstream(line) >> numOfTests;
+    std::cout<<"pushing back.."<<std::endl;
     _DTraining.push_back(numOfTests);
     while(std::getline(answerfile, line)){
         std::vector<std::string> token;
