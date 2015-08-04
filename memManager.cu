@@ -208,13 +208,14 @@ void MemManager::importKpData(){
     }
     tinyxml2::XMLElement * KpList = pElement->FirstChildElement("Kp_hr");
     while(KpList != NULL){
-        int seconds;
+        int time;
         float magnitude;
-        eResult = KpList->QueryIntAttribute("secs", &seconds);
+        eResult = KpList->QueryIntAttribute("secs", &time);
         XMLCheckResult(eResult);
+        time = time/3600;
         eResult = KpList->QueryFloatText(&magnitude);
         XMLCheckResult(eResult);
-        _DKpIndex.push_back(seconds);
+        _DKpIndex.push_back(time);//in hours
         _DKpIndex.push_back(magnitude);
         KpList = KpList->NextSiblingElement("Kp_hr");
     }
@@ -240,11 +241,14 @@ void MemManager::importGQuakes(){
         exit(tinyxml2::XML_ERROR_PARSING_ELEMENT);
     }
     tinyxml2::XMLElement * quakeList = pElement->FirstChildElement("Quake");
+    std::vector<int64_t> tmp;
+    int numQuakes=0;
     while(quakeList != NULL){
-        int seconds;
+        float time;
         float latitude, longitude, magnitude, depth;
-        eResult = quakeList->QueryIntAttribute("secs", &seconds);
+        eResult = quakeList->QueryFloatAttribute("secs", &time);
         XMLCheckResult(eResult);
+        time = time/3600;
         eResult = quakeList->QueryFloatAttribute("latitude", &latitude);
         XMLCheckResult(eResult);
         eResult = quakeList->QueryFloatAttribute("longitude", &longitude);
@@ -252,12 +256,32 @@ void MemManager::importGQuakes(){
         eResult = quakeList->QueryFloatAttribute("magnitude", &magnitude);
         XMLCheckResult(eResult);
         eResult = quakeList->QueryFloatAttribute("depth", &depth);
-        _DGQuakes.push_back(seconds);
-        _DGQuakes.push_back(latitude);
-        _DGQuakes.push_back(longitude);
-        _DGQuakes.push_back(magnitude);
-        _DGQuakes.push_back(depth);
+        tmp.push_back(time);
+        tmp.push_back(latitude);
+        tmp.push_back(longitude);
+        tmp.push_back(magnitude);
+        tmp.push_back(depth);
+        numQuakes++;
         quakeList = quakeList->NextSiblingElement("Quake");
+    }
+    for(int hour=0; hour<2610; hour++){
+        _DGQuakes.resize(tmp.size(), 0);
+        int accVal=0;
+        _DGQuakes[hour*4] = hour;
+        for (int i=0; i<numQuakes; i++){
+            if(tmp[i*4]>= hour && tmp[i*4]< hour+1){
+                for(int k=1; k<5; k++){//don't start at 0 because 0 is time.
+                    _DGQuakes[hour*4+k] += tmp[i*4 +k];
+                    accVal++;
+                }
+            }
+            for(int k=1; k<5; k++){
+                _DGQuakes[hour*4+k] = _DGQuakes[hour*4+k]/accVal; // push the hourly average into _DGQuakes for all parameters.
+            }
+            for(int k=0; k<5; k++){
+                std::cout<<_DGQuakes[hour*4+k]<<std::endl;
+            }
+        }
     }
 }
 
