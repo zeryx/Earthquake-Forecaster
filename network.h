@@ -8,24 +8,26 @@
 class  NetworkGenetic{
 public:
     NetworkGenetic(const int &numInNeurons, const int &numHiddenNeurons, const int &numMemoryNeurons,
-                   const int &numOutNeurons,const int &numHiddeLayers, const thrust::pair<int, int> &connections);
+                   const int &numOutNeurons,const int &numHiddenLayers, const std::vector<int> &connections);
     void errorFunc();
     void initializeWeights(); //initializes _data array and fills with random numbers
-    void getTestInfo(std::string dataFolder); // gets Kp, GQuakes, SiteInfo xml doc data and puts it in the gpu.
-    void allocateHostAndGPUObjects(std::map<const std::string, float> pHostRam,
-                                   std::map<const std::string, float> pDeviceRam,
-                                   float pMaxHost, float pMaxDevice);
-
+    void allocateHostAndGPUObjects(float pMaxHost, float pMaxDevice);
+    bool init(int sampleRate, int SiteNum, std::vector<double>siteData);
+    void doingTraining(int site, int hour, double lat, double lon, double mag, double dist);
+    double* forecast(int& hour, std::vector<int> *data, double &K, std::vector<double> *globalQuakes);
+    void storeWeights(std::string filepath);
+    bool checkForWeights(std::string filepath);
 private:
     MemManager _memVirtualizer; // component that handles memory virtualization and transfer
-    thrust::pair<int, int> _connections;
+    thrust::device_vector <int> _connections;
     thrust::device_vector<int> _NNParams; // only vector that stays on here
-    dataArray<double> _genetics;
-    dataArray<int> _input;
-    dataArray<double> _training;
-    dataArray<double> _kpIndex;
-    dataArray<double> _sites;
-    dataArray<double> _gquakes;
+    thrust::device_vector<double> _siteData;
+    thrust::device_vector<double> _answers;
+    thrust::host_vector<double> _ret;
+    thrust::host_vector<double> _best;
+    bool _istraining;
+    int _sampleRate;
+    int _numofSites;
 };
 
 
