@@ -22,16 +22,16 @@ dataArray<double> MemManager::genetics(){
 
 
 bool MemManager::memoryAlloc(int individualLength, float pMaxHost, float pMaxDevice){//allocates memory for genetis & input vectors
-        long long hostMem = GetHostRamInBytes()*pMaxHost; //make a host memory container, this is the max
+    long long hostMem = GetHostRamInBytes()*pMaxHost; //make a host memory container, this is the max
     long long deviceMem = GetDeviceRamInBytes()*pMaxDevice; //dito for gpu
-        _hostGeneticsAlloc = hostMem/8; //since these are doubles, divide bytes by 8
+    _hostGeneticsAlloc = hostMem/8; //since these are doubles, divide bytes by 8
     _deviceGeneticsAlloc = deviceMem/8;
 
-        _hostGeneticsAlloc = (_hostGeneticsAlloc/individualLength)*individualLength;
+    _hostGeneticsAlloc = (_hostGeneticsAlloc/individualLength)*individualLength;
     _deviceGeneticsAlloc = (_deviceGeneticsAlloc/individualLength)*individualLength;
     //initialize all large vectors (everything not from an xml file)
     try{
-                this->_HGenetics.setMax(_hostGeneticsAlloc);
+        this->_HGenetics.setMax(_hostGeneticsAlloc);
     }
     catch(thrust::system_error &e){
         std::cerr<<"Error resizing vector Element: "<<e.what()<<std::endl;
@@ -45,6 +45,7 @@ bool MemManager::memoryAlloc(int individualLength, float pMaxHost, float pMaxDev
     }
     try{
         this->_DGenetics.resize(_deviceGeneticsAlloc);
+
     }
     catch(thrust::system_error &e){
         std::cerr<<"Error resizing vector Element: "<<e.what()<<std::endl;
@@ -56,7 +57,8 @@ bool MemManager::memoryAlloc(int individualLength, float pMaxHost, float pMaxDev
         std::cout<<GetDeviceRamInBytes()<<std::endl;
         exit(1);
     }
-    std::cout<<"gpu ram avilable after genetics allocation: "<<GetDeviceRamInBytes()<<std::endl;
+    std::cerr<<"gpu ram avilable after genetics allocation: "<<GetDeviceRamInBytes()<<std::endl;
+    std::cerr<<"host ram available: "<<GetHostRamInBytes()<<std::endl;
 
     return true;
 }

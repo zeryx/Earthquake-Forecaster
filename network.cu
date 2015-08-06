@@ -384,10 +384,14 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
     std::cerr<<"channels std and mean calculated"<<std::endl;
     //input data from all sites and all channels normalized
     if(_istraining){
-        thrust::device_vector<double> retVec(2160*_numofSites, 0);
+        thrust::device_vector<double> retVec(2160*_numofSites);
+        std::cerr<<"retVect created"<<std::endl;
         thrust::device_vector<int> input(data->size());
+        std::cerr<<"input vector created"<<std::endl;
         thrust::device_vector<double>gQuakeAvg(globalQuakes->size());
+        std::cerr<<"gQuakeAvg vector created"<<std::endl;
         thrust::device_vector<thrust::pair<int, int> > dConnect(_connect->size());
+        std::cerr<<"connections  vector created"<<std::endl;
         thrust::copy(_connect->begin(), _connect->end(), dConnect.begin());
         thrust::copy(data->begin(), data->end(), input.begin());
         thrust::copy(globalQuakes->begin(), globalQuakes->end(), gQuakeAvg.begin());
