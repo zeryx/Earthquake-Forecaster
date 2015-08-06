@@ -1,5 +1,5 @@
-#ifndef DATAARRAY_H
-#define DATAARRAY_H
+#ifndef SYSINFO_H
+#define SYSINFO_H
 #include <sys/sysinfo.h>
 
 #include <iostream>

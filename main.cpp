@@ -96,13 +96,13 @@ int main(int argc, char** arg){
         int gtf_site, gtf_hour;
         double gtf_lat, gtf_long, gtf_mag, gtf_dist;
         std::cin>>gtf_site>>gtf_hour>>gtf_lat>>gtf_long>>gtf_mag>>gtf_dist;
+        ConstructedNetwork.doingTraining(gtf_site, gtf_hour, gtf_lat, gtf_long, gtf_mag, gtf_dist);
         std::cerr<<"lets allocate GPU and host objects"<<std::endl;
         ConstructedNetwork.allocateHostAndGPUObjects(0.25, 0.75);
+        std::cerr<<"weights initialized, setting training"<<std::endl;
         std::cerr<<"checking for weightfile"<<std::endl;
         if(!ConstructedNetwork.checkForWeights("/weights.bin"))
             ConstructedNetwork.initializeWeights();
-        std::cerr<<"weights initialized, setting training"<<std::endl;
-        ConstructedNetwork.doingTraining(gtf_site, gtf_hour, gtf_lat, gtf_long, gtf_mag, gtf_dist);
     }
     while(1)
     {

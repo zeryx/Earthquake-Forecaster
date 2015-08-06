@@ -56,6 +56,8 @@ bool MemManager::memoryAlloc(int individualLength, float pMaxHost, float pMaxDev
         std::cout<<GetDeviceRamInBytes()<<std::endl;
         exit(1);
     }
+    std::cout<<"gpu ram avilable after genetics allocation: "<<GetDeviceRamInBytes()<<std::endl;
+
     return true;
 }
 //bool MemManager::geneticsBufferSwap(dataArray<double> *dGen){

@@ -327,20 +327,27 @@ bool NetworkGenetic::checkForWeights(std::string filepath){
     if(weightFile){
         std::cerr<<"the weightfile exists"<<std::endl;
         _memVirtualizer.initFromStream(weightFile);
+        weightFile.close();
         return true;
     }
     else{
         std::cerr<<"no weightfile found"<<std::endl;
+        weightFile.close();
         return false;
     }
 }
 
-void NetworkGenetic::doingTraining(const int &site, const int &hour, const double &lat,
-                                   const double &lon, const double &mag, const double &dist){
+void NetworkGenetic::doingTraining(int site, int hour, double lat,
+                                   double lon, double mag, double dist){
+    std::cerr<<"we entered doing training"<<std::endl;
+    std::cerr<<"we resized answers"<<std::endl;
     _answers.push_back(site);
+    std::cerr<<"we accepted site"<<std::endl;
     _answers.push_back(hour);
+    std::cerr<<"we accepted hour"<<std::endl;
     _answers.push_back(lat);
     _answers.push_back(lon);
+    std::cerr<<"we accepted longitude"<<std::endl;
     _answers.push_back(mag);
     _answers.push_back(dist);
     _istraining = true;
