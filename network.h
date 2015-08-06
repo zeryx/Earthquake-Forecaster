@@ -13,7 +13,7 @@ public:
                    const int &numOutNeurons, const int &numWeights,  std::vector< thrust::pair<int, int> >&connections);
     void errorFunc();
     void initializeWeights(); //initializes _data array and fills with random numbers
-    void allocateHostAndGPUObjects(float pMaxHost, float pMaxDevice);
+    void allocateHostAndGPUObjects(float pMaxDevice);
     bool init(int sampleRate, int SiteNum, std::vector<double>siteData);
     void doingTraining(int site, int hour, double lat,
                        double lon, double mag, double dist);

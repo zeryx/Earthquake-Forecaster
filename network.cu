@@ -298,8 +298,8 @@ void NetworkGenetic::initializeWeights(){
 }
 
 
-void NetworkGenetic::allocateHostAndGPUObjects(float pMaxHost, float pMaxDevice){
-    _memVirtualizer.memoryAlloc(_NNParams[7], pMaxHost, pMaxDevice);
+void NetworkGenetic::allocateHostAndGPUObjects(float pMaxDevice){
+    _memVirtualizer.memoryAlloc(_NNParams[7], pMaxDevice);
 
 }
 bool NetworkGenetic::init(int sampleRate, int SiteNum, std::vector<double> siteData){
@@ -339,15 +339,10 @@ bool NetworkGenetic::checkForWeights(std::string filepath){
 
 void NetworkGenetic::doingTraining(int site, int hour, double lat,
                                    double lon, double mag, double dist){
-    std::cerr<<"we entered doing training"<<std::endl;
-    std::cerr<<"we resized answers"<<std::endl;
     _answers.push_back(site);
-    std::cerr<<"we accepted site"<<std::endl;
     _answers.push_back(hour);
-    std::cerr<<"we accepted hour"<<std::endl;
     _answers.push_back(lat);
     _answers.push_back(lon);
-    std::cerr<<"we accepted longitude"<<std::endl;
     _answers.push_back(mag);
     _answers.push_back(dist);
     _istraining = true;
@@ -359,7 +354,6 @@ void NetworkGenetic::storeWeights(std::string filepath){
 
 void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, double &Kp, std::vector<double> *globalQuakes)
 {
-    std::cerr<<"entered forecast"<<std::endl;
     //normalize inputs using v` = (v-mean)/stdev
     double meanCh1=0, meanCh2=0, meanCh3=0, stdCh1=0, stdCh2=0, stdCh3=0;
     int num=0;
@@ -397,8 +391,9 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
         thrust::copy(globalQuakes->begin(), globalQuakes->end(), gQuakeAvg.begin());
         int blocksPerGrid; //the blocksize defined by the configurator
         int threadsblock = 512; // the actual grid size needed
-
+        std::cerr<<"about to run cuda kernel.."<<std::endl;
         _NNParams[8] = _memVirtualizer._DGenetics.size()/(_NNParams[7]);
+        std::cerr<<"number of threads is :"<<_NNParams[8]<<std::endl;
         blocksPerGrid=(_NNParams[8]+threadsblock-1)/threadsblock;
         Net<<<blocksPerGrid, threadsblock>>>(_memVirtualizer.genetics(),
                                              convertToKernel(_NNParams),

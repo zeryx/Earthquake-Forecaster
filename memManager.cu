@@ -21,17 +21,17 @@ dataArray<double> MemManager::genetics(){
 
 
 
-bool MemManager::memoryAlloc(int individualLength, float pMaxHost, float pMaxDevice){//allocates memory for genetis & input vectors
-    long long hostMem = GetHostRamInBytes()*pMaxHost; //make a host memory container, this is the max
+bool MemManager::memoryAlloc(int individualLength,float pMaxDevice){//allocates memory for genetis & input vectors
+//    long long hostMem = GetHostRamInBytes()*pMaxHost; //make a host memory container, this is the max
     long long deviceMem = GetDeviceRamInBytes()*pMaxDevice; //dito for gpu
-    _hostGeneticsAlloc = hostMem/8; //since these are doubles, divide bytes by 8
+//    _hostGeneticsAlloc = hostMem/8; //since these are doubles, divide bytes by 8
     _deviceGeneticsAlloc = deviceMem/8;
 
-    _hostGeneticsAlloc = (_hostGeneticsAlloc/individualLength)*individualLength;
+//    _hostGeneticsAlloc = (_hostGeneticsAlloc/individualLength)*individualLength;
     _deviceGeneticsAlloc = (_deviceGeneticsAlloc/individualLength)*individualLength;
     //initialize all large vectors (everything not from an xml file)
     try{
-        this->_HGenetics.setMax(_hostGeneticsAlloc);
+//        this->_HGenetics.setMax(_hostGeneticsAlloc);
     }
     catch(thrust::system_error &e){
         std::cerr<<"Error resizing vector Element: "<<e.what()<<std::endl;

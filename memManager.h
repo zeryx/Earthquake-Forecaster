@@ -7,7 +7,7 @@ using thrust::device_vector;
 class MemManager{
 public:
      MemManager();
-    bool memoryAlloc(int individualLength, float pMaxHost, float pMaxDevice);
+    bool memoryAlloc(int individualLength, float pMaxDevice);
     dataArray<double> genetics();
 
 public:
