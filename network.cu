@@ -56,10 +56,10 @@ __host__ __device__ inline double bearingCalc(double lat1, double lon1, double l
 }
 
 __host__ __device__ inline double ActFunc(double x){
-    return tanh(x);
+    return 1+1/exp(-x);
 }
 __host__ __device__ inline double normalizeChannels(double x, double mean, double stdev){
-    return (x-mean)/stdev;
+    return (abs(x-mean))/stdev*2;
 }
 
 __host__ __device__ inline double normalizeInputs(double x, double max, double min){
@@ -267,15 +267,15 @@ __global__ void Net(dataArray<double> weights, dataArray<int> params, dataArray<
 
 
 NetworkGenetic::NetworkGenetic(const int &numInputNodes, const int &numHiddenNeurons, const int &numMemoryNeurons,
-                               const int &numOutNeurons, std::vector< thrust::pair<int, int> >&connections){
+                              const int &numOutNeurons, const int &numWeights, std::vector< thrust::pair<int, int> >&connections){
     this->_NNParams.resize(15, 0); // room to grow
     _NNParams[1] = numInputNodes + numHiddenNeurons + numMemoryNeurons + numOutNeurons;
-    _NNParams[2] = numInputNodes + numHiddenNeurons + numOutNeurons;
+    _NNParams[2] = numWeights;
     _NNParams[3] = numInputNodes;
     _NNParams[4] = numHiddenNeurons;
     _NNParams[5] = numMemoryNeurons;
     _NNParams[6] = numOutNeurons;
-    _NNParams[7] = numInputNodes + numHiddenNeurons + numMemoryNeurons + numOutNeurons + 1 + 1; //1 for fitness, 1 for community output composite vector
+    _NNParams[7] = numWeights + 1 + 1; //1 for fitness, 1 for community output composite vector
     _connect = &connections;
 }
 
@@ -283,18 +283,18 @@ void NetworkGenetic::initializeWeights(){
     int blocksPerGrid; //the blocksize defined by the configurator
     int threadsblock = 512; // the actual grid size needed
     int seedItr = 0;
-    //    do{
+
     _NNParams[8] = _memVirtualizer._DGenetics.size()/(_NNParams[7]); // number of individuals on device.
     long seed = std::clock() + std::clock()*seedItr++;
-    blocksPerGrid=(_NNParams[9]+threadsblock-1)/threadsblock;
+    blocksPerGrid=(_NNParams[8]+threadsblock-1)/threadsblock;
     genWeights<double><<<blocksPerGrid, threadsblock>>>(_memVirtualizer.genetics(), seed, _NNParams[2], _NNParams[8]);
     cudaDeviceSynchronize();
-    //    }while(_memVirtualizer.GeneticsPushToHost(&_genetics));
-    //    _NNParams[9] = _genetics.size/(_NNParams[8]); // number of individuals on device.
-    //    long seed = std::clock() + std::clock()*seedItr++;
-    //    blocksPerGrid=(_NNParams[9]+threadsblock-1)/threadsblock;
-    //    genWeights<double><<< blocksPerGrid, threadsblock>>>(_genetics, seed, _NNParams[2], _NNParams[8]);
-    //    cudaDeviceSynchronize();
+//        }while(_memVirtualizer.GeneticsPushToHost(&_genetics));
+//        _NNParams[9] = _genetics.size/(_NNParams[8]); // number of individuals on device.
+//        long seed = std::clock() + std::clock()*seedItr++;
+//        blocksPerGrid=(_NNParams[9]+threadsblock-1)/threadsblock;
+//        genWeights<double><<< blocksPerGrid, threadsblock>>>(_genetics, seed, _NNParams[2], _NNParams[8]);
+//        cudaDeviceSynchronize();
 }
 
 
@@ -349,27 +349,27 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
 {
     std::cerr<<"entered forecast"<<std::endl;
     //normalize inputs using v` = (v-mean)/stdev
-    int numCh1=0,meanCh1=0, numCh2=0, meanCh2=0, numCh3=0, meanCh3=0, stdCh1=0, stdCh2=0, stdCh3=0;
-    for(int i=0; i<data->size(); i++){
+    double meanCh1=0, meanCh2=0, meanCh3=0, stdCh1=0, stdCh2=0, stdCh3=0;
+    int num=0;
+    for(int i=0; i<3600*_sampleRate; i++){
         meanCh1 +=data->at(3600*_sampleRate*0*3 + 0*(3600*_sampleRate)+i);
         meanCh1 += data->at(3600*_sampleRate*1*3 + 0*(3600*_sampleRate)+i);
         meanCh1 += data->at(3600*_sampleRate*2*3 + 0*(3600*_sampleRate)+i);
-        meanCh2 +=data->at(3600*_sampleRate*0*3 + 1*(3600*_sampleRate)+i);
+        meanCh2 += data->at(3600*_sampleRate*0*3 + 1*(3600*_sampleRate)+i);
         meanCh2 += data->at(3600*_sampleRate*1*3 + 1*(3600*_sampleRate)+i);
         meanCh2 += data->at(3600*_sampleRate*2*3 + 1*(3600*_sampleRate)+i);
         meanCh3 +=data->at(3600*_sampleRate*0*3 + 2*(3600*_sampleRate)+i);
         meanCh3 += data->at(3600*_sampleRate*1*3 + 2*(3600*_sampleRate)+i);
         meanCh3 += data->at(3600*_sampleRate*2*3 + 2*(3600*_sampleRate)+i);
-        numCh1 = numCh1+3;
-        numCh2 = numCh2+3;
-        numCh3 = numCh3+3;
+        num = num+3;
     }
-    meanCh1 = meanCh1/numCh1;
-    meanCh2 = meanCh2/numCh2;
-    meanCh3 = meanCh3/numCh3;
+    meanCh1 = meanCh1/num;
+    meanCh2 = meanCh2/num;
+    meanCh3 = meanCh3/num;
     stdCh1 = sqrt(meanCh1);
     stdCh2 = sqrt(meanCh2);
     stdCh3 = sqrt(meanCh3);
+    std::cerr<<"channels std and mean calculated"<<std::endl;
     //input data from all sites and all channels normalized
     if(_istraining){
         thrust::device_vector<double> retVec(2160*_numofSites, 0);
@@ -383,7 +383,7 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
         int threadsblock = 512; // the actual grid size needed
 
         _NNParams[8] = _memVirtualizer._DGenetics.size()/(_NNParams[7]);
-        blocksPerGrid=(_NNParams[9]+threadsblock-1)/threadsblock;
+        blocksPerGrid=(_NNParams[8]+threadsblock-1)/threadsblock;
         Net<<<blocksPerGrid, threadsblock>>>(_memVirtualizer.genetics(),
                                              convertToKernel(_NNParams),
                                              convertToKernel(gQuakeAvg),
@@ -401,9 +401,9 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
         std::cerr<<"entered not training version.."<<std::endl;
         typedef std::vector<thrust::pair<int, int> > connectPairMatrix;
         //replace this later
-        _best.resize(45);
         for(std::vector<double>::iterator it = _best.begin(); it != _best.end(); ++it){
-            *it = 1/rand();
+            std::srand(std::time(NULL)+*it);
+            *it = (double)(std::rand())/(RAND_MAX);
         }
         std::cerr<<"example best vector has been set."<<std::endl;
         double CommunityLat = 0;
@@ -453,23 +453,14 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
                 int startOfMemGateForget = startOfMemGateOut + _NNParams[5];
                 int startOfOutput = startOfMemGateForget + _NNParams[5];
                 input[0] = normalizeInputs((double)(data->at(3600*_sampleRate*j*3 + 0*(3600*_sampleRate)+step)), meanCh1, stdCh1);
-                std::cerr<<"input 0 was set"<<" value is : "<<input[0]<<std::endl;
                 input[1] = normalizeChannels((double)(data->at(3600*_sampleRate*j*3 + 1*(3600*_sampleRate)+step)), meanCh2, stdCh2);
-                std::cerr<<"input 1 was set"<<" value is : "<<input[1]<<std::endl;
                 input[2] = normalizeChannels((double)(data->at(3600*_sampleRate*j*3 + 2*(3600*_sampleRate)+step)), meanCh3, stdCh3);
-                std::cerr<<"input 2 was set"<<" value is : "<<input[2]<<std::endl;
                 input[3] = normalizeInputs(GQuakeAvgdist, 40075.1, 0);
-                std::cerr<<"input 3 was set"<<" value is : "<<input[3]<<std::endl;
                 input[4] = normalizeInputs(GQuakeAvgBearing, 360, 0);
-                std::cerr<<"input 4 was set"<<" value is : "<<input[4]<<std::endl;
                 input[5] = normalizeInputs(GQuakeAvgMag, 9.5, 0);
-                std::cerr<<"input 5 was set"<<" value is : "<<input[5]<<std::endl;
                 input[6] = normalizeInputs(Kp, 10, 0);
-                std::cerr<<"input 6 was set"<<" value is : "<<input[6]<<std::endl;
                 input[7] = normalizeInputs(CommunityDist,40075.1/2, 0);
-                std::cerr<<"input 7 was set"<<" value is : "<<input[7]<<std::endl;
                 input[8] = normalizeInputs(CommunityBearing, 360, 0);
-                std::cerr<<"input 8 was set"<<" value is : "<<input[8]<<std::endl;
                 //lets reset all neuron values for this new timestep (except memory neurons)
                 for(int gate=0; gate<_NNParams[5]; gate++){
                     memGateIn[gate] = 0;
@@ -488,32 +479,38 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
                 std::cerr<<"preparing to set the values for memoryGates."<<std::endl;
                 for(int gate = 0; gate<_NNParams[5]; gate++){//calculate memory gate node values, you can connect inputs & hidden neurons to them.
                     for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){//for memGateIn
-                        if(it->second == gate+startOfMemGateIn && it->second < startOfHidden){ //for inputs
+                        if(it->second == gate+startOfMemGateIn && it->first < startOfHidden){ //for inputs
+                            std::cerr<<"weights for memGateIn #"<<gate<<" is: "<<_best[n];
                             memGateIn[gate] += input[it->first-startOfInput]*_best[n++]; // memGateIn vect starts at 0
                         }
-                        else if(it->second == gate+startOfMemGateIn && it->second >startOfHidden && it->second <startOfMem){//for hidden neurons
+                        else if(it->second == gate+startOfMemGateIn && it->first >startOfHidden && it->first < startOfMem){//for hidden neurons
                             memGateIn[gate] += hidden[it->first-startOfHidden]*_best[n++];
                         }
                     }
                     for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){//for memGateOut
-                        if(it->second == gate+startOfMemGateOut && it->second < startOfHidden){//for inputs
+                        if(it->second == gate+startOfMemGateOut && it->first < startOfHidden){//for inputs
+                            std::cerr<<"weights for memGateOut #"<<gate<<" is: "<<_best[n];
                             memGateOut[gate] += input[it->first-startOfInput]*_best[n++];
                         }
-                        else if(it->second == gate+startOfMemGateOut && it->second >startOfHidden && it->second <startOfMem){//for hidden neurons
+                        else if(it->second == gate+startOfMemGateOut && it->first >startOfHidden && it->first <startOfMem){//for hidden neurons
                             memGateOut[gate] += hidden[it->first-startOfHidden]*_best[n++];
                         }
                     }
                     for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){//for  memGateForget
-                        if(it->second == gate+startOfMemGateForget && it->second < startOfHidden){//for inputs
+                        if(it->second == gate+startOfMemGateForget && it->first < startOfHidden){//for inputs
+                            std::cerr<<"weights for memGateForget #"<<gate<<" is: "<<_best[n];
                             memGateForget[gate] += input[it->first - startOfInput]*_best[n++];
                         }
-                        else if(it->second == gate+startOfMemGateForget && it->second >startOfHidden && it->second <startOfMem){//for hidden neurons
+                        else if(it->second == gate+startOfMemGateForget && it->first >startOfHidden && it->first <startOfMem){//for hidden neurons
                             memGateForget[gate] += hidden[it->first-startOfHidden]*_best[n++];
                         }
                     }
                     memGateIn[gate] = ActFunc(memGateIn[gate]);
                     memGateOut[gate] = ActFunc(memGateOut[gate]);
                     memGateForget[gate] = ActFunc(memGateForget[gate]);
+                    std::cerr<<"memGateIn val: "<<memGateIn[gate]<<std::endl;
+                    std::cerr<<"memGateOut val: "<<memGateOut[gate]<<std::endl;
+                    std::cerr<<"memGateForget val: "<<memGateForget[gate]<<std::endl;
                 }
                 //since we calculated the values for memGateIn and memGateOut, and MemGateForget..
                 for (int gate = 0; gate<_NNParams[5]; gate++){ // if memGateIn is greater than 0.3, then let mem = the sum inputs attached to memGateIn
@@ -535,22 +532,24 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
                             }
                         }
                     }
+                    std::cerr<<"mem val stored is: "<<mem[gate]<<std::endl;
                 }
 
                 // hidden neuron nodes --
                 for(int hid=0; hid<_NNParams[4]; hid++){ // for all hidden neurons at layer 1, lets sum the inputs, the memory values were already added.
                     for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){ // Add the inputs to the hidden neurons
-                        if(it->second == hid+startOfHidden && it->first < startOfHidden && it->first >= startOfInput){ // if an input connects with this hidden neuron
+                        if(it->second == hid+startOfHidden && it->first < startOfHidden){ // if an input connects with this hidden neuron
                             hidden[hid] += input[it->first]*_best[n++];
                         }
                     }
                     for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){//add other hidden neuron inputs to each hidden neuron (if applicable)
-                        if(it->second == hid+startOfHidden && it->first < startOfMem && it->first >= startOfHidden){
+                        if(it->second == hid+startOfHidden && it->first < startOfMem && it->first > startOfHidden){
                             hidden[hid] += hidden[it->first-startOfHidden]*_best[n++];
                         }
                     }
                     hidden[hid] += 1*_best[n++]; // add bias
                     hidden[hid] = ActFunc(hidden[hid]); // then squash it.
+                    std::cerr<<"hidden nueron values: "<<hidden[hid]<<std::endl;
                 }
                 //output nodes --
 
@@ -565,9 +564,12 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
                 }
 
 
-                When[j] += 1/outputs[0]; //return when back to an integer value (adjust to fit within boundaries)
+                When[j] += outputs[0]*(2160-hour)+hour; //return when back to an integer value (adjust to fit within boundaries)
+                std::cerr<<"When for site: "<<j<<" and for step: "<<step<< " is: "<<When[j]<<std::endl;
                 HowCertain[j] += outputs[1];
+                std::cerr<<"howCertain for site: "<<j<<" and for step: "<<step<< " is: "<<HowCertain[j]<<std::endl;
                 CommunityMag[j] =  outputs[2]; // set the next sets communityMag = output #3.
+                std::cerr<<"ComunityMagnitude for site: "<<j<<" and for step: "<<step<< " is: "<<CommunityMag[j]<<std::endl;
             }
         }
         for(int j=0; j<_numofSites; j++){ // each site has its own when and howcertain vector

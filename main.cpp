@@ -12,34 +12,44 @@ int main(int argc, char** arg){
     int MemGateOut = 3;
     int MemGateForget = 3;
     int outputs = 3;
+    int numWeights;
     std::vector< thrust::pair<int, int> >connections; //each vector starts at 0, and then is < than the num of each val
     connections.push_back(make_pair(0, inputs+0));
     connections.push_back(make_pair(0, inputs+hidden+memory+0)); // connect input 1 to memorygateIn 1
     connections.push_back(make_pair(0, inputs+hidden+memory+memGateIn+0)); // connect input 1 to memory gateoutput 1
+    connections.push_back(make_pair(0, inputs+hidden+memory+memGateIn+MemGateOut+0));
     connections.push_back(make_pair(1, inputs+0));
     connections.push_back(make_pair(1, inputs+hidden+memory+0));
     connections.push_back(make_pair(1, inputs+hidden+memory+memGateIn+0)); //connect input 2 to memory gate out 1 (all 3 data channels share a memory
+    connections.push_back(make_pair(1, inputs+hidden+memory+memGateIn+MemGateOut+0));
     connections.push_back(make_pair(2, inputs+0));
     connections.push_back(make_pair(2, inputs+hidden+memory+0));
     connections.push_back(make_pair(2, inputs+hidden+memory+memGateIn+0));
+    connections.push_back(make_pair(2, inputs+hidden+memory+memGateIn+MemGateOut+0));
     connections.push_back(make_pair(3, inputs+1));
     connections.push_back(make_pair(3, inputs+hidden+memory+1));
     connections.push_back(make_pair(3, inputs+hidden+memory+memGateIn+1));
+    connections.push_back(make_pair(3, inputs+hidden+memory+memGateIn+MemGateOut+1));
     connections.push_back(make_pair(4, inputs+1));
     connections.push_back(make_pair(4, inputs+hidden+memory+1));
     connections.push_back(make_pair(4, inputs+hidden+memory+memGateIn+1));
+    connections.push_back(make_pair(4, inputs+hidden+memory+memGateIn+MemGateOut+1));
     connections.push_back(make_pair(5, inputs+1));
     connections.push_back(make_pair(5, inputs+hidden+memory+1));
     connections.push_back(make_pair(5, inputs+hidden+memory+memGateIn+1));
+    connections.push_back(make_pair(5, inputs+hidden+memory+memGateIn+MemGateOut+1));
     connections.push_back(make_pair(6, inputs+2));
     connections.push_back(make_pair(6, inputs+hidden+memory+2));
     connections.push_back(make_pair(6, inputs+hidden+memory+memGateIn+2));
+    connections.push_back(make_pair(6, inputs+hidden+memory+memGateIn+MemGateOut+2));
     connections.push_back(make_pair(7, inputs+2));
     connections.push_back(make_pair(7, inputs+hidden+memory+2));
     connections.push_back(make_pair(7, inputs+hidden+memory+memGateIn+2));
+    connections.push_back(make_pair(7, inputs+hidden+memory+memGateIn+MemGateOut+2));
     connections.push_back(make_pair(8, inputs+2));
     connections.push_back(make_pair(8, inputs+hidden+memory+2));
     connections.push_back(make_pair(8, inputs+hidden+memory+memGateIn+2));
+    connections.push_back(make_pair(8, inputs+hidden+memory+memGateIn+MemGateOut+2));
     //connect memory gate in/outs/forgets to the memory node.
     connections.push_back(make_pair(inputs+hidden+memory+0, inputs+hidden+0));
     connections.push_back(make_pair(inputs+hidden+memory+memGateIn+0, inputs+hidden+0));
@@ -64,8 +74,8 @@ int main(int argc, char** arg){
     connections.push_back(make_pair(inputs+2, inputs+hidden+memGateIn+MemGateOut+MemGateForget+0));
     connections.push_back(make_pair(inputs+2, inputs+hidden+memGateIn+MemGateOut+MemGateForget+1));
     connections.push_back(make_pair(inputs+2, inputs+hidden+memGateIn+MemGateOut+MemGateForget+2));
-    std::cerr<<"number of weights = "<<connections.size()-3<<std::endl;
-    NetworkGenetic ConstructedNetwork(inputs, hidden, memory, outputs,  connections);
+    numWeights = connections.size()-3; //minus 3 because the memory neurons connect without weights.
+    NetworkGenetic ConstructedNetwork(inputs, hidden, memory, outputs,numWeights, connections);
 
     int sampleRate, numberOfSites, SLEN;
     std::cin>>sampleRate>>numberOfSites>>SLEN;

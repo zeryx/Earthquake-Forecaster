@@ -10,7 +10,7 @@
 class  NetworkGenetic{
 public:
     NetworkGenetic(const int &numInNeurons, const int &numHiddenNeurons, const int &numMemoryNeurons,
-                   const int &numOutNeurons,  std::vector< thrust::pair<int, int> >&connections);
+                   const int &numOutNeurons, const int &numWeights,  std::vector< thrust::pair<int, int> >&connections);
     void errorFunc();
     void initializeWeights(); //initializes _data array and fills with random numbers
     void allocateHostAndGPUObjects(float pMaxHost, float pMaxDevice);
