@@ -15,7 +15,7 @@ public:
 //    bool GeneticsPushToHost(dataArray<double> *dGen);
     void initFromStream(std::ifstream& stream);
     void pushToStream(std::string filename);
-
+    hVector<double> _HGenetics;
     device_vector<double> _DGenetics; //device loaded memory object containing the training weights & fitness data.
 private:
 

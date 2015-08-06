@@ -299,7 +299,7 @@ void NetworkGenetic::initializeWeights(){
 
 
 void NetworkGenetic::allocateHostAndGPUObjects(float pMaxHost, float pMaxDevice){
-    _memVirtualizer.memoryAlloc(_NNParams[8], pMaxHost, pMaxDevice);
+    _memVirtualizer.memoryAlloc(_NNParams[7], pMaxHost, pMaxDevice);
 
 }
 bool NetworkGenetic::init(int sampleRate, int SiteNum, std::vector<double> siteData){
@@ -335,7 +335,8 @@ bool NetworkGenetic::checkForWeights(std::string filepath){
     }
 }
 
-void NetworkGenetic::doingTraining(int site, int hour, double lat, double lon, double mag, double dist){
+void NetworkGenetic::doingTraining(const int &site, const int &hour, const double &lat,
+                                   const double &lon, const double &mag, const double &dist){
     _answers.push_back(site);
     _answers.push_back(hour);
     _answers.push_back(lat);

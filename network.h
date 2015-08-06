@@ -15,7 +15,8 @@ public:
     void initializeWeights(); //initializes _data array and fills with random numbers
     void allocateHostAndGPUObjects(float pMaxHost, float pMaxDevice);
     bool init(int sampleRate, int SiteNum, std::vector<double>siteData);
-    void doingTraining(int site, int hour, double lat, double lon, double mag, double dist);
+    void doingTraining(const int &site, const int &hour, const double &lat,
+                       const double &lon, const double &mag, const double &dist);
     void forecast(double* ret, int& hour, std::vector<int> *data, double &K, std::vector<double> *globalQuakes);
     void storeWeights(std::string filepath);
     bool checkForWeights(std::string filepath);
