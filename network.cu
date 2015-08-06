@@ -58,6 +58,13 @@ __host__ __device__ inline double bearingCalc(double lat1, double lon1, double l
 __host__ __device__ inline double ActFunc(double x){
     return tanh(x);
 }
+__host__ __device__ inline double normalizeChannels(double x, double mean, double stdev){
+    return (x-mean)/stdev;
+}
+
+__host__ __device__ inline double normalizeInputs(double x, double max, double min){
+    return (x-min)/(max-min);
+}
 
 template <typename T>
 __global__ void genWeights( dataArray<T> ref, long in, int nRegWeights, int indLength){
@@ -75,7 +82,9 @@ __global__ void genWeights( dataArray<T> ref, long in, int nRegWeights, int indL
 __global__ void Net(dataArray<double> weights, dataArray<int> params, dataArray<double> globalQuakes,
                     dataArray<int> inputVal, dataArray<double> siteData,
                     dataArray<double> answers, dataArray<double> returnVal,
-                    dataArray<thrust::pair<int, int> > connections, double Kp, int sampleRate,int numOfSites, int hour){
+                    dataArray<thrust::pair<int, int> > connections,
+                    double Kp, int sampleRate,int numOfSites, int hour,
+                    double meanCh1, double meanCh2, double meanCh3, double stdCh1, double stdCh2, double stdCh3){
 
 
 
@@ -125,15 +134,15 @@ __global__ void Net(dataArray<double> weights, dataArray<int> params, dataArray<
             int startOfMemGateOut = startOfMemGateIn + params.array[5];
             int startOfMemGateForget = startOfMemGateOut + params.array[5];
             int startOfOutput = startOfMemGateForget + params.array[5];
-            input[0] = 1/inputVal.array[(3600*sampleRate*j*3 + 1*(3600*sampleRate)+step)];//channel 1
-            input[1] = 1/inputVal.array[(3600*sampleRate*j*3 + 2*(3600*sampleRate)+step)];//channel 2
-            input[2] = 1/inputVal.array[(3600*sampleRate*j*3 + 3*(3600*sampleRate)+step)];//channel 3
-            input[3] = 1/GQuakeAvgdist;
-            input[4] = 1/GQuakeAvgBearing;
-            input[5] = 1/GQuakeAvgMag;
-            input[6] = 1/Kp;
-            input[7] = 1/CommunityDist;
-            input[8] = 1/CommunityBearing;
+            input[0] = normalizeChannels(inputVal.array[(3600*sampleRate*j*3 + 1*(3600*sampleRate)+step)], meanCh1, stdCh1);//channel 1
+            input[1] = normalizeInputs(inputVal.array[(3600*sampleRate*j*3 + 2*(3600*sampleRate)+step)], meanCh2, stdCh2);//channel 2
+            input[2] = normalizeInputs(inputVal.array[(3600*sampleRate*j*3 + 3*(3600*sampleRate)+step)], meanCh3, stdCh3);//channel 3
+            input[3] = normalizeInputs(GQuakeAvgdist, 40075.1, 0);
+            input[4] = normalizeInputs(GQuakeAvgBearing, 360, 0);
+            input[5] = normalizeInputs(GQuakeAvgMag, 9.5, 0);
+            input[6] = normalizeInputs(Kp, 10, 0);
+            input[7] = normalizeInputs(CommunityDist,40075.1/2, 0);
+            input[8] = normalizeInputs(CommunityBearing, 360, 0);
             //lets reset all neuron values for this new timestep (except memory neurons)
             for(int gate=0; gate<params.array[5]; gate++){
                 memGateIn[gate] = 0;
@@ -339,6 +348,29 @@ void NetworkGenetic::storeWeights(std::string filepath){
 void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, double &Kp, std::vector<double> *globalQuakes)
 {
     std::cerr<<"entered forecast"<<std::endl;
+    //normalize inputs using v` = (v-mean)/stdev
+    int numCh1=0,meanCh1=0, numCh2=0, meanCh2=0, numCh3=0, meanCh3=0, stdCh1=0, stdCh2=0, stdCh3=0;
+    for(int i=0; i<data->size(); i++){
+        meanCh1 +=data->at(3600*_sampleRate*0*3 + 0*(3600*_sampleRate)+i);
+        meanCh1 += data->at(3600*_sampleRate*1*3 + 0*(3600*_sampleRate)+i);
+        meanCh1 += data->at(3600*_sampleRate*2*3 + 0*(3600*_sampleRate)+i);
+        meanCh2 +=data->at(3600*_sampleRate*0*3 + 1*(3600*_sampleRate)+i);
+        meanCh2 += data->at(3600*_sampleRate*1*3 + 1*(3600*_sampleRate)+i);
+        meanCh2 += data->at(3600*_sampleRate*2*3 + 1*(3600*_sampleRate)+i);
+        meanCh3 +=data->at(3600*_sampleRate*0*3 + 2*(3600*_sampleRate)+i);
+        meanCh3 += data->at(3600*_sampleRate*1*3 + 2*(3600*_sampleRate)+i);
+        meanCh3 += data->at(3600*_sampleRate*2*3 + 2*(3600*_sampleRate)+i);
+        numCh1 = numCh1+3;
+        numCh2 = numCh2+3;
+        numCh3 = numCh3+3;
+    }
+    meanCh1 = meanCh1/numCh1;
+    meanCh2 = meanCh2/numCh2;
+    meanCh3 = meanCh3/numCh3;
+    stdCh1 = sqrt(meanCh1);
+    stdCh2 = sqrt(meanCh2);
+    stdCh3 = sqrt(meanCh3);
+    //input data from all sites and all channels normalized
     if(_istraining){
         thrust::device_vector<double> retVec(2160*_numofSites, 0);
         thrust::device_vector<int> input(data->size());
@@ -347,7 +379,6 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
         thrust::copy(_connect->begin(), _connect->end(), dConnect.begin());
         thrust::copy(data->begin(), data->end(), input.begin());
         thrust::copy(globalQuakes->begin(), globalQuakes->end(), gQuakeAvg.begin());
-
         int blocksPerGrid; //the blocksize defined by the configurator
         int threadsblock = 512; // the actual grid size needed
 
@@ -361,10 +392,8 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
                                              convertToKernel(_answers),
                                              convertToKernel(retVec),
                                              convertToKernel(dConnect),
-                                             Kp,
-                                             _sampleRate,
-                                             _numofSites,
-                                             hour);
+                                             Kp,_sampleRate,_numofSites,hour,
+                                             meanCh1, meanCh2, meanCh3, stdCh1, stdCh2, stdCh3);
         cudaDeviceSynchronize();
         thrust::copy(retVec.begin(), retVec.end(), ret);
     }
@@ -398,13 +427,12 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
                 double lonSite = _siteData[j*2+1];
                 double avgLatGQuake = globalQuakes->at(0);
                 double avgLonGQuake = globalQuakes->at(1);
-                //                double avgDepthGQuake = globalQuakes->at(2); don't think I care about depth that much.
                 double GQuakeAvgMag = globalQuakes->at(3);
                 double GQuakeAvgdist = distCalc(latSite, lonSite, avgLatGQuake, avgLonGQuake);
                 double GQuakeAvgBearing = bearingCalc(latSite, lonSite, avgLatGQuake, avgLonGQuake);
                 double CommunityDist = distCalc(latSite, lonSite, CommunityLat, CommunityLon);
                 double CommunityBearing = bearingCalc(latSite, lonSite, CommunityLat, CommunityLon);
-                std::vector<int> input;
+                std::vector<double> input;
                 std::vector<double> hidden, outputs, mem, memGateOut, memGateIn, memGateForget;
                 //replace these with real connections, num of inputs, and num of hidden & memory neurons (mem neurons probably accurate)
                 input.resize(_NNParams[3], 0); // number of inputs is 9.
@@ -415,6 +443,7 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
                 memGateForget.resize(_NNParams[5], 0);
                 outputs.resize(_NNParams[6], 0); /* 3 outputs, 1 with an hour in the future when the earthquake will hit,
                     1 with the porbability of that earthquake happening (between [0,1]) and 1 with the sites magnitude (for community feedback) */
+                std::cerr<<"all neuron vectors are sized, all pre-net calculations done."<<std::endl;
                 int n =0;
                 int startOfInput = 0;
                 int startOfHidden = startOfInput +_NNParams[3];
@@ -423,15 +452,24 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
                 int startOfMemGateOut = startOfMemGateIn + _NNParams[5];
                 int startOfMemGateForget = startOfMemGateOut + _NNParams[5];
                 int startOfOutput = startOfMemGateForget + _NNParams[5];
-                input[0] = 1/data->at(3600*_sampleRate*j*3 + 1*(3600*_sampleRate)+step);
-                input[1] = 1/data->at(3600*_sampleRate*j*3 + 2*(3600*_sampleRate)+step);
-                input[2] = 1/data->at(3600*_sampleRate*j*3 + 3*(3600*_sampleRate)+step);
-                input[3] = 1/GQuakeAvgdist;
-                input[4] = 1/GQuakeAvgBearing;
-                input[5] = 1/GQuakeAvgMag;
-                input[6] = 1/Kp;
-                input[7] = 1/CommunityDist;
-                input[8] = 1/CommunityBearing;
+                input[0] = normalizeInputs((double)(data->at(3600*_sampleRate*j*3 + 0*(3600*_sampleRate)+step)), meanCh1, stdCh1);
+                std::cerr<<"input 0 was set"<<" value is : "<<input[0]<<std::endl;
+                input[1] = normalizeChannels((double)(data->at(3600*_sampleRate*j*3 + 1*(3600*_sampleRate)+step)), meanCh2, stdCh2);
+                std::cerr<<"input 1 was set"<<" value is : "<<input[1]<<std::endl;
+                input[2] = normalizeChannels((double)(data->at(3600*_sampleRate*j*3 + 2*(3600*_sampleRate)+step)), meanCh3, stdCh3);
+                std::cerr<<"input 2 was set"<<" value is : "<<input[2]<<std::endl;
+                input[3] = normalizeInputs(GQuakeAvgdist, 40075.1, 0);
+                std::cerr<<"input 3 was set"<<" value is : "<<input[3]<<std::endl;
+                input[4] = normalizeInputs(GQuakeAvgBearing, 360, 0);
+                std::cerr<<"input 4 was set"<<" value is : "<<input[4]<<std::endl;
+                input[5] = normalizeInputs(GQuakeAvgMag, 9.5, 0);
+                std::cerr<<"input 5 was set"<<" value is : "<<input[5]<<std::endl;
+                input[6] = normalizeInputs(Kp, 10, 0);
+                std::cerr<<"input 6 was set"<<" value is : "<<input[6]<<std::endl;
+                input[7] = normalizeInputs(CommunityDist,40075.1/2, 0);
+                std::cerr<<"input 7 was set"<<" value is : "<<input[7]<<std::endl;
+                input[8] = normalizeInputs(CommunityBearing, 360, 0);
+                std::cerr<<"input 8 was set"<<" value is : "<<input[8]<<std::endl;
                 //lets reset all neuron values for this new timestep (except memory neurons)
                 for(int gate=0; gate<_NNParams[5]; gate++){
                     memGateIn[gate] = 0;
@@ -444,9 +482,10 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
                 for(int out=0; out<_NNParams[6]; out++){
                     outputs[out] = 0;
                 }
-
+                std::cerr<<"memGate, hidden, and output neurons are zeroed."<<std::endl;
                 //now that everything that should be zeroed is zeroed, lets start the network.
                 //mem gates & LSTM nodes --
+                std::cerr<<"preparing to set the values for memoryGates."<<std::endl;
                 for(int gate = 0; gate<_NNParams[5]; gate++){//calculate memory gate node values, you can connect inputs & hidden neurons to them.
                     for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){//for memGateIn
                         if(it->second == gate+startOfMemGateIn && it->second < startOfHidden){ //for inputs
