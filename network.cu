@@ -322,13 +322,17 @@ bool NetworkGenetic::init(int sampleRate, int SiteNum, std::vector<double> siteD
 
 bool NetworkGenetic::checkForWeights(std::string filepath){
     std::ifstream weightFile;
+    std::cerr<<"checking for weights.."<<std::endl;
     weightFile.open(filepath.c_str(), std::ios_base::in);
     if(weightFile){
+        std::cerr<<"the weightfile exists"<<std::endl;
         _memVirtualizer.initFromStream(weightFile);
         return true;
     }
-    else
+    else{
+        std::cerr<<"no weightfile found"<<std::endl;
         return false;
+    }
 }
 
 void NetworkGenetic::doingTraining(int site, int hour, double lat, double lon, double mag, double dist){

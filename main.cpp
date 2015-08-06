@@ -92,12 +92,16 @@ int main(int argc, char** arg){
     std::cin>>doTraining;
     if (doTraining == 1)
     {
+        std::cerr<<"looks like were doing training"<<std::endl;
         int gtf_site, gtf_hour;
         double gtf_lat, gtf_long, gtf_mag, gtf_dist;
         std::cin>>gtf_site>>gtf_hour>>gtf_lat>>gtf_long>>gtf_mag>>gtf_dist;
+        std::cerr<<"lets allocate GPU and host objects"<<std::endl;
         ConstructedNetwork.allocateHostAndGPUObjects(0.25, 0.85);
+        std::cerr<<"checking for weightfile"<<std::endl;
         if(!ConstructedNetwork.checkForWeights("/weights.bin"))
             ConstructedNetwork.initializeWeights();
+        std::cerr<<"setting do training parameters & answer key"<<std::endl;
         ConstructedNetwork.doingTraining(gtf_site, gtf_hour, gtf_lat, gtf_long, gtf_mag, gtf_dist);
     }
     while(1)
