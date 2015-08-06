@@ -76,8 +76,8 @@ int main(int argc, char** arg){
         sitesData.push_back(0);
         std::cin>>sitesData.at(i);
     }
-    int ret = ConstructedNetwork.init(sampleRate, numberOfSites, sitesData);
-    std::cout<<ret<<std::endl;
+    int initRet= ConstructedNetwork.init(sampleRate, numberOfSites, sitesData);
+    std::cout<<initRet<<std::endl;
     int doTraining;
     std::cin>>doTraining;
     if (doTraining == 1)
@@ -94,7 +94,7 @@ int main(int argc, char** arg){
     {
         int DLEN, QLEN;
         int hour;
-        double k;
+        double Kp;
         std::vector<int> data;
         std::vector<double> globalQuakes(5);
         std::cin>>hour;
@@ -108,12 +108,15 @@ int main(int argc, char** arg){
                 data.at(i) = data.at(i-1);
             }
         }
-        std::cin>>k>>QLEN;
+        std::cerr<<"recieved all input data"<<std::endl;
+        std::cin>>Kp;
+        std::cin>>QLEN;
         std::vector<double> tmpQuakes;
-        for(int i=0; i<QLEN; i){
-            tmpQuakes.push_back(0);
+        for(int i=0; i<QLEN; i++){
+            tmpQuakes.push_back(0.0);
             std::cin>>tmpQuakes.at(i);
         }
+        std::cerr<<"recieved all global quakes data"<<std::endl;
         int accVal=0;
         globalQuakes[5] = hour;
         for (int i=0; i<QLEN; i++){
@@ -126,12 +129,16 @@ int main(int argc, char** arg){
             if(globalQuakes[k] !=0)
                 globalQuakes[k] = globalQuakes[k]/accVal; // push the hourly average into _DGQuakes for all parameters.
         }
-
-        double * ret = ConstructedNetwork.forecast(hour, &data, k, &globalQuakes);
-        std::cout<<2160*numberOfSites;
-        for(int i=0; i<=2160*numberOfSites; i++){
-            std::cout<<ret[i]<<std::endl;
+        std::cerr<<"about to call forecast.."<<std::endl;
+        double retM[2160*numberOfSites];
+        ConstructedNetwork.forecast(retM, hour, &data, Kp, &globalQuakes);
+        std::cerr<<"forecast returned."<<std::endl;
+        int retSize = numberOfSites;
+        std::cout<<retSize<<std::endl;
+        for(int i=0; i<2160*numberOfSites; i++){
+            std::cout<<retM[i]<<std::endl;
         }
+        std::cerr<<"ret is returned to stream."<<std::endl;
         std::cout.flush();
     }
     if(doTraining == 1)

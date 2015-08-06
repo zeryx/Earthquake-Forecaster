@@ -16,7 +16,7 @@ public:
     void allocateHostAndGPUObjects(float pMaxHost, float pMaxDevice);
     bool init(int sampleRate, int SiteNum, std::vector<double>siteData);
     void doingTraining(int site, int hour, double lat, double lon, double mag, double dist);
-    double* forecast(int& hour, std::vector<int> *data, double &K, std::vector<double> *globalQuakes);
+    void forecast(double* ret, int& hour, std::vector<int> *data, double &K, std::vector<double> *globalQuakes);
     void storeWeights(std::string filepath);
     bool checkForWeights(std::string filepath);
 private:

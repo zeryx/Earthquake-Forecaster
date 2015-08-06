@@ -296,6 +296,7 @@ void NetworkGenetic::allocateHostAndGPUObjects(float pMaxHost, float pMaxDevice)
 bool NetworkGenetic::init(int sampleRate, int SiteNum, std::vector<double> siteData){
     _sampleRate = sampleRate;
     _numofSites = SiteNum;
+    _siteData.resize(siteData.size());
     try{thrust::copy(siteData.begin(), siteData.end(), _siteData.begin());}
     catch(thrust::system_error &e){
         std::cerr<<"Error resizing vector Element: "<<e.what()<<std::endl;
@@ -306,6 +307,7 @@ bool NetworkGenetic::init(int sampleRate, int SiteNum, std::vector<double> siteD
         std::cerr<<e.what()<<std::endl;
         return false;
     }
+    _istraining = false;
     return true;
 }
 
@@ -334,10 +336,9 @@ void NetworkGenetic::storeWeights(std::string filepath){
     _memVirtualizer.pushToStream(filepath);
 }
 
-double* NetworkGenetic::forecast(int &hour, std::vector<int> *data, double &Kp, std::vector<double> *globalQuakes)
+void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, double &Kp, std::vector<double> *globalQuakes)
 {
-    double*  ret =(double*)calloc(2160*_numofSites, sizeof(double));
-
+    std::cerr<<"entered forecast"<<std::endl;
     if(_istraining){
         thrust::device_vector<double> retVec(2160*_numofSites, 0);
         thrust::device_vector<int> input(data->size());
@@ -366,19 +367,24 @@ double* NetworkGenetic::forecast(int &hour, std::vector<int> *data, double &Kp, 
                                              hour);
         cudaDeviceSynchronize();
         thrust::copy(retVec.begin(), retVec.end(), ret);
-        return ret;
     }
     else{
+        std::cerr<<"entered not training version.."<<std::endl;
         typedef std::vector<thrust::pair<int, int> > connectPairMatrix;
-
+        //replace this later
+        _best.resize(45);
+        for(std::vector<double>::iterator it = _best.begin(); it != _best.end(); ++it){
+            *it = 1/rand();
+        }
+        std::cerr<<"example best vector has been set."<<std::endl;
         double CommunityLat = 0;
         double CommunityLon = 0;
         std::vector<double> When(_numofSites);
         std::vector<double> HowCertain(_numofSites,0);
         std::vector<double> CommunityMag(_numofSites, 1); //give all sites equal mag to start, this value is [0,1]
-
+        std::cerr<<"all output vectors created and initialized."<<std::endl;
         for(int step=0; step<3600*_sampleRate; step++){
-
+            std::cerr<<"entering step #"<<step<<std::endl;
             for(int j=0; j<_numofSites; j++){ //sitesWeighted Lat/Lon values are determined based on all previous sites mag output value.
                 CommunityLat += _siteData[j*2]*CommunityMag[j];
                 CommunityLon += _siteData[j*2+1]*CommunityMag[j];
@@ -387,6 +393,7 @@ double* NetworkGenetic::forecast(int &hour, std::vector<int> *data, double &Kp, 
             CommunityLon = CommunityLon/_numofSites;
 
             for(int j=0; j<_numofSites; j++){ // each site is run independently of others, but shares an output from the previous step
+                std::cerr<<"entering site #"<<j<<std::endl;
                 double latSite = _siteData[j*2];
                 double lonSite = _siteData[j*2+1];
                 double avgLatGQuake = globalQuakes->at(0);
@@ -537,5 +544,4 @@ double* NetworkGenetic::forecast(int &hour, std::vector<int> *data, double &Kp, 
             }
         }
     }
-    return ret;
 }
