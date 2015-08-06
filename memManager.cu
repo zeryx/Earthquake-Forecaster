@@ -29,7 +29,6 @@ bool MemManager::memoryAlloc(int individualLength, float pMaxHost, float pMaxDev
 
     //    _hostGeneticsAlloc = (_hostGeneticsAlloc/individualLength)*individualLength;
     _deviceGeneticsAlloc = (_deviceGeneticsAlloc/individualLength)*individualLength;
-    std::cout<<"allocating..."<<std::endl;
     //initialize all large vectors (everything not from an xml file)
     try{
         //        this->_HGenetics.setMax(_hostGeneticsAlloc);
@@ -57,7 +56,6 @@ bool MemManager::memoryAlloc(int individualLength, float pMaxHost, float pMaxDev
         std::cout<<GetDeviceRamInBytes()<<std::endl;
         exit(1);
     }
-    std::cout<<"allocated."<<std::endl;
     return true;
 }
 //bool MemManager::geneticsBufferSwap(dataArray<double> *dGen){

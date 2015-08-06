@@ -1,25 +1,78 @@
 #include "network.h"
 #include <iostream>
-#include <map>
+#include <utility>
+#include <thrust/pair.h>
 
-
+using std::make_pair;
 int main(int argc, char** arg){
-    int inputs = 8;
-    int hidden = 4;
-    int memory = 2; //LSTM neurons
-    int hidden_layers = 2;
+    int inputs = 9;
+    int hidden = 3;
+    int memory = 3; //LSTM neurons
+    int memGateIn = 3;
+    int MemGateOut = 3;
+    int MemGateForget = 3;
     int outputs = 3;
-    std::vector<int> connections; // I'll actually populate this at some point
-
-    NetworkGenetic ConstructedNetwork(inputs, hidden, memory, outputs, hidden_layers,  connections);
-    ConstructedNetwork.allocateHostAndGPUObjects(0.25, 0.85);
+    std::vector< thrust::pair<int, int> >connections; //each vector starts at 0, and then is < than the num of each val
+    connections.push_back(make_pair(0, inputs+0));
+    connections.push_back(make_pair(0, inputs+hidden+memory+0)); // connect input 1 to memorygateIn 1
+    connections.push_back(make_pair(0, inputs+hidden+memory+memGateIn+0)); // connect input 1 to memory gateoutput 1
+    connections.push_back(make_pair(1, inputs+0));
+    connections.push_back(make_pair(1, inputs+hidden+memory+0));
+    connections.push_back(make_pair(1, inputs+hidden+memory+memGateIn+0)); //connect input 2 to memory gate out 1 (all 3 data channels share a memory
+    connections.push_back(make_pair(2, inputs+0));
+    connections.push_back(make_pair(2, inputs+hidden+memory+0));
+    connections.push_back(make_pair(2, inputs+hidden+memory+memGateIn+0));
+    connections.push_back(make_pair(3, inputs+1));
+    connections.push_back(make_pair(3, inputs+hidden+memory+1));
+    connections.push_back(make_pair(3, inputs+hidden+memory+memGateIn+1));
+    connections.push_back(make_pair(4, inputs+1));
+    connections.push_back(make_pair(4, inputs+hidden+memory+1));
+    connections.push_back(make_pair(4, inputs+hidden+memory+memGateIn+1));
+    connections.push_back(make_pair(5, inputs+1));
+    connections.push_back(make_pair(5, inputs+hidden+memory+1));
+    connections.push_back(make_pair(5, inputs+hidden+memory+memGateIn+1));
+    connections.push_back(make_pair(6, inputs+2));
+    connections.push_back(make_pair(6, inputs+hidden+memory+2));
+    connections.push_back(make_pair(6, inputs+hidden+memory+memGateIn+2));
+    connections.push_back(make_pair(7, inputs+2));
+    connections.push_back(make_pair(7, inputs+hidden+memory+2));
+    connections.push_back(make_pair(7, inputs+hidden+memory+memGateIn+2));
+    connections.push_back(make_pair(8, inputs+2));
+    connections.push_back(make_pair(8, inputs+hidden+memory+2));
+    connections.push_back(make_pair(8, inputs+hidden+memory+memGateIn+2));
+    //connect memory gate in/outs/forgets to the memory node.
+    connections.push_back(make_pair(inputs+hidden+memory+0, inputs+hidden+0));
+    connections.push_back(make_pair(inputs+hidden+memory+memGateIn+0, inputs+hidden+0));
+    connections.push_back(make_pair(inputs+hidden+memory+memGateIn+MemGateOut+0, inputs+hidden+0));
+    connections.push_back(make_pair(inputs+hidden+memory+1, inputs+hidden+1));
+    connections.push_back(make_pair(inputs+hidden+memory+memGateIn+1, inputs+hidden+1));
+    connections.push_back(make_pair(inputs+hidden+memory+memGateIn+MemGateOut+1, inputs+hidden+1));
+    connections.push_back(make_pair(inputs+hidden+memory+2, inputs+hidden+2));
+    connections.push_back(make_pair(inputs+hidden+memory+memGateIn+2, inputs+hidden+2));
+    connections.push_back(make_pair(inputs+hidden+memory+memGateIn+MemGateOut+2, inputs+hidden+2));
+    //connect memory neurons to hidden neurons, they don't have weights
+    connections.push_back(make_pair(inputs+hidden+0, inputs+0));
+    connections.push_back(make_pair(inputs+hidden+1, inputs+1));
+    connections.push_back(make_pair( inputs+hidden+2, inputs+2));
+    //connect hidden neurons to output neurons.
+    connections.push_back(make_pair(inputs+0, inputs+hidden+memGateIn+MemGateOut+MemGateForget+0));
+    connections.push_back(make_pair(inputs+0, inputs+hidden+memGateIn+MemGateOut+MemGateForget+1));
+    connections.push_back(make_pair(inputs+0, inputs+hidden+memGateIn+MemGateOut+MemGateForget+2));
+    connections.push_back(make_pair(inputs+1, inputs+hidden+memGateIn+MemGateOut+MemGateForget+0));
+    connections.push_back(make_pair(inputs+1, inputs+hidden+memGateIn+MemGateOut+MemGateForget+1));
+    connections.push_back(make_pair(inputs+1, inputs+hidden+memGateIn+MemGateOut+MemGateForget+2));
+    connections.push_back(make_pair(inputs+2, inputs+hidden+memGateIn+MemGateOut+MemGateForget+0));
+    connections.push_back(make_pair(inputs+2, inputs+hidden+memGateIn+MemGateOut+MemGateForget+1));
+    connections.push_back(make_pair(inputs+2, inputs+hidden+memGateIn+MemGateOut+MemGateForget+2));
+    std::cerr<<"number of weights = "<<connections.size()-3<<std::endl;
+    NetworkGenetic ConstructedNetwork(inputs, hidden, memory, outputs,  connections);
 
     int sampleRate, numberOfSites, SLEN;
     std::cin>>sampleRate>>numberOfSites>>SLEN;
 
     std::vector<double> sitesData;
 
-    for (int i=0; i < SLEN; i){
+    for (int i=0; i < SLEN; i++){
         sitesData.push_back(0);
         std::cin>>sitesData.at(i);
     }
@@ -27,13 +80,14 @@ int main(int argc, char** arg){
     std::cout<<ret<<std::endl;
     int doTraining;
     std::cin>>doTraining;
-    if(!ConstructedNetwork.checkForWeights("/weights.bin"))
-            ConstructedNetwork.initializeWeights();
     if (doTraining == 1)
     {
         int gtf_site, gtf_hour;
         double gtf_lat, gtf_long, gtf_mag, gtf_dist;
         std::cin>>gtf_site>>gtf_hour>>gtf_lat>>gtf_long>>gtf_mag>>gtf_dist;
+        ConstructedNetwork.allocateHostAndGPUObjects(0.25, 0.85);
+        if(!ConstructedNetwork.checkForWeights("/weights.bin"))
+            ConstructedNetwork.initializeWeights();
         ConstructedNetwork.doingTraining(gtf_site, gtf_hour, gtf_lat, gtf_long, gtf_mag, gtf_dist);
     }
     while(1)
@@ -47,36 +101,39 @@ int main(int argc, char** arg){
         if(hour== -1)
             break;
         std::cin>>DLEN;
-        for(int i=0; i<DLEN; i){
+        for(int i=0; i<DLEN; i++){
             data.push_back(0);
             std::cin>>data.at(i);
+            if(data.at(i) == -1){
+                data.at(i) = data.at(i-1);
+            }
         }
-       std::cin>>k>>QLEN;
-       std::vector<double> tmpQuakes;
+        std::cin>>k>>QLEN;
+        std::vector<double> tmpQuakes;
         for(int i=0; i<QLEN; i){
             tmpQuakes.push_back(0);
             std::cin>>tmpQuakes.at(i);
         }
-            int accVal=0;
-            globalQuakes[5] = hour;
-            for (int i=0; i<QLEN; i++){
-                    for(int k=0; k<4; k++){//don't start at 0 because 0 is time.
-                        globalQuakes[k] += tmpQuakes[i*5+k];
-                        accVal++;
-                    }
-                }
-            for(int k=1; k<4; k++){
-                if(globalQuakes[k] !=0)
-                    globalQuakes[k] = globalQuakes[k]/accVal; // push the hourly average into _DGQuakes for all parameters.
+        int accVal=0;
+        globalQuakes[5] = hour;
+        for (int i=0; i<QLEN; i++){
+            for(int k=0; k<4; k++){//don't start at 0 because 0 is time.
+                globalQuakes[k] += tmpQuakes[i*5+k];
+                accVal++;
             }
-
-            double * ret = ConstructedNetwork.forecast(hour, &data, k, &globalQuakes);
-            std::cout<<2160*numberOfSites;
-            for(int i=0; i<=2160*numberOfSites; i++){
-                std::cout<<ret[i]<<std::endl;
-            }
-            std::cout.flush();
         }
+        for(int k=1; k<4; k++){
+            if(globalQuakes[k] !=0)
+                globalQuakes[k] = globalQuakes[k]/accVal; // push the hourly average into _DGQuakes for all parameters.
+        }
+
+        double * ret = ConstructedNetwork.forecast(hour, &data, k, &globalQuakes);
+        std::cout<<2160*numberOfSites;
+        for(int i=0; i<=2160*numberOfSites; i++){
+            std::cout<<ret[i]<<std::endl;
+        }
+        std::cout.flush();
+    }
     if(doTraining == 1)
         ConstructedNetwork.storeWeights("/weights.bin");
 }
