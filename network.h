@@ -1,7 +1,6 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 #include "memManager.h"
-#include "neuralconnections.h"
 #include <string>
 #include <map>
 #include <thrust/pair.h>
@@ -13,7 +12,7 @@ public:
                    const int &numOutNeurons, const int &numWeights,  std::vector< thrust::pair<int, int> >&connections);
     void errorFunc();
     void initializeWeights(); //initializes _data array and fills with random numbers
-    void allocateHostAndGPUObjects(float pMaxDevice);
+    void allocateHostAndGPUObjects(float pMaxHost, float pMaxDevice);
     bool init(int sampleRate, int SiteNum, std::vector<double>siteData);
     void doingTraining(int site, int hour, double lat,
                        double lon, double mag, double dist);

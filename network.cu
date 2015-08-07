@@ -267,7 +267,7 @@ __global__ void Net(dataArray<double> weights, dataArray<int> params, dataArray<
 
 
 NetworkGenetic::NetworkGenetic(const int &numInputNodes, const int &numHiddenNeurons, const int &numMemoryNeurons,
-                              const int &numOutNeurons, const int &numWeights, std::vector< thrust::pair<int, int> >&connections){
+                               const int &numOutNeurons, const int &numWeights, std::vector< thrust::pair<int, int> >&connections){
     this->_NNParams.resize(15, 0); // room to grow
     _NNParams[1] = numInputNodes + numHiddenNeurons + numMemoryNeurons + numOutNeurons;
     _NNParams[2] = numWeights;
@@ -289,17 +289,17 @@ void NetworkGenetic::initializeWeights(){
     blocksPerGrid=(_NNParams[8]+threadsblock-1)/threadsblock;
     genWeights<double><<<blocksPerGrid, threadsblock>>>(_memVirtualizer.genetics(), seed, _NNParams[2], _NNParams[8]);
     cudaDeviceSynchronize();
-//        }while(_memVirtualizer.GeneticsPushToHost(&_genetics));
-//        _NNParams[9] = _genetics.size/(_NNParams[8]); // number of individuals on device.
-//        long seed = std::clock() + std::clock()*seedItr++;
-//        blocksPerGrid=(_NNParams[9]+threadsblock-1)/threadsblock;
-//        genWeights<double><<< blocksPerGrid, threadsblock>>>(_genetics, seed, _NNParams[2], _NNParams[8]);
-//        cudaDeviceSynchronize();
+    //        }while(_memVirtualizer.GeneticsPushToHost(&_genetics));
+    //        _NNParams[9] = _genetics.size/(_NNParams[8]); // number of individuals on device.
+    //        long seed = std::clock() + std::clock()*seedItr++;
+    //        blocksPerGrid=(_NNParams[9]+threadsblock-1)/threadsblock;
+    //        genWeights<double><<< blocksPerGrid, threadsblock>>>(_genetics, seed, _NNParams[2], _NNParams[8]);
+    //        cudaDeviceSynchronize();
 }
 
 
-void NetworkGenetic::allocateHostAndGPUObjects(float pMaxDevice){
-    _memVirtualizer.memoryAlloc(_NNParams[7], pMaxDevice);
+void NetworkGenetic::allocateHostAndGPUObjects(float pMaxHost, float pMaxDevice){
+    _memVirtualizer.memoryAlloc(_NNParams[7], pMaxHost, pMaxDevice);
 
 }
 bool NetworkGenetic::init(int sampleRate, int SiteNum, std::vector<double> siteData){
@@ -309,12 +309,12 @@ bool NetworkGenetic::init(int sampleRate, int SiteNum, std::vector<double> siteD
     try{thrust::copy(siteData.begin(), siteData.end(), _siteData.begin());}
     catch(thrust::system_error &e){
         std::cerr<<"Error resizing vector Element: "<<e.what()<<std::endl;
-        return false;
+        exit(-1);
     }
     catch(std::bad_alloc &e){
         std::cerr<<"Ran out of space due to : "<<"host"<<std::endl;
         std::cerr<<e.what()<<std::endl;
-        return false;
+        exit(-1);
     }
     _istraining = false;
     return true;
@@ -378,17 +378,69 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
     std::cerr<<"channels std and mean calculated"<<std::endl;
     //input data from all sites and all channels normalized
     if(_istraining){
-        thrust::device_vector<double> retVec(2160*_numofSites);
-        std::cerr<<"retVect created"<<std::endl;
-        thrust::device_vector<int> input(data->size());
-        std::cerr<<"input vector created"<<std::endl;
-        thrust::device_vector<double>gQuakeAvg(globalQuakes->size());
-        std::cerr<<"gQuakeAvg vector created"<<std::endl;
-        thrust::device_vector<thrust::pair<int, int> > dConnect(_connect->size());
-        std::cerr<<"connections  vector created"<<std::endl;
-        thrust::copy(_connect->begin(), _connect->end(), dConnect.begin());
-        thrust::copy(data->begin(), data->end(), input.begin());
-        thrust::copy(globalQuakes->begin(), globalQuakes->end(), gQuakeAvg.begin());
+        thrust::device_vector<double> retVec;
+        thrust::device_vector<int> input;
+        thrust::device_vector<double>gQuakeAvg;
+        thrust::device_vector<thrust::pair<int, int> > dConnect;
+        try{retVec.resize(2160*_numofSites);}
+        catch(std::bad_alloc &e){
+            std::cerr<<"bad alloc error:  "<<e.what()<<std::endl;
+            exit(-1);
+        }
+        try{input.resize(data->size());}
+        catch(std::bad_alloc &e){
+            std::cerr<<"bad alloc error:  "<<e.what()<<std::endl;
+            std::cerr<<e.what()<<std::endl;
+            exit(-1);
+        }
+        try{gQuakeAvg.resize(globalQuakes->size());}
+        catch(std::bad_alloc &e){
+            std::cerr<<"bad alloc error:  "<<e.what()<<std::endl;
+            std::cerr<<e.what()<<std::endl;
+            exit(-1);
+        }
+        try{dConnect.resize(_connect->size());}
+        catch(std::bad_alloc &e){
+            std::cerr<<"bad alloc error:  "<<e.what()<<std::endl;
+            std::cerr<<e.what()<<std::endl;
+            exit(-1);
+        }
+        try{thrust::copy(_connect->begin(), _connect->end(), dConnect.begin());}
+        catch(std::bad_alloc &e)
+        {
+          std::cerr << "Ran out of memory while copying _connect" << std::endl;
+          std::cerr<<e.what()<<std::endl;
+          exit(-1);
+        }
+        catch(thrust::system_error &e)
+        {
+          std::cerr << "Some other error happened during copying: " << e.what() << std::endl;
+          exit(-1);
+        }
+        try{thrust::copy(data->begin(), data->end(), input.begin());}
+        catch(std::bad_alloc &e)
+        {
+          std::cerr << "Ran out of memory while copying input" << std::endl;
+          std::cerr<<e.what()<<std::endl;
+          exit(-1);
+        }
+        catch(thrust::system_error &e)
+        {
+          std::cerr << "Some other error happened during copying: " << e.what() << std::endl;
+          exit(-1);
+        }
+        try{thrust::copy(globalQuakes->begin(), globalQuakes->end(), gQuakeAvg.begin());}
+        catch(std::bad_alloc &e)
+        {
+          std::cerr << "Ran out of memory while copying globalQuakes" << std::endl;
+          std::cerr<<e.what()<<std::endl;
+          exit(-1);
+        }
+        catch(thrust::system_error &e)
+        {
+          std::cerr << "Some other error happened during copying: " << e.what() << std::endl;
+          exit(-1);
+        }
         int blocksPerGrid; //the blocksize defined by the configurator
         int threadsblock = 512; // the actual grid size needed
         std::cerr<<"about to run cuda kernel.."<<std::endl;
