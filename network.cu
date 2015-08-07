@@ -4,6 +4,7 @@
 #include <thrust/random.h>
 #include <thrust/system_error.h>
 #include <utility>
+#include <vector>
 #include <ctime>
 #include <thrust/host_vector.h>
 
@@ -487,6 +488,7 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
         std::cerr<<"entered not training version.."<<std::endl;
         typedef std::vector<thrust::pair<int, int> > connectPairMatrix;
         //replace this later
+        _best.resize(_NNParams[2]);
         for(std::vector<double>::iterator it = _best.begin(); it != _best.end(); ++it){
             std::srand(std::time(NULL)+*it);
             *it = (double)(std::rand())/(RAND_MAX);
