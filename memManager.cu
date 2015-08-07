@@ -26,9 +26,10 @@ bool MemManager::memoryAlloc(int individualLength,float pMaxHost, float pMaxDevi
     long long deviceMem = GetDeviceRamInBytes()*pMaxDevice; //dito for gpu
     _hostGeneticsAlloc = hostMem/8; //since these are doubles, divide bytes by 8
     _deviceGeneticsAlloc = deviceMem/8;
-
     _hostGeneticsAlloc = (_hostGeneticsAlloc/individualLength)*individualLength;
     _deviceGeneticsAlloc = (_deviceGeneticsAlloc/individualLength)*individualLength;
+    std::cerr<<"about to allocate: "<<_hostGeneticsAlloc<<" for the host"<<std::endl;
+    std::cerr<<"about to allocate: "<<_deviceGeneticsAlloc<<" for the device"<<std::endl;
     //initialize all large vectors (everything not from an xml file)
     try{
         this->_HGenetics.setMax(_hostGeneticsAlloc);

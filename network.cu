@@ -2,6 +2,7 @@
 #include <fstream>
 #include <thrust/device_vector.h>
 #include <thrust/random.h>
+#include <thrust/system_error.h>
 #include <utility>
 #include <ctime>
 #include <thrust/host_vector.h>
@@ -354,37 +355,43 @@ void NetworkGenetic::storeWeights(std::string filepath){
 
 void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, double &Kp, std::vector<double> *globalQuakes)
 {
-    //normalize inputs using v` = (v-mean)/stdev
+    //were going to normalize the inputs using v` = v-mean/stdev, so we need mean and stdev for each channel.
     double meanCh1=0, meanCh2=0, meanCh3=0, stdCh1=0, stdCh2=0, stdCh3=0;
     int num=0;
-    for(int i=0; i<3600*_sampleRate; i++){
-        meanCh1 +=data->at(3600*_sampleRate*0*3 + 0*(3600*_sampleRate)+i);
-        meanCh1 += data->at(3600*_sampleRate*1*3 + 0*(3600*_sampleRate)+i);
-        meanCh1 += data->at(3600*_sampleRate*2*3 + 0*(3600*_sampleRate)+i);
-        meanCh2 += data->at(3600*_sampleRate*0*3 + 1*(3600*_sampleRate)+i);
-        meanCh2 += data->at(3600*_sampleRate*1*3 + 1*(3600*_sampleRate)+i);
-        meanCh2 += data->at(3600*_sampleRate*2*3 + 1*(3600*_sampleRate)+i);
-        meanCh3 +=data->at(3600*_sampleRate*0*3 + 2*(3600*_sampleRate)+i);
-        meanCh3 += data->at(3600*_sampleRate*1*3 + 2*(3600*_sampleRate)+i);
-        meanCh3 += data->at(3600*_sampleRate*2*3 + 2*(3600*_sampleRate)+i);
-        num = num+3;
-    }
-    meanCh1 = meanCh1/num;
-    meanCh2 = meanCh2/num;
-    meanCh3 = meanCh3/num;
-    stdCh1 = sqrt(meanCh1);
-    stdCh2 = sqrt(meanCh2);
-    stdCh3 = sqrt(meanCh3);
-    std::cerr<<"channels std and mean calculated"<<std::endl;
+//    std::cerr<<"right before mean & std calc"<<std::endl;
+//    for(int i=0; i<3600*_sampleRate; i++){
+//        for(int j=0; j < _numofSites; j++){
+//            meanCh1 += data->at(3600*_sampleRate*j*3 + 0*3600*_sampleRate+i);
+//            meanCh2 += data->at(3600*_sampleRate*j*3 + 1*3600*_sampleRate+i);
+//            meanCh3 += data->at(3600*_sampleRate*j*3 + 2*3600*_sampleRate+i);
+//            num++;
+//        }
+//    }
+//    meanCh1 = meanCh1/num;
+//    meanCh2 = meanCh2/num;
+//    meanCh3 = meanCh3/num;
+//    stdCh1 = sqrt(meanCh1);
+//    stdCh2 = sqrt(meanCh2);
+//    stdCh3 = sqrt(meanCh3);
+//    std::cerr<<"means are: "<<meanCh1<<" "<<meanCh2<<" "<<meanCh3<<std::endl;
+//    std::cerr<<"stdevs are: "<<stdCh1<<" "<<stdCh2<<" "<<stdCh3<<std::endl;
+//    std::cerr<<"channels std and mean calculated"<<std::endl;
     //input data from all sites and all channels normalized
-    if(_istraining){
-        thrust::device_vector<double> retVec;
+    if(_istraining == true){
+        std::cerr<<"about to create device vectors"<<std::endl;
         thrust::device_vector<int> input;
+        thrust::device_vector<double>retVec;
         thrust::device_vector<double>gQuakeAvg;
         thrust::device_vector<thrust::pair<int, int> > dConnect;
+        std::cerr<<"before the try block"<<std::endl;
         try{retVec.resize(2160*_numofSites);}
         catch(std::bad_alloc &e){
             std::cerr<<"bad alloc error:  "<<e.what()<<std::endl;
+            exit(-1);
+        }
+        catch(thrust::system_error &e)
+        {
+            std::cerr << "Some other error happened during copying: " << e.what() << std::endl;
             exit(-1);
         }
         try{input.resize(data->size());}
@@ -393,10 +400,21 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
             std::cerr<<e.what()<<std::endl;
             exit(-1);
         }
+        catch(thrust::system_error &e)
+        {
+            std::cerr << "Some other error happened during copying: " << e.what() << std::endl;
+            exit(-1);
+        }
+
         try{gQuakeAvg.resize(globalQuakes->size());}
         catch(std::bad_alloc &e){
             std::cerr<<"bad alloc error:  "<<e.what()<<std::endl;
             std::cerr<<e.what()<<std::endl;
+            exit(-1);
+        }
+        catch(thrust::system_error &e)
+        {
+            std::cerr << "Some other error happened during copying: " << e.what() << std::endl;
             exit(-1);
         }
         try{dConnect.resize(_connect->size());}
@@ -405,41 +423,46 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
             std::cerr<<e.what()<<std::endl;
             exit(-1);
         }
+        catch(thrust::system_error &e)
+        {
+            std::cerr << "Some other error happened during copying: " << e.what() << std::endl;
+            exit(-1);
+        }
         try{thrust::copy(_connect->begin(), _connect->end(), dConnect.begin());}
         catch(std::bad_alloc &e)
         {
-          std::cerr << "Ran out of memory while copying _connect" << std::endl;
-          std::cerr<<e.what()<<std::endl;
-          exit(-1);
+            std::cerr << "Ran out of memory while copying _connect" << std::endl;
+            std::cerr<<e.what()<<std::endl;
+            exit(-1);
         }
         catch(thrust::system_error &e)
         {
-          std::cerr << "Some other error happened during copying: " << e.what() << std::endl;
-          exit(-1);
+            std::cerr << "Some other error happened during copying: " << e.what() << std::endl;
+            exit(-1);
         }
         try{thrust::copy(data->begin(), data->end(), input.begin());}
         catch(std::bad_alloc &e)
         {
-          std::cerr << "Ran out of memory while copying input" << std::endl;
-          std::cerr<<e.what()<<std::endl;
-          exit(-1);
+            std::cerr << "Ran out of memory while copying input" << std::endl;
+            std::cerr<<e.what()<<std::endl;
+            exit(-1);
         }
         catch(thrust::system_error &e)
         {
-          std::cerr << "Some other error happened during copying: " << e.what() << std::endl;
-          exit(-1);
+            std::cerr << "Some other error happened during copying: " << e.what() << std::endl;
+            exit(-1);
         }
         try{thrust::copy(globalQuakes->begin(), globalQuakes->end(), gQuakeAvg.begin());}
         catch(std::bad_alloc &e)
         {
-          std::cerr << "Ran out of memory while copying globalQuakes" << std::endl;
-          std::cerr<<e.what()<<std::endl;
-          exit(-1);
+            std::cerr << "Ran out of memory while copying globalQuakes" << std::endl;
+            std::cerr<<e.what()<<std::endl;
+            exit(-1);
         }
         catch(thrust::system_error &e)
         {
-          std::cerr << "Some other error happened during copying: " << e.what() << std::endl;
-          exit(-1);
+            std::cerr << "Some other error happened during copying: " << e.what() << std::endl;
+            exit(-1);
         }
         int blocksPerGrid; //the blocksize defined by the configurator
         int threadsblock = 512; // the actual grid size needed
@@ -471,7 +494,7 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
         std::cerr<<"example best vector has been set."<<std::endl;
         double CommunityLat = 0;
         double CommunityLon = 0;
-        std::vector<double> When(_numofSites);
+        std::vector<double> When(_numofSites, 0);
         std::vector<double> HowCertain(_numofSites,0);
         std::vector<double> CommunityMag(_numofSites, 1); //give all sites equal mag to start, this value is [0,1]
         std::cerr<<"all output vectors created and initialized."<<std::endl;

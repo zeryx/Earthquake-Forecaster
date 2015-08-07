@@ -96,9 +96,9 @@ int main(int argc, char** arg){
         int gtf_site, gtf_hour;
         double gtf_lat, gtf_long, gtf_mag, gtf_dist;
         std::cin>>gtf_site>>gtf_hour>>gtf_lat>>gtf_long>>gtf_mag>>gtf_dist;
+        ConstructedNetwork.allocateHostAndGPUObjects(0.65, 0.85);
         ConstructedNetwork.doingTraining(gtf_site, gtf_hour, gtf_lat, gtf_long, gtf_mag, gtf_dist);
         std::cerr<<"lets allocate GPU and host objects"<<std::endl;
-        ConstructedNetwork.allocateHostAndGPUObjects(0.5, 0.85);
         std::cerr<<"weights initialized, setting training"<<std::endl;
         std::cerr<<"checking for weightfile"<<std::endl;
         if(!ConstructedNetwork.checkForWeights("/weights.bin"))
