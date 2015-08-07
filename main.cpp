@@ -1,6 +1,7 @@
 #include "network.h"
 #include <iostream>
 #include <utility>
+#include <vector>
 #include <thrust/pair.h>
 
 using std::make_pair;

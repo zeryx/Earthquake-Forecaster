@@ -23,24 +23,28 @@
 //neural functions
 __host__ __device__ inline double sind(double x)
 {
-    return sin(x * M_PI / 180);
+    double ret= sin(x * M_PI / 180);;
+    return ret;
 }
 
 __host__ __device__ inline double cosd(double x)
 {
     return cos(x * M_PI / 180);
 }
-__host__ __device__ inline double distCalc(double lat1, double lon1, double lat2, double lon2){
+__host__ __device__ inline double distCalc(double lat1, double lon1, double lat2, double lon2)
+{
     double earthRad = 6371.01;
     double deltalon = abs(lon1 - lon2);
     if(deltalon > 180)
         deltalon = 360 - deltalon;
-    return earthRad * atan2( sqrt( pow( cosd(lat1) * sind(deltalon), 2) +
-                                   pow( cosd(lat2) * sind(lat1) - sind(lat2) * cosd(lat1) * cosd(deltalon), 2) ),
-                             sind(lat2) * sind(lat1) + cosd(lat2) * cosd(lat1) * cosd(deltalon));
+    double ret = earthRad * atan2( sqrt( pow( cosd(lat1) * sind(deltalon), 2) +
+                                         pow( cosd(lat2) * sind(lat1) - sind(lat2) * cosd(lat1) * cosd(deltalon), 2) ),
+                                   sind(lat2) * sind(lat1) + cosd(lat2) * cosd(lat1) * cosd(deltalon));
+    return ret;
 }
 
-__host__ __device__ inline double bearingCalc(double lat1, double lon1, double lat2, double lon2){
+__host__ __device__ inline double bearingCalc(double lat1, double lon1, double lat2, double lon2)
+{
     double dLon = (lon2 - lon1);
 
     double y = sin(dLon) * cos(lat2);
@@ -57,19 +61,26 @@ __host__ __device__ inline double bearingCalc(double lat1, double lon1, double l
     return brng;
 }
 
-__host__ __device__ inline double ActFunc(double x){
-    return 1+1/exp(-x);
+__host__ __device__ inline double ActFunc(double x)
+{
+    double ret = 1+1/exp(-x);
+    return ret;
 }
-__host__ __device__ inline double normalizeChannels(double x, double mean, double stdev){
-    return (abs(x-mean))/stdev*2;
+__host__ __device__ inline double normalize(double x, double mean, double stdev)
+{
+    double ret = (abs(x-mean))/stdev*2;
+    return ret;
 }
 
-__host__ __device__ inline double normalizeInputs(double x, double max, double min){
-    return (x-min)/(max-min);
+__host__ __device__ inline double shift(double x, double max, double min)
+{
+    double ret = (x-min)/(max-min);
+    return ret;
 }
 
 template <typename T>
-__global__ void genWeights( dataArray<T> ref, long in, int nRegWeights, int indLength){
+__global__ void genWeights( dataArray<T> ref, long in, int nRegWeights, int indLength)
+{
     long idx = blockIdx.x * blockDim.x + threadIdx.x;
     thrust::minstd_rand0 randEng;
     randEng.seed(idx);
@@ -83,10 +94,10 @@ __global__ void genWeights( dataArray<T> ref, long in, int nRegWeights, int indL
 
 __global__ void Net(dataArray<double> weights, dataArray<int> params, dataArray<double> globalQuakes,
                     dataArray<int> inputVal, dataArray<double> siteData,
-                    dataArray<double> answers, dataArray<double> returnVal,
-                    dataArray<thrust::pair<int, int> > connections,
+                    dataArray<double> answers, dataArray<thrust::pair<int, int> > connections,
                     double Kp, int sampleRate,int numOfSites, int hour,
-                    double meanCh1, double meanCh2, double meanCh3, double stdCh1, double stdCh2, double stdCh3){
+                    double meanCh1, double meanCh2, double meanCh3, double stdCh1, double stdCh2, double stdCh3)
+{
 
 
 
@@ -136,15 +147,15 @@ __global__ void Net(dataArray<double> weights, dataArray<int> params, dataArray<
             int startOfMemGateOut = startOfMemGateIn + params.array[5];
             int startOfMemGateForget = startOfMemGateOut + params.array[5];
             int startOfOutput = startOfMemGateForget + params.array[5];
-            input[0] = normalizeChannels(inputVal.array[(3600*sampleRate*j*3 + 1*(3600*sampleRate)+step)], meanCh1, stdCh1);//channel 1
-            input[1] = normalizeInputs(inputVal.array[(3600*sampleRate*j*3 + 2*(3600*sampleRate)+step)], meanCh2, stdCh2);//channel 2
-            input[2] = normalizeInputs(inputVal.array[(3600*sampleRate*j*3 + 3*(3600*sampleRate)+step)], meanCh3, stdCh3);//channel 3
-            input[3] = normalizeInputs(GQuakeAvgdist, 40075.1, 0);
-            input[4] = normalizeInputs(GQuakeAvgBearing, 360, 0);
-            input[5] = normalizeInputs(GQuakeAvgMag, 9.5, 0);
-            input[6] = normalizeInputs(Kp, 10, 0);
-            input[7] = normalizeInputs(CommunityDist,40075.1/2, 0);
-            input[8] = normalizeInputs(CommunityBearing, 360, 0);
+            input[0] = normalize(inputVal.array[(3600*sampleRate*j*3 + 1*(3600*sampleRate)+step)], meanCh1, stdCh1);//channel 1
+            input[1] = normalize(inputVal.array[(3600*sampleRate*j*3 + 2*(3600*sampleRate)+step)], meanCh2, stdCh2);//channel 2
+            input[2] = normalize(inputVal.array[(3600*sampleRate*j*3 + 3*(3600*sampleRate)+step)], meanCh3, stdCh3);//channel 3
+            input[3] = shift(GQuakeAvgdist, 40075.1, 0);
+            input[4] = shift(GQuakeAvgBearing, 360, 0);
+            input[5] = shift(GQuakeAvgMag, 9.5, 0);
+            input[6] = shift(Kp, 10, 0);
+            input[7] = shift(CommunityDist,40075.1/2, 0);
+            input[8] = shift(CommunityBearing, 360, 0);
             //lets reset all neuron values for this new timestep (except memory neurons)
             for(int gate=0; gate<params.array[5]; gate++){
                 memGateIn[gate] = 0;
@@ -247,26 +258,73 @@ __global__ void Net(dataArray<double> weights, dataArray<int> params, dataArray<
             }
 
 
-            When[j] += 1/outputs[0]; //return when back to an integer value (adjust to fit within boundaries)
+            When[j] += outputs[0]*((2160-hour)-hour)+2160-hour; // nv = ((ov - omin)*(nmax-nmin) / (omax - omin))+nmin
             HowCertain[j] += outputs[1];
             CommunityMag[j] =  outputs[2]; // set the next sets communityMag = output #3.
         }
     }
-    for(int j=0; j<numOfSites; j++){ // each site has its own when and howcertain vector
+    for(int j=0; j<numOfSites; j++){ // now lets get the average when and howcertain values.
         When[j] = When[j]/3600*sampleRate;
         HowCertain[j] = HowCertain[j]/3600*sampleRate;
     }
-    //all done, lets output the return matrix.
-    //since right now were using a point value for when & how certain (only one output per site),
-    //we're going to approximate using a normal distribution around when with a sigma of howCertain, over the whole array from T=currentHour [T, 2160]
-    for(int h=hour; h<2160; h++){
-        for(int j=0; j<numOfSites; j++){
-            returnVal.array[h*numOfSites+j] = 1/(1/HowCertain[j]*sqrt(2*M_PI))*exp(-pow(h-When[j], 2)/(2*pow(1/HowCertain[j], 2))); // normal distribution with a mu of When and a sigma of 1/HowCertain
+    // calculate performance for this individual - score = 1/(abs(whenGuess-whenReal)*distToQuake), for whenGuess = when[j] where HowCertain is max for set.
+    //distToQuake is from the current sites parameters, it emphasizes higher scores for the closest site, a smaller distance is a higher score.
+    int maxCertainty=0;
+    double whenGuess=0;
+    double latSite;
+    double lonSite;
+    for(int j=0; j<numOfSites; j++){
+        if(HowCertain[j] > maxCertainty){
+            whenGuess = When[j];
+            latSite = siteData.array[j*2];
+            lonSite = siteData.array[j*2+1];
         }
     }
+    double SiteToQuakeDist = distCalc(latSite, lonSite, answers.array[2], answers.array[3]); // [2] is latitude, [3] is longitude.
+    double fitness = 1/(abs(whenGuess - answers.array[1]-hour)*SiteToQuakeDist);//larger is better, negative numbers are impossible.
+    weights.array[ind + params.array[2]+2] = fitness; // set the fitness number for the individual.
 }
 
+__global__ void reduce_by_block(dataArray<double> weights,
+                          dataArray<double> per_block_results,
+                          dataArray<int> params)
+{
+  extern __shared__ float sdata[];
 
+  unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
+  int fit = idx*params.array[7]+params.array[2]+2;
+
+  // load input into __shared__ memory
+  float x = 0;
+  if(idx < params.array[8])
+  {
+    x = weights.array[fit];
+  }
+  sdata[threadIdx.x] = x;
+  __syncthreads();
+
+  // contiguous range pattern
+  for(int offset = blockDim.x / 2;
+      offset > 0;
+      offset >>= 1)
+  {
+    if(threadIdx.x < offset)
+    {
+      // add a partial sum upstream to our own
+      sdata[threadIdx.x] += sdata[threadIdx.x + offset];
+    }
+
+    // wait until all threads in the block have
+    // updated their partial sums
+    __syncthreads();
+  }
+
+  // thread 0 writes the final result
+  if(threadIdx.x == 0)
+  {
+    per_block_results.array[blockIdx.x] = sdata[0];
+  }
+}
 
 NetworkGenetic::NetworkGenetic(const int &numInputNodes, const int &numHiddenNeurons, const int &numMemoryNeurons,
                                const int &numOutNeurons, const int &numWeights, std::vector< thrust::pair<int, int> >&connections){
@@ -359,24 +417,24 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
     //were going to normalize the inputs using v` = v-mean/stdev, so we need mean and stdev for each channel.
     double meanCh1=0, meanCh2=0, meanCh3=0, stdCh1=0, stdCh2=0, stdCh3=0;
     int num=0;
-//    std::cerr<<"right before mean & std calc"<<std::endl;
-//    for(int i=0; i<3600*_sampleRate; i++){
-//        for(int j=0; j < _numofSites; j++){
-//            meanCh1 += data->at(3600*_sampleRate*j*3 + 0*3600*_sampleRate+i);
-//            meanCh2 += data->at(3600*_sampleRate*j*3 + 1*3600*_sampleRate+i);
-//            meanCh3 += data->at(3600*_sampleRate*j*3 + 2*3600*_sampleRate+i);
-//            num++;
-//        }
-//    }
-//    meanCh1 = meanCh1/num;
-//    meanCh2 = meanCh2/num;
-//    meanCh3 = meanCh3/num;
-//    stdCh1 = sqrt(meanCh1);
-//    stdCh2 = sqrt(meanCh2);
-//    stdCh3 = sqrt(meanCh3);
-//    std::cerr<<"means are: "<<meanCh1<<" "<<meanCh2<<" "<<meanCh3<<std::endl;
-//    std::cerr<<"stdevs are: "<<stdCh1<<" "<<stdCh2<<" "<<stdCh3<<std::endl;
-//    std::cerr<<"channels std and mean calculated"<<std::endl;
+    std::cerr<<"right before mean & std calc"<<std::endl;
+    for(int i=0; i<3600*_sampleRate; i++){
+        for(int j=0; j < _numofSites; j++){
+            meanCh1 += data->at(3600*_sampleRate*j*3 + 0*3600*_sampleRate+i);
+            meanCh2 += data->at(3600*_sampleRate*j*3 + 1*3600*_sampleRate+i);
+            meanCh3 += data->at(3600*_sampleRate*j*3 + 2*3600*_sampleRate+i);
+            num++;
+        }
+    }
+    meanCh1 = meanCh1/num;
+    meanCh2 = meanCh2/num;
+    meanCh3 = meanCh3/num;
+    stdCh1 = sqrt(meanCh1);
+    stdCh2 = sqrt(meanCh2);
+    stdCh3 = sqrt(meanCh3);
+    std::cerr<<"means are: "<<meanCh1<<" "<<meanCh2<<" "<<meanCh3<<std::endl;
+    std::cerr<<"stdevs are: "<<stdCh1<<" "<<stdCh2<<" "<<stdCh3<<std::endl;
+    std::cerr<<"channels std and mean calculated"<<std::endl;
     //input data from all sites and all channels normalized
     if(_istraining == true){
         std::cerr<<"about to create device vectors"<<std::endl;
@@ -385,104 +443,35 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
         thrust::device_vector<double>gQuakeAvg;
         thrust::device_vector<thrust::pair<int, int> > dConnect;
         std::cerr<<"before the try block"<<std::endl;
-        try{retVec.resize(2160*_numofSites);}
-        catch(std::bad_alloc &e){
-            std::cerr<<"bad alloc error:  "<<e.what()<<std::endl;
-            exit(-1);
-        }
-        catch(thrust::system_error &e)
-        {
-            std::cerr << "Some other error happened during copying: " << e.what() << std::endl;
-            exit(-1);
-        }
-        try{input.resize(data->size());}
-        catch(std::bad_alloc &e){
-            std::cerr<<"bad alloc error:  "<<e.what()<<std::endl;
-            std::cerr<<e.what()<<std::endl;
-            exit(-1);
-        }
-        catch(thrust::system_error &e)
-        {
-            std::cerr << "Some other error happened during copying: " << e.what() << std::endl;
-            exit(-1);
-        }
-
-        try{gQuakeAvg.resize(globalQuakes->size());}
-        catch(std::bad_alloc &e){
-            std::cerr<<"bad alloc error:  "<<e.what()<<std::endl;
-            std::cerr<<e.what()<<std::endl;
-            exit(-1);
-        }
-        catch(thrust::system_error &e)
-        {
-            std::cerr << "Some other error happened during copying: " << e.what() << std::endl;
-            exit(-1);
-        }
-        try{dConnect.resize(_connect->size());}
-        catch(std::bad_alloc &e){
-            std::cerr<<"bad alloc error:  "<<e.what()<<std::endl;
-            std::cerr<<e.what()<<std::endl;
-            exit(-1);
-        }
-        catch(thrust::system_error &e)
-        {
-            std::cerr << "Some other error happened during copying: " << e.what() << std::endl;
-            exit(-1);
-        }
-        try{thrust::copy(_connect->begin(), _connect->end(), dConnect.begin());}
-        catch(std::bad_alloc &e)
-        {
-            std::cerr << "Ran out of memory while copying _connect" << std::endl;
-            std::cerr<<e.what()<<std::endl;
-            exit(-1);
-        }
-        catch(thrust::system_error &e)
-        {
-            std::cerr << "Some other error happened during copying: " << e.what() << std::endl;
-            exit(-1);
-        }
-        try{thrust::copy(data->begin(), data->end(), input.begin());}
-        catch(std::bad_alloc &e)
-        {
-            std::cerr << "Ran out of memory while copying input" << std::endl;
-            std::cerr<<e.what()<<std::endl;
-            exit(-1);
-        }
-        catch(thrust::system_error &e)
-        {
-            std::cerr << "Some other error happened during copying: " << e.what() << std::endl;
-            exit(-1);
-        }
-        try{thrust::copy(globalQuakes->begin(), globalQuakes->end(), gQuakeAvg.begin());}
-        catch(std::bad_alloc &e)
-        {
-            std::cerr << "Ran out of memory while copying globalQuakes" << std::endl;
-            std::cerr<<e.what()<<std::endl;
-            exit(-1);
-        }
-        catch(thrust::system_error &e)
-        {
-            std::cerr << "Some other error happened during copying: " << e.what() << std::endl;
-            exit(-1);
-        }
+        retVec.resize(2160*_numofSites);
+        input.resize(data->size());
+        gQuakeAvg.resize(globalQuakes->size());
+        dConnect.resize(_connect->size());
+        thrust::copy(_connect->begin(), _connect->end(), dConnect.begin());
+        thrust::copy(data->begin(), data->end(), input.begin());
+        thrust::copy(globalQuakes->begin(), globalQuakes->end(), gQuakeAvg.begin());
         int blocksPerGrid; //the blocksize defined by the configurator
-        int threadsblock = 512; // the actual grid size needed
+        int blockSize = 512; // the actual grid size needed
         std::cerr<<"about to run cuda kernel.."<<std::endl;
         _NNParams[8] = _memVirtualizer._DGenetics.size()/(_NNParams[7]);
         std::cerr<<"number of threads is :"<<_NNParams[8]<<std::endl;
-        blocksPerGrid=(_NNParams[8]+threadsblock-1)/threadsblock;
-        Net<<<blocksPerGrid, threadsblock>>>(_memVirtualizer.genetics(),
-                                             convertToKernel(_NNParams),
-                                             convertToKernel(gQuakeAvg),
-                                             convertToKernel(input),
-                                             convertToKernel(_siteData),
-                                             convertToKernel(_answers),
-                                             convertToKernel(retVec),
-                                             convertToKernel(dConnect),
-                                             Kp,_sampleRate,_numofSites,hour,
-                                             meanCh1, meanCh2, meanCh3, stdCh1, stdCh2, stdCh3);
+        blocksPerGrid=(_NNParams[8]+blockSize-1)/blockSize;
+        Net<<<blockSize, blocksPerGrid>>>(_memVirtualizer.genetics(), convertToKernel(_NNParams),convertToKernel(gQuakeAvg),
+                                          convertToKernel(input),convertToKernel(_siteData),convertToKernel(_answers),
+                                          convertToKernel(dConnect),Kp,_sampleRate,_numofSites,hour,
+                                          meanCh1, meanCh2, meanCh3, stdCh1, stdCh2, stdCh3);
         cudaDeviceSynchronize();
-        thrust::copy(retVec.begin(), retVec.end(), ret);
+        int num_blocks = (_NNParams[8]/blockSize)+((_NNParams[8]%blockSize) ? 1 : 0);
+        thrust::device_vector<double> partial_reduce_sums(num_blocks+1);
+        reduce_by_block<<<num_blocks, blockSize, blockSize*sizeof(double)>>>(_memVirtualizer.genetics(), // calculate the partial sums on the GPU.
+                                                                             convertToKernel(partial_reduce_sums),convertToKernel(_NNParams));
+        double fitnessAvg=0;
+        for(thrust::device_vector<double>::iterator it = partial_reduce_sums.begin(); // then since there shouldn't be THAT many blocks (~23437) lets calculate it on the CPU.
+            it != partial_reduce_sums.end(); ++it){
+            fitnessAvg += *it;
+        }
+        fitnessAvg = fitnessAvg /(num_blocks+1);
+        std::cerr<<"the average fitness for this round is: "<<fitnessAvg<<std::endl;
     }
     else{
         std::cerr<<"entered not training version.."<<std::endl;
@@ -540,20 +529,20 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
                 int startOfMemGateOut = startOfMemGateIn + _NNParams[5];
                 int startOfMemGateForget = startOfMemGateOut + _NNParams[5];
                 int startOfOutput = startOfMemGateForget + _NNParams[5];
-                input[0] = normalizeInputs((double)(data->at(3600*_sampleRate*j*3 + 0*(3600*_sampleRate)+step)), meanCh1, stdCh1);
-                input[1] = normalizeChannels((double)(data->at(3600*_sampleRate*j*3 + 1*(3600*_sampleRate)+step)), meanCh2, stdCh2);
-                input[2] = normalizeChannels((double)(data->at(3600*_sampleRate*j*3 + 2*(3600*_sampleRate)+step)), meanCh3, stdCh3);
-                input[3] = normalizeInputs(GQuakeAvgdist, 40075.1, 0);
-                input[4] = normalizeInputs(GQuakeAvgBearing, 360, 0);
-                input[5] = normalizeInputs(GQuakeAvgMag, 9.5, 0);
-                input[6] = normalizeInputs(Kp, 10, 0);
-                input[7] = normalizeInputs(CommunityDist,40075.1/2, 0);
-                input[8] = normalizeInputs(CommunityBearing, 360, 0);
+                input[0] = shift((double)(data->at(3600*_sampleRate*j*3 + 0*(3600*_sampleRate)+step)), meanCh1, stdCh1);
+                input[1] = normalize((double)(data->at(3600*_sampleRate*j*3 + 1*(3600*_sampleRate)+step)), meanCh2, stdCh2);
+                input[2] = normalize((double)(data->at(3600*_sampleRate*j*3 + 2*(3600*_sampleRate)+step)), meanCh3, stdCh3);
+                input[3] = shift(GQuakeAvgdist, 40075.1, 0);
+                input[4] = shift(GQuakeAvgBearing, 360, 0);
+                input[5] = shift(GQuakeAvgMag, 9.5, 0);
+                input[6] = shift(Kp, 10, 0);
+                input[7] = shift(CommunityDist,40075.1/2, 0);
+                input[8] = shift(CommunityBearing, 360, 0);
                 //lets reset all neuron values for this new timestep (except memory neurons)
                 for(int gate=0; gate<_NNParams[5]; gate++){
-                    memGateIn[gate] = 0;
-                    memGateOut[gate] = 0;
-                    memGateForget[gate] = 0;
+                    memGateIn.at(gate) = 0;
+                    memGateOut.at(gate) = 0;
+                    memGateForget.at(gate) = 0;
                 }
                 for(int hid=0; hid<_NNParams[4]; hid++){
                     hidden[hid] = 0;
@@ -569,58 +558,58 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
                     for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){//for memGateIn
                         if(it->second == gate+startOfMemGateIn && it->first < startOfHidden){ //for inputs
                             std::cerr<<"weights for memGateIn #"<<gate<<" is: "<<_best[n];
-                            memGateIn[gate] += input[it->first-startOfInput]*_best[n++]; // memGateIn vect starts at 0
+                            memGateIn.at(gate) += input[it->first-startOfInput]*_best[n++]; // memGateIn vect starts at 0
                         }
                         else if(it->second == gate+startOfMemGateIn && it->first >startOfHidden && it->first < startOfMem){//for hidden neurons
-                            memGateIn[gate] += hidden[it->first-startOfHidden]*_best[n++];
+                            memGateIn.at(gate) += hidden[it->first-startOfHidden]*_best[n++];
                         }
                     }
                     for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){//for memGateOut
                         if(it->second == gate+startOfMemGateOut && it->first < startOfHidden){//for inputs
                             std::cerr<<"weights for memGateOut #"<<gate<<" is: "<<_best[n];
-                            memGateOut[gate] += input[it->first-startOfInput]*_best[n++];
+                            memGateOut.at(gate) += input[it->first-startOfInput]*_best[n++];
                         }
                         else if(it->second == gate+startOfMemGateOut && it->first >startOfHidden && it->first <startOfMem){//for hidden neurons
-                            memGateOut[gate] += hidden[it->first-startOfHidden]*_best[n++];
+                            memGateOut.at(gate) += hidden[it->first-startOfHidden]*_best[n++];
                         }
                     }
                     for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){//for  memGateForget
                         if(it->second == gate+startOfMemGateForget && it->first < startOfHidden){//for inputs
                             std::cerr<<"weights for memGateForget #"<<gate<<" is: "<<_best[n];
-                            memGateForget[gate] += input[it->first - startOfInput]*_best[n++];
+                            memGateForget.at(gate) += input[it->first - startOfInput]*_best[n++];
                         }
                         else if(it->second == gate+startOfMemGateForget && it->first >startOfHidden && it->first <startOfMem){//for hidden neurons
-                            memGateForget[gate] += hidden[it->first-startOfHidden]*_best[n++];
+                            memGateForget.at(gate) += hidden[it->first-startOfHidden]*_best[n++];
                         }
                     }
-                    memGateIn[gate] = ActFunc(memGateIn[gate]);
-                    memGateOut[gate] = ActFunc(memGateOut[gate]);
-                    memGateForget[gate] = ActFunc(memGateForget[gate]);
-                    std::cerr<<"memGateIn val: "<<memGateIn[gate]<<std::endl;
-                    std::cerr<<"memGateOut val: "<<memGateOut[gate]<<std::endl;
-                    std::cerr<<"memGateForget val: "<<memGateForget[gate]<<std::endl;
+                    memGateIn.at(gate) = ActFunc(memGateIn.at(gate));
+                    memGateOut.at(gate) = ActFunc(memGateOut.at(gate));
+                    memGateForget.at(gate) = ActFunc(memGateForget.at(gate));
+                    std::cerr<<"memGateIn val: "<<memGateIn.at(gate)<<std::endl;
+                    std::cerr<<"memGateOut val: "<<memGateOut.at(gate)<<std::endl;
+                    std::cerr<<"memGateForget val: "<<memGateForget.at(gate)<<std::endl;
                 }
                 //since we calculated the values for memGateIn and memGateOut, and MemGateForget..
                 for (int gate = 0; gate<_NNParams[5]; gate++){ // if memGateIn is greater than 0.3, then let mem = the sum inputs attached to memGateIn
-                    if(memGateIn[gate] > 0.5){ //gate -startOfMemGateIn = [0, num of mem neurons]
+                    if(memGateIn.at(gate) > 0.5){ //gate -startOfMemGateIn = [0, num of mem neurons]
                         for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){
                             if(it->second == gate+startOfMemGateIn && it->first < gate+startOfHidden){//only pass inputs
-                                mem[gate] += input[it->first-startOfInput]; // no weights attached, but the old value stored here is not removed.
+                                mem.at(gate) += input[it->first-startOfInput]; // no weights attached, but the old value stored here is not removed.
                             }
                         }
                     }
-                    if(memGateForget[gate] > 0.5){// if memGateForget is greater than 0.5, then tell mem to forget
-                        mem[gate] = 0;
+                    if(memGateForget.at(gate) > 0.5){// if memGateForget is greater than 0.5, then tell mem to forget
+                        mem.at(gate) = 0;
                     }
                     //if memGateForget fires, then memGateOut will output nothing.
-                    if(memGateOut[gate] > 0.5){//if memGateOut is greater than 0.3, let the nodes mem is connected to recieve mem
+                    if(memGateOut.at(gate) > 0.5){//if memGateOut is greater than 0.3, let the nodes mem is connected to recieve mem
                         for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){
                             if(it->first == gate+startOfMem){// since mem node: memIn node : memOut node = 1:1:1, we can do this.
-                                hidden[it->second-startOfHidden] += mem[gate];
+                                hidden[it->second-startOfHidden] += mem.at(gate);
                             }
                         }
                     }
-                    std::cerr<<"mem val stored is: "<<mem[gate]<<std::endl;
+                    std::cerr<<"mem val stored is: "<<mem.at(gate)<<std::endl;
                 }
 
                 // hidden neuron nodes --
@@ -652,7 +641,7 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
                 }
 
 
-                When[j] += outputs[0]*(2160-hour)+hour; //return when back to an integer value (adjust to fit within boundaries)
+                When[j] += outputs[0]*((2160-hour)-hour)+2160-hour;; //return when back to an integer value (adjust to fit within boundaries)
                 std::cerr<<"When for site: "<<j<<" and for step: "<<step<< " is: "<<When[j]<<std::endl;
                 HowCertain[j] += outputs[1];
                 std::cerr<<"howCertain for site: "<<j<<" and for step: "<<step<< " is: "<<HowCertain[j]<<std::endl;
