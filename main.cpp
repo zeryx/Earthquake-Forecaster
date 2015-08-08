@@ -79,35 +79,29 @@ int main(int argc, char** arg){
     NetworkGenetic ConstructedNetwork(inputs, hidden, memory, outputs,numWeights, connections);
     std::cout<<"about to start"<<std::endl;
     int sampleRate, numberOfSites, SLEN;
-//    std::cin>>sampleRate>>numberOfSites>>SLEN;
-    sampleRate =  50;
-    numberOfSites =  9;
-    SLEN =  40;
-
+    std::cin>>sampleRate>>numberOfSites>>SLEN;
     std::vector<double> sitesData;
 
     for (int i=0; i < SLEN; i++){
         sitesData.push_back(0);
-//        std::cin>>sitesData.at(i);
+        std::cin>>sitesData.at(i);
     }
     int initRet= ConstructedNetwork.init(sampleRate, numberOfSites, sitesData);
     std::cout<<initRet<<std::endl;
     int doTraining;
-//    std::cin>>doTraining;
-    doTraining =1;
+    std::cin>>doTraining;
     if (doTraining == 1)
     {
         std::cerr<<"looks like were doing training"<<std::endl;
         int gtf_site, gtf_hour;
         double gtf_lat, gtf_long, gtf_mag, gtf_dist;
-//        std::cin>>gtf_site>>gtf_hour>>gtf_lat>>gtf_long>>gtf_mag>>gtf_dist;
-        gtf_site =0; gtf_hour=0; gtf_lat=0; gtf_long=0; gtf_mag=0; gtf_dist=0;
+        std::cin>>gtf_site>>gtf_hour>>gtf_lat>>gtf_long>>gtf_mag>>gtf_dist;
         std::cerr<<"lets allocate GPU and host objects"<<std::endl;
-//        ConstructedNetwork.allocateHostAndGPUObjects(0.50, 0.85);
-//        std::cerr<<"checking for weightfile"<<std::endl;
+        ConstructedNetwork.allocateHostAndGPUObjects(0.50, 0.85);
+        std::cerr<<"checking for weightfile"<<std::endl;
 
-//        if(!ConstructedNetwork.checkForWeights("/weights.bin"))
-//            ConstructedNetwork.initializeWeights();
+        if(!ConstructedNetwork.checkForWeights("/weights.bin"))
+            ConstructedNetwork.initializeWeights();
         std::cerr<<"weights initialized, setting training"<<std::endl;
         ConstructedNetwork.doingTraining(gtf_site, gtf_hour, gtf_lat, gtf_long, gtf_mag, gtf_dist);
     }
@@ -118,28 +112,25 @@ int main(int argc, char** arg){
         double Kp;
         std::vector<int> *data = new std::vector<int>;
         std::vector<double> *globalQuakes = new std::vector<double>(5);
-//        std::cin>>hour;
-        hour = 0;
+        std::cin>>hour;
         if(hour== -1)
             break;
-//        std::cin>>DLEN;
-        DLEN = 3600*50*3*9;
+        std::cin>>DLEN;
         for(int i=0; i<DLEN; i++){
             data->push_back(0);
-//            std::cin>>data.at(i);
+            std::cin>>data->at(i);
             if(data->at(i) == -1){
                 data->at(i) = data->at(i-1);
             }
         }
-//        std::cerr<<"recieved all input data"<<std::endl;
-//        std::cin>>Kp;
-//        std::cin>>QLEN;
-        Kp = 0.4;
-        QLEN = 50;
+        std::cerr<<"recieved all input data"<<std::endl;
+        std::cin>>Kp;
+        std::cin>>QLEN;
+
         std::vector<double>* tmpQuakes = new std::vector<double>;
         for(int i=0; i<QLEN; i++){
             tmpQuakes->push_back(0.0);
-//            std::cin>>tmpQuakes.at(i);
+            std::cin>>tmpQuakes->at(i);
         }
         std::cerr<<"recieved all global quakes data"<<std::endl;
         int accVal=0;
@@ -159,11 +150,10 @@ int main(int argc, char** arg){
         std::cerr<<"about to call forecast.."<<std::endl;
         ConstructedNetwork.forecast(retM, hour, data, Kp, globalQuakes);
         std::cerr<<"forecast returned."<<std::endl;
-//        int retSize = numberOfSites;
-//        std::cout<<retSize<<std::endl;
-//        for(int i=0; i<2160*numberOfSites; i++){
-//            std::cout<<retM->at(i)<<std::endl;
-//        }
+        std::cout<<retM->size()<<std::endl;
+        for(unsigned int i=0; i<retM->size(); i++){
+            std::cout<<retM->at(i)<<std::endl;
+        }
         std::cerr<<"ret is returned to stream."<<std::endl;
         std::cout.flush();
         delete data;

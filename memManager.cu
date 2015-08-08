@@ -11,7 +11,9 @@
 #include <thrust/iterator/counting_iterator.h>
 
 
-MemManager::MemManager(){}
+MemManager::MemManager(){
+    this->_DGenetics = new thrust::device_vector<double>;
+}
 
 
 dataArray<double> MemManager::genetics(){
@@ -30,7 +32,7 @@ bool MemManager::memoryAlloc(int individualLength,float pMaxHost, float pMaxDevi
     _deviceGeneticsAlloc = deviceMem/8;
     _hostGeneticsAlloc = (_hostGeneticsAlloc/individualLength)*individualLength;
     _deviceGeneticsAlloc = (_deviceGeneticsAlloc/individualLength)*individualLength;
-    std::cerr<<"about to allocate: "<<_hostGeneticsAlloc*8<<" bytes for the host"<<std::endl;
+//    std::cerr<<"about to allocate: "<<_hostGeneticsAlloc*8<<" bytes for the host"<<std::endl;
     std::cerr<<"about to allocate: "<<_deviceGeneticsAlloc*8<<" byes for the device"<<std::endl;
     //initialize all large vectors (everything not from an xml file)
     try{

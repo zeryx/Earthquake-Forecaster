@@ -12,11 +12,14 @@ template <typename T>
 class hVector{
 public:
     void setMax(long long maxLen){
-        delete _hVect;
-        _hVect = new thrust::host_vector<double>(maxLen);
+        _hVect->resize(maxLen);
         _itr = 0;
         _maxLen = maxLen;
     }
+    hVector(){
+        _hVect = new thrust::host_vector<double>;
+    }
+
     ~hVector(){
         delete _hVect;
     }

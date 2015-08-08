@@ -412,24 +412,24 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
 {
     //were going to normalize the inputs using v` = v-mean/stdev, so we need mean and stdev for each channel.
     double meanCh1=0, meanCh2=0, meanCh3=0, stdCh1=0, stdCh2=0, stdCh3=0;
-//    int num=0;
-//    std::cerr<<"right before mean & std calc"<<std::endl;
-//    for(int i=0; i<3600*_sampleRate; i++){
-//        for(int j=0; j < _numofSites; j++){
-//            meanCh1 += data->at(3600*_sampleRate*j*3 + 0*3600*_sampleRate+i);
-//            meanCh2 += data->at(3600*_sampleRate*j*3 + 1*3600*_sampleRate+i);
-//            meanCh3 += data->at(3600*_sampleRate*j*3 + 2*3600*_sampleRate+i);
-//            num++;
-//        }
-//    }
-//    meanCh1 = meanCh1/num;
-//    meanCh2 = meanCh2/num;
-//    meanCh3 = meanCh3/num;
-//    stdCh1 = sqrt(meanCh1);
-//    stdCh2 = sqrt(meanCh2);
-//    stdCh3 = sqrt(meanCh3);
-//    std::cerr<<"means are: "<<meanCh1<<" "<<meanCh2<<" "<<meanCh3<<std::endl;
-//    std::cerr<<"stdevs are: "<<stdCh1<<" "<<stdCh2<<" "<<stdCh3<<std::endl;
+    int num=0;
+    std::cerr<<"right before mean & std calc"<<std::endl;
+    for(int i=0; i<3600*_sampleRate; i++){
+        for(int j=0; j < _numofSites; j++){
+            meanCh1 += data->at(3600*_sampleRate*j*3 + 0*3600*_sampleRate+i);
+            meanCh2 += data->at(3600*_sampleRate*j*3 + 1*3600*_sampleRate+i);
+            meanCh3 += data->at(3600*_sampleRate*j*3 + 2*3600*_sampleRate+i);
+            num++;
+        }
+    }
+    meanCh1 = meanCh1/num;
+    meanCh2 = meanCh2/num;
+    meanCh3 = meanCh3/num;
+    stdCh1 = sqrt(meanCh1);
+    stdCh2 = sqrt(meanCh2);
+    stdCh3 = sqrt(meanCh3);
+    std::cerr<<"means are: "<<meanCh1<<" "<<meanCh2<<" "<<meanCh3<<std::endl;
+    std::cerr<<"stdevs are: "<<stdCh1<<" "<<stdCh2<<" "<<stdCh3<<std::endl;
     std::cerr<<"channels std and mean calculated"<<std::endl;
     //input data from all sites and all channels normalized
     if(_istraining == true){
