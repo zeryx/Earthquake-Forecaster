@@ -10,20 +10,13 @@
 
 //macros
 //cuda error message handling
-#define CUDA_SAFE_CALL(call)                                          \
-    do {                                                                  \
-    cudaError_t err = call;                                           \
-    if (cudaSuccess != err) {                                         \
-    fprintf (stderr, "Cuda error in file '%s' in line %i : %s.\n",\
-    __FILE__, __LINE__, cudaGetErrorString(err) );                  \
-    exit(EXIT_FAILURE);                                             \
-    }                                                                 \
-    } while (0)
-
+#ifndef CUDA_SAFE_CALL
+#define CUDA_SAFE_CALL(call) do{cudaError_t err = call; if (cudaSuccess != err) {fprintf (stderr, "Cuda error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, cudaGetErrorString(err) ); exit(EXIT_FAILURE);}} while (0)
+#endif
 //neural functions
 __host__ __device__ inline double sind(double x)
 {
-    double ret= sin(x * M_PI / 180);;
+    double ret= sin(x * M_PI / 180);
     return ret;
 }
 
@@ -81,14 +74,17 @@ __host__ __device__ inline double shift(double x, double max, double min)
 __global__ void genWeights( dataArray<double> ref, long in, dataArray<int> params)
 {
     long idx = blockIdx.x * blockDim.x + threadIdx.x;
-    long ind = idx*params.array[7];
+//    long ind = idx*params.array[7];
+    if(idx != params.array[2]+1 && idx != params.array[2] +2 && idx%(params.array[2]+1) != 0 && idx%(params.array[2]+2) != 0)
+    {
     thrust::minstd_rand0 randEng;
     randEng.seed(idx);
+    thrust::uniform_real_distribution<double> uniDist(0,1);
     long seed = idx+ref.size*in;
-    for(int i=0; i<params.array[2]; i++){
-        thrust::uniform_real_distribution<double> uniDist(0,1);
+//    for(int i=0; i<params.array[2]; i++){
         randEng.discard(seed+1);
-        ref.array[ind + i] = uniDist(randEng);
+        ref.array[idx] = uniDist(randEng);
+//    }
     }
 }
 
@@ -345,13 +341,13 @@ void NetworkGenetic::initializeWeights(){
     int seedItr = 0;
 
     _NNParams[8] = _memVirtualizer._DGenetics.size()/(_NNParams[7]); // number of individuals on device.
-    std::cerr<<"num of individuals about to have weights genned is: "<<_NNParams[8]<<std::endl;
+    //we create a thread for every weight location, so we can do the math faster.
+    std::cerr<<"num of individuals about to have weights genned is: "<<_NNParams[7]<<std::endl;
     long seed = std::clock() + std::clock()*seedItr++;
-    blocksPerGrid=(_NNParams[8]+threadsblock-1)/threadsblock;
+    blocksPerGrid=(_NNParams[7]+threadsblock-1)/threadsblock;
     genWeights<<<blocksPerGrid, threadsblock>>>(_memVirtualizer.genetics(), seed, convertToKernel(_NNParams));
     CUDA_SAFE_CALL( cudaPeekAtLastError() );
     CUDA_SAFE_CALL( cudaDeviceSynchronize() );
-    CUDA_SAFE_CALL( cudaPeekAtLastError() );
     //        }while(_memVirtualizer.GeneticsPushToHost(&_genetics));
     //        _NNParams[9] = _genetics.size/(_NNParams[8]); // number of individuals on device.
     //        long seed = std::clock() + std::clock()*seedItr++;
@@ -445,21 +441,33 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
         thrust::device_vector<double> retVec;
         thrust::device_vector<double> gQuakeAvg;
         thrust::device_vector<thrust::pair<int, int> > dConnect;
+        std::cerr<<"about to resize vectors"<<std::endl;
         try{input.resize(data->size());}
-        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() );}
+        catch(std::bad_alloc &e){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, e.what() );exit(-1);}
+        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
+        catch(...){std::cerr<<"problem"<<std::endl;}
         try{retVec.resize(2160*_numofSites);}
-        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() );}
+        catch(std::bad_alloc &e){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, e.what() );exit(-1);}
+        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
+
         try{gQuakeAvg.resize(globalQuakes->size());}
-        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() );}
+        catch(std::bad_alloc &e){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, e.what() );exit(-1);}
+        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
+
         try{dConnect.resize(_connect->size());}
-        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() );}
+        catch(std::bad_alloc &e){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, e.what() );exit(-1);}
+        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
         std::cerr<<"all vectors resized"<<std::endl;
+
         try{thrust::copy(_connect->begin(), _connect->end(), dConnect.begin());}
-        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() );}
+        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
+
         try{thrust::copy(data->begin(), data->end(), input.begin());}
-        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() );}
+        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
+
         try{thrust::copy(globalQuakes->begin(), globalQuakes->end(), gQuakeAvg.begin());}
-        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() );}
+        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
+
         int blocksPerGrid; //the blocksize defined by the configurator
         int blockSize = 512; // the actual grid size needed
         std::cerr<<"about to run cuda kernel.."<<std::endl;
@@ -652,7 +660,7 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
                 }
 
 
-                When[j] += outputs[0]*((2160-hour)-hour)+2160-hour;; //return when back to an integer value (adjust to fit within boundaries)
+                When[j] += outputs[0]*((2160-hour)-hour)+2160-hour; //return when back to an integer value (adjust to fit within boundaries)
                 std::cerr<<"When for site: "<<j<<" and for step: "<<step<< " is: "<<When[j]<<std::endl;
                 HowCertain[j] += outputs[1];
                 std::cerr<<"howCertain for site: "<<j<<" and for step: "<<step<< " is: "<<HowCertain[j]<<std::endl;
