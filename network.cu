@@ -438,15 +438,12 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
     //input data from all sites and all channels normalized
     if(_istraining == true){
         std::cerr<<"about to create device vectors"<<std::endl;
-        thrust::device_vector<int> input;
-        thrust::device_vector<double>retVec;
-        thrust::device_vector<double>gQuakeAvg;
-        thrust::device_vector<thrust::pair<int, int> > dConnect;
-        std::cerr<<"before the try block"<<std::endl;
-        retVec.resize(2160*_numofSites);
-        input.resize(data->size());
-        gQuakeAvg.resize(globalQuakes->size());
-        dConnect.resize(_connect->size());
+        thrust::device_vector<int> input(data->size());
+        std::cerr<<"input resized"<<std::endl;
+        thrust::device_vector<double>retVec(2160*_numofSites);
+        thrust::device_vector<double>gQuakeAvg(globalQuakes->size());
+        thrust::device_vector<thrust::pair<int, int> > dConnect(_connect->size());
+        std::cerr<<"all vectors resized"<<std::endl;
         thrust::copy(_connect->begin(), _connect->end(), dConnect.begin());
         thrust::copy(data->begin(), data->end(), input.begin());
         thrust::copy(globalQuakes->begin(), globalQuakes->end(), gQuakeAvg.begin());
