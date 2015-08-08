@@ -45,7 +45,7 @@ bool MemManager::memoryAlloc(int individualLength,float pMaxHost, float pMaxDevi
         exit(1);
     }
     try{
-        this->_DGenetics.resize(_deviceGeneticsAlloc);
+        this->_DGenetics.resize(_deviceGeneticsAlloc, 0);
 
     }
     catch(thrust::system_error &e){

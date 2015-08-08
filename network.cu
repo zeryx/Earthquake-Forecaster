@@ -78,8 +78,7 @@ __host__ __device__ inline double shift(double x, double max, double min)
     return ret;
 }
 
-template <typename T>
-__global__ void genWeights( dataArray<T> ref, long in, int nRegWeights, int indLength)
+__global__ void genWeights( dataArray<double> ref, long in, int nRegWeights, int indLength)
 {
     long idx = blockIdx.x * blockDim.x + threadIdx.x;
     thrust::minstd_rand0 randEng;
@@ -345,10 +344,10 @@ void NetworkGenetic::initializeWeights(){
     int seedItr = 0;
 
     _NNParams[8] = _memVirtualizer._DGenetics.size()/(_NNParams[7]); // number of individuals on device.
+    std::cerr<<"num of individuals about to have weights genned is: "<<_NNParams[8]<<std::endl;
     long seed = std::clock() + std::clock()*seedItr++;
     blocksPerGrid=(_NNParams[8]+threadsblock-1)/threadsblock;
-    genWeights<double><<<blocksPerGrid, threadsblock>>>(_memVirtualizer.genetics(), seed, _NNParams[2], _NNParams[8]);
-    cudaDeviceSynchronize();
+    genWeights<<<blocksPerGrid, threadsblock>>>(_memVirtualizer.genetics(), seed, _NNParams[2], _NNParams[8]);
     //        }while(_memVirtualizer.GeneticsPushToHost(&_genetics));
     //        _NNParams[9] = _genetics.size/(_NNParams[8]); // number of individuals on device.
     //        long seed = std::clock() + std::clock()*seedItr++;
