@@ -408,7 +408,7 @@ void NetworkGenetic::storeWeights(std::string filepath){
     _memVirtualizer.pushToStream(filepath);
 }
 
-void NetworkGenetic::forecast(std::vector<double> &ret, int &hour, std::vector<int> &data, double &Kp, std::vector<double> &globalQuakes)
+void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<int> *data, double &Kp, std::vector<double> *globalQuakes)
 {
     //were going to normalize the inputs using v` = v-mean/stdev, so we need mean and stdev for each channel.
     double meanCh1=0, meanCh2=0, meanCh3=0, stdCh1=0, stdCh2=0, stdCh3=0;
@@ -439,17 +439,17 @@ void NetworkGenetic::forecast(std::vector<double> &ret, int &hour, std::vector<i
         thrust::device_vector<double>* gQuakeAvg;
         thrust::device_vector<thrust::pair<int, int> >* dConnect;
         std::cerr<<"about to resize vectors"<<std::endl;
-        std::cerr<<"input data size is: "<<data.size()<<std::endl;
-        std::cerr<<"QuakeAvg size is: "<<globalQuakes.size()<<std::endl;
+        std::cerr<<"input data size is: "<<data->size()<<std::endl;
+        std::cerr<<"QuakeAvg size is: "<<globalQuakes->size()<<std::endl;
         std::cerr<<"connections size is: "<<_connect->size()<<std::endl;
-        try{input = new thrust::device_vector<int>(data.size());}
+        try{input = new thrust::device_vector<int>(data->size());}
         catch(std::bad_alloc &e){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, e.what() );exit(-1);}
         catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
         try{retVec = new thrust::device_vector<double>(2160*_numofSites);}
         catch(std::bad_alloc &e){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, e.what() );exit(-1);}
         catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
 
-        try{gQuakeAvg = new thrust::device_vector<double>(globalQuakes.size());}
+        try{gQuakeAvg = new thrust::device_vector<double>(globalQuakes->size());}
         catch(std::bad_alloc &e){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, e.what() );exit(-1);}
         catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
 
@@ -457,16 +457,14 @@ void NetworkGenetic::forecast(std::vector<double> &ret, int &hour, std::vector<i
         catch(std::bad_alloc &e){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, e.what() );exit(-1);}
         catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
         std::cerr<<"all vectors resized"<<std::endl;
-        size_t free, total;
-        cudaMemGetInfo(&free, &total);
-        std::cout<<"device space left: "<<free<<std::endl;
+
         try{thrust::copy(_connect->begin(), _connect->end(), dConnect->begin());}
         catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
 
-        try{thrust::copy(data.begin(), data.end(), input->begin());}
+        try{thrust::copy(data->begin(), data->end(), input->begin());}
         catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
 
-        try{thrust::copy(globalQuakes.begin(), globalQuakes.end(), gQuakeAvg->begin());}
+        try{thrust::copy(globalQuakes->begin(), globalQuakes->end(), gQuakeAvg->begin());}
         catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
 
         int blocksNum; //the blocksize defined by the configurator
@@ -527,9 +525,9 @@ void NetworkGenetic::forecast(std::vector<double> &ret, int &hour, std::vector<i
                 std::cerr<<"entering site #"<<j<<std::endl;
                 double latSite = _siteData[j*2];
                 double lonSite = _siteData[j*2+1];
-                double avgLatGQuake = globalQuakes.at(0);
-                double avgLonGQuake = globalQuakes.at(1);
-                double GQuakeAvgMag = globalQuakes.at(3);
+                double avgLatGQuake = globalQuakes->at(0);
+                double avgLonGQuake = globalQuakes->at(1);
+                double GQuakeAvgMag = globalQuakes->at(3);
                 double GQuakeAvgdist = distCalc(latSite, lonSite, avgLatGQuake, avgLonGQuake);
                 double GQuakeAvgBearing = bearingCalc(latSite, lonSite, avgLatGQuake, avgLonGQuake);
                 double CommunityDist = distCalc(latSite, lonSite, CommunityLat, CommunityLon);
@@ -554,9 +552,9 @@ void NetworkGenetic::forecast(std::vector<double> &ret, int &hour, std::vector<i
                 int startOfMemGateOut = startOfMemGateIn + _NNParams[5];
                 int startOfMemGateForget = startOfMemGateOut + _NNParams[5];
                 int startOfOutput = startOfMemGateForget + _NNParams[5];
-                input[0] = shift((double)(data.at(3600*_sampleRate*j*3 + 0*(3600*_sampleRate)+step)), meanCh1, stdCh1);
-                input[1] = normalize((double)(data.at(3600*_sampleRate*j*3 + 1*(3600*_sampleRate)+step)), meanCh2, stdCh2);
-                input[2] = normalize((double)(data.at(3600*_sampleRate*j*3 + 2*(3600*_sampleRate)+step)), meanCh3, stdCh3);
+                input[0] = shift((double)(data->at(3600*_sampleRate*j*3 + 0*(3600*_sampleRate)+step)), meanCh1, stdCh1);
+                input[1] = normalize((double)(data->at(3600*_sampleRate*j*3 + 1*(3600*_sampleRate)+step)), meanCh2, stdCh2);
+                input[2] = normalize((double)(data->at(3600*_sampleRate*j*3 + 2*(3600*_sampleRate)+step)), meanCh3, stdCh3);
                 input[3] = shift(GQuakeAvgdist, 40075.1, 0);
                 input[4] = shift(GQuakeAvgBearing, 360, 0);
                 input[5] = shift(GQuakeAvgMag, 9.5, 0);
@@ -683,7 +681,7 @@ void NetworkGenetic::forecast(std::vector<double> &ret, int &hour, std::vector<i
         //we're going to approximate using a normal distribution around when with a sigma of howCertain, over the whole array from T=currentHour [T, 2160]
         for(int h=hour; h<2160; h++){
             for(int j=0; j<_numofSites; j++){
-                ret[h*_numofSites+j] = 1/(1/HowCertain[j]*sqrt(2*M_PI))*exp(-pow(h-When[j], 2)/(2*pow(1/HowCertain[j], 2))); // normal distribution with a mu of When and a sigma of 1/HowCertain
+                ret->at(h*_numofSites+j)= 1/(1/HowCertain[j]*sqrt(2*M_PI))*exp(-pow(h-When[j], 2)/(2*pow(1/HowCertain[j], 2))); // normal distribution with a mu of When and a sigma of 1/HowCertain
             }
         }
     }

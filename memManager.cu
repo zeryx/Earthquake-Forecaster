@@ -106,6 +106,8 @@ bool MemManager::memoryAlloc(int individualLength,float pMaxHost, float pMaxDevi
 
 void MemManager::initFromStream(std::ifstream &stream){
     std::string line;
+    _DGenetics->clear();
+    _DGenetics->shrink_to_fit();
     while(std::getline(stream, line)){ // each line
         std::string item;
         std::stringstream ss(line);

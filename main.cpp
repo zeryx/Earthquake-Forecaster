@@ -116,8 +116,8 @@ int main(int argc, char** arg){
         int DLEN, QLEN;
         int hour;
         double Kp;
-        std::vector<int> data;
-        std::vector<double> globalQuakes(5);
+        std::vector<int> *data = new std::vector<int>;
+        std::vector<double> *globalQuakes = new std::vector<double>(5);
 //        std::cin>>hour;
         hour = 0;
         if(hour== -1)
@@ -125,10 +125,10 @@ int main(int argc, char** arg){
 //        std::cin>>DLEN;
         DLEN = 3600*50*3*9;
         for(int i=0; i<DLEN; i++){
-            data.push_back(0);
+            data->push_back(0);
 //            std::cin>>data.at(i);
-            if(data.at(i) == -1){
-                data.at(i) = data.at(i-1);
+            if(data->at(i) == -1){
+                data->at(i) = data->at(i-1);
             }
         }
 //        std::cerr<<"recieved all input data"<<std::endl;
@@ -136,35 +136,39 @@ int main(int argc, char** arg){
 //        std::cin>>QLEN;
         Kp = 0.4;
         QLEN = 50;
-        std::vector<double> tmpQuakes;
+        std::vector<double>* tmpQuakes = new std::vector<double>;
         for(int i=0; i<QLEN; i++){
-            tmpQuakes.push_back(0.0);
+            tmpQuakes->push_back(0.0);
 //            std::cin>>tmpQuakes.at(i);
         }
         std::cerr<<"recieved all global quakes data"<<std::endl;
         int accVal=0;
-        globalQuakes[5] = hour;
+        globalQuakes->at(5) = hour;
         for (int i=0; i<QLEN; i++){
             for(int k=0; k<4; k++){//don't start at 0 because 0 is time.
-                globalQuakes[k] += tmpQuakes[i*5+k];
+                globalQuakes->at(k) += tmpQuakes->at(i*5+k);
                 accVal++;
             }
         }
         for(int k=1; k<4; k++){
-            if(globalQuakes[k] !=0)
-                globalQuakes[k] = globalQuakes[k]/accVal; // push the hourly average into _DGQuakes for all parameters.
+            if(globalQuakes->at(k) !=0)
+                globalQuakes->at(k) = globalQuakes->at(k)/accVal; // push the hourly average into _DGQuakes for all parameters.
         }
-        std::vector<double> retM(2160*numberOfSites);
+        delete tmpQuakes;
+        std::vector<double> *retM = new std::vector<double>(2160*numberOfSites);
         std::cerr<<"about to call forecast.."<<std::endl;
         ConstructedNetwork.forecast(retM, hour, data, Kp, globalQuakes);
         std::cerr<<"forecast returned."<<std::endl;
 //        int retSize = numberOfSites;
 //        std::cout<<retSize<<std::endl;
-        for(int i=0; i<2160*numberOfSites; i++){
-//            std::cout<<retM[i]<<std::endl;
-        }
+//        for(int i=0; i<2160*numberOfSites; i++){
+//            std::cout<<retM->at(i)<<std::endl;
+//        }
         std::cerr<<"ret is returned to stream."<<std::endl;
         std::cout.flush();
+        delete data;
+        delete globalQuakes;
+        delete retM;
     }
     if(doTraining == 1)
         ConstructedNetwork.storeWeights("/weights.bin");
