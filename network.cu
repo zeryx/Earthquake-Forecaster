@@ -10,15 +10,13 @@
 
 //macros
 //cuda error message handling
-#define CUDA_SAFE_CALL(call)                                          \
-    do {                                                                  \
+#define CUDA_SAFE_CALL(call)                                          \                                                                 \
     cudaError_t err = call;                                           \
     if (cudaSuccess != err) {                                         \
-    fprintf (stderr, "Cuda error in file '%s' in line %i : %s.\n",\
-    __FILE__, __LINE__, cudaGetErrorString(err) );       \
-    exit(EXIT_FAILURE);                                           \
+    fprintf (stderr, "Cuda error in file '%s' in line %i : %s.\n",      \
+    __FILE__, __LINE__, cudaGetErrorString(err) );                      \
+    exit(EXIT_FAILURE);                                                  \
     }                                                                 \
-    } while (0)
 
 //neural functions
 __host__ __device__ inline double sind(double x)
@@ -348,6 +346,8 @@ void NetworkGenetic::initializeWeights(){
     long seed = std::clock() + std::clock()*seedItr++;
     blocksPerGrid=(_NNParams[8]+threadsblock-1)/threadsblock;
     genWeights<<<blocksPerGrid, threadsblock>>>(_memVirtualizer.genetics(), seed, _NNParams[2], _NNParams[8]);
+    CUDA_SAFE_CALL( cudaPeekAtLastError() );
+    CUDA_SAFE_CALL( cudaDeviceSynchronize() );
     //        }while(_memVirtualizer.GeneticsPushToHost(&_genetics));
     //        _NNParams[9] = _genetics.size/(_NNParams[8]); // number of individuals on device.
     //        long seed = std::clock() + std::clock()*seedItr++;
