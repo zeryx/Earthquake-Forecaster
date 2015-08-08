@@ -1,6 +1,6 @@
 project(Earthquake_Forecaster)
 find_package(CUDA REQUIRED)
 cmake_minimum_required(VERSION 2.8)
-set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -G -gencode arch=compute_30,code=sm_30)
+set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -G -DTHRUST_DEBUG -gencode arch=compute_30,code=sm_30)
 file(GLOB EF_SRC "*.h" "*.cpp" "*.cu")
 CUDA_ADD_EXECUTABLE(${PROJECT_NAME} ${EF_SRC})

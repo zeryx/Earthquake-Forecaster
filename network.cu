@@ -10,13 +10,15 @@
 
 //macros
 //cuda error message handling
-#define CUDA_SAFE_CALL(call)                                          \                                                                 \
+#define CUDA_SAFE_CALL(call)                                          \
+    do {                                                                  \
     cudaError_t err = call;                                           \
     if (cudaSuccess != err) {                                         \
-    fprintf (stderr, "Cuda error in file '%s' in line %i : %s.\n",      \
-    __FILE__, __LINE__, cudaGetErrorString(err) );                      \
-    exit(EXIT_FAILURE);                                                  \
+    fprintf (stderr, "Cuda error in file '%s' in line %i : %s.\n",\
+    __FILE__, __LINE__, cudaGetErrorString(err) );                  \
+    exit(EXIT_FAILURE);                                             \
     }                                                                 \
+    } while (0)
 
 //neural functions
 __host__ __device__ inline double sind(double x)
@@ -76,16 +78,17 @@ __host__ __device__ inline double shift(double x, double max, double min)
     return ret;
 }
 
-__global__ void genWeights( dataArray<double> ref, long in, int nRegWeights, int indLength)
+__global__ void genWeights( dataArray<double> ref, long in, dataArray<int> params)
 {
     long idx = blockIdx.x * blockDim.x + threadIdx.x;
+    long ind = idx*params.array[7];
     thrust::minstd_rand0 randEng;
     randEng.seed(idx);
     long seed = idx+ref.size*in;
-    for(int i=0; i<nRegWeights; i++){
+    for(int i=0; i<params.array[2]; i++){
         thrust::uniform_real_distribution<double> uniDist(0,1);
-        randEng.discard(seed);
-        ref.array[idx*indLength + i] = uniDist(randEng);
+        randEng.discard(seed+1);
+        ref.array[ind + i] = uniDist(randEng);
     }
 }
 
@@ -345,9 +348,10 @@ void NetworkGenetic::initializeWeights(){
     std::cerr<<"num of individuals about to have weights genned is: "<<_NNParams[8]<<std::endl;
     long seed = std::clock() + std::clock()*seedItr++;
     blocksPerGrid=(_NNParams[8]+threadsblock-1)/threadsblock;
-    genWeights<<<blocksPerGrid, threadsblock>>>(_memVirtualizer.genetics(), seed, _NNParams[2], _NNParams[8]);
+    genWeights<<<blocksPerGrid, threadsblock>>>(_memVirtualizer.genetics(), seed, convertToKernel(_NNParams));
     CUDA_SAFE_CALL( cudaPeekAtLastError() );
     CUDA_SAFE_CALL( cudaDeviceSynchronize() );
+    CUDA_SAFE_CALL( cudaPeekAtLastError() );
     //        }while(_memVirtualizer.GeneticsPushToHost(&_genetics));
     //        _NNParams[9] = _genetics.size/(_NNParams[8]); // number of individuals on device.
     //        long seed = std::clock() + std::clock()*seedItr++;
@@ -437,15 +441,25 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
     //input data from all sites and all channels normalized
     if(_istraining == true){
         std::cerr<<"about to create device vectors"<<std::endl;
-        thrust::device_vector<int> input(data->size());
-        std::cerr<<"input resized"<<std::endl;
-        thrust::device_vector<double>retVec(2160*_numofSites);
-        thrust::device_vector<double>gQuakeAvg(globalQuakes->size());
-        thrust::device_vector<thrust::pair<int, int> > dConnect(_connect->size());
+        thrust::device_vector<int> input;
+        thrust::device_vector<double> retVec;
+        thrust::device_vector<double> gQuakeAvg;
+        thrust::device_vector<thrust::pair<int, int> > dConnect;
+        try{input.resize(data->size());}
+        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() );}
+        try{retVec.resize(2160*_numofSites);}
+        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() );}
+        try{gQuakeAvg.resize(globalQuakes->size());}
+        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() );}
+        try{dConnect.resize(_connect->size());}
+        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() );}
         std::cerr<<"all vectors resized"<<std::endl;
-        thrust::copy(_connect->begin(), _connect->end(), dConnect.begin());
-        thrust::copy(data->begin(), data->end(), input.begin());
-        thrust::copy(globalQuakes->begin(), globalQuakes->end(), gQuakeAvg.begin());
+        try{thrust::copy(_connect->begin(), _connect->end(), dConnect.begin());}
+        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() );}
+        try{thrust::copy(data->begin(), data->end(), input.begin());}
+        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() );}
+        try{thrust::copy(globalQuakes->begin(), globalQuakes->end(), gQuakeAvg.begin());}
+        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() );}
         int blocksPerGrid; //the blocksize defined by the configurator
         int blockSize = 512; // the actual grid size needed
         std::cerr<<"about to run cuda kernel.."<<std::endl;
@@ -456,7 +470,8 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
                                           convertToKernel(input),convertToKernel(_siteData),convertToKernel(_answers),
                                           convertToKernel(dConnect),Kp,_sampleRate,_numofSites,hour,
                                           meanCh1, meanCh2, meanCh3, stdCh1, stdCh2, stdCh3);
-        cudaDeviceSynchronize();
+        CUDA_SAFE_CALL(cudaPeekAtLastError());
+        CUDA_SAFE_CALL(cudaDeviceSynchronize());
         int num_blocks = (_NNParams[8]/blockSize)+((_NNParams[8]%blockSize) ? 1 : 0);
         thrust::device_vector<double> partial_reduce_sums(num_blocks+1);
         reduce_by_block<<<num_blocks, blockSize, blockSize*sizeof(double)>>>(_memVirtualizer.genetics(), // calculate the partial sums on the GPU.
