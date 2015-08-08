@@ -16,16 +16,15 @@ public:
     bool init(int sampleRate, int SiteNum, std::vector<double>siteData);
     void doingTraining(int site, int hour, double lat,
                        double lon, double mag, double dist);
-    void forecast(double* ret, int& hour, std::vector<int> *data, double &K, std::vector<double> *globalQuakes);
+    void forecast(std::vector<double> &ret, int& hour, std::vector<int> &data, double &K, std::vector<double> &globalQuakes);
     void storeWeights(std::string filepath);
     bool checkForWeights(std::string filepath);
 private:
     MemManager _memVirtualizer; // component that handles memory virtualization and transfer
-    std::vector<thrust::pair<int, int> >* _connect;
-    thrust::device_vector<int> _NNParams; // only vector that stays on here
+    std::vector<thrust::pair<int, int> > *_connect;
+    thrust::device_vector<int>_NNParams; // only vector that stays on here
     thrust::device_vector<double> _siteData;
     thrust::device_vector<double> _answers;
-    thrust::host_vector<double> _ret;
     std::vector<double> _best;
     bool _istraining;
     int _sampleRate;

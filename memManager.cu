@@ -18,7 +18,9 @@ dataArray<double> MemManager::genetics(){
     return convertToKernel(_DGenetics);
 }
 
-
+MemManager::~MemManager(){
+    delete _DGenetics;
+}
 
 
 bool MemManager::memoryAlloc(int individualLength,float pMaxHost, float pMaxDevice){//allocates memory for genetis & input vectors
@@ -28,8 +30,8 @@ bool MemManager::memoryAlloc(int individualLength,float pMaxHost, float pMaxDevi
     _deviceGeneticsAlloc = deviceMem/8;
     _hostGeneticsAlloc = (_hostGeneticsAlloc/individualLength)*individualLength;
     _deviceGeneticsAlloc = (_deviceGeneticsAlloc/individualLength)*individualLength;
-    std::cerr<<"about to allocate: "<<_hostGeneticsAlloc<<" for the host"<<std::endl;
-    std::cerr<<"about to allocate: "<<_deviceGeneticsAlloc<<" for the device"<<std::endl;
+    std::cerr<<"about to allocate: "<<_hostGeneticsAlloc*8<<" bytes for the host"<<std::endl;
+    std::cerr<<"about to allocate: "<<_deviceGeneticsAlloc*8<<" byes for the device"<<std::endl;
     //initialize all large vectors (everything not from an xml file)
     try{
         this->_HGenetics.setMax(_hostGeneticsAlloc);
@@ -45,7 +47,7 @@ bool MemManager::memoryAlloc(int individualLength,float pMaxHost, float pMaxDevi
         exit(1);
     }
     try{
-        this->_DGenetics.resize(_deviceGeneticsAlloc, 0);
+        this->_DGenetics = new thrust::device_vector<double>(_deviceGeneticsAlloc);
 
     }
     catch(thrust::system_error &e){
@@ -104,12 +106,11 @@ bool MemManager::memoryAlloc(int individualLength,float pMaxHost, float pMaxDevi
 
 void MemManager::initFromStream(std::ifstream &stream){
     std::string line;
-    int itr =0;
     while(std::getline(stream, line)){ // each line
         std::string item;
         std::stringstream ss(line);
         while(std::getline(ss, item, ',')){ // each weight
-            _DGenetics[itr] = std::atoi(item.c_str());
+            _DGenetics->push_back(std::atoi(item.c_str()));
         }
     }
 }
@@ -117,8 +118,8 @@ void MemManager::initFromStream(std::ifstream &stream){
 void MemManager::pushToStream(std::string filename){
     std::ofstream ret;
     ret.open(filename.c_str(), std::ios_base::out | std::ios_base::trunc);
-    for(int i=0; i<_DGenetics.size(); i++){
-        ret << _DGenetics[i]<<","<<std::endl;
+    for(thrust::device_vector<double>::iterator it = _DGenetics->begin(); it != _DGenetics->end(); ++it){
+        ret << *it<<","<<std::endl;
     }
     ret.close();
 }

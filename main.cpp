@@ -77,33 +77,39 @@ int main(int argc, char** arg){
     connections.push_back(make_pair(inputs+2, inputs+hidden+memGateIn+MemGateOut+MemGateForget+2));
     numWeights = connections.size()-3; //minus 3 because the memory neurons connect without weights.
     NetworkGenetic ConstructedNetwork(inputs, hidden, memory, outputs,numWeights, connections);
-
+    std::cout<<"about to start"<<std::endl;
     int sampleRate, numberOfSites, SLEN;
-    std::cin>>sampleRate>>numberOfSites>>SLEN;
+//    std::cin>>sampleRate>>numberOfSites>>SLEN;
+    sampleRate =  50;
+    numberOfSites =  9;
+    SLEN =  40;
 
     std::vector<double> sitesData;
 
     for (int i=0; i < SLEN; i++){
         sitesData.push_back(0);
-        std::cin>>sitesData.at(i);
+//        std::cin>>sitesData.at(i);
     }
     int initRet= ConstructedNetwork.init(sampleRate, numberOfSites, sitesData);
     std::cout<<initRet<<std::endl;
     int doTraining;
-    std::cin>>doTraining;
+//    std::cin>>doTraining;
+    doTraining =1;
     if (doTraining == 1)
     {
         std::cerr<<"looks like were doing training"<<std::endl;
         int gtf_site, gtf_hour;
         double gtf_lat, gtf_long, gtf_mag, gtf_dist;
-        std::cin>>gtf_site>>gtf_hour>>gtf_lat>>gtf_long>>gtf_mag>>gtf_dist;
-        ConstructedNetwork.allocateHostAndGPUObjects(0.50, 0.85);
-        ConstructedNetwork.doingTraining(gtf_site, gtf_hour, gtf_lat, gtf_long, gtf_mag, gtf_dist);
+//        std::cin>>gtf_site>>gtf_hour>>gtf_lat>>gtf_long>>gtf_mag>>gtf_dist;
+        gtf_site =0; gtf_hour=0; gtf_lat=0; gtf_long=0; gtf_mag=0; gtf_dist=0;
         std::cerr<<"lets allocate GPU and host objects"<<std::endl;
+//        ConstructedNetwork.allocateHostAndGPUObjects(0.50, 0.85);
+//        std::cerr<<"checking for weightfile"<<std::endl;
+
+//        if(!ConstructedNetwork.checkForWeights("/weights.bin"))
+//            ConstructedNetwork.initializeWeights();
         std::cerr<<"weights initialized, setting training"<<std::endl;
-        std::cerr<<"checking for weightfile"<<std::endl;
-        if(!ConstructedNetwork.checkForWeights("/weights.bin"))
-            ConstructedNetwork.initializeWeights();
+        ConstructedNetwork.doingTraining(gtf_site, gtf_hour, gtf_lat, gtf_long, gtf_mag, gtf_dist);
     }
     while(1)
     {
@@ -112,24 +118,28 @@ int main(int argc, char** arg){
         double Kp;
         std::vector<int> data;
         std::vector<double> globalQuakes(5);
-        std::cin>>hour;
+//        std::cin>>hour;
+        hour = 0;
         if(hour== -1)
             break;
-        std::cin>>DLEN;
+//        std::cin>>DLEN;
+        DLEN = 3600*50*3*9;
         for(int i=0; i<DLEN; i++){
             data.push_back(0);
-            std::cin>>data.at(i);
+//            std::cin>>data.at(i);
             if(data.at(i) == -1){
                 data.at(i) = data.at(i-1);
             }
         }
-        std::cerr<<"recieved all input data"<<std::endl;
-        std::cin>>Kp;
-        std::cin>>QLEN;
+//        std::cerr<<"recieved all input data"<<std::endl;
+//        std::cin>>Kp;
+//        std::cin>>QLEN;
+        Kp = 0.4;
+        QLEN = 50;
         std::vector<double> tmpQuakes;
         for(int i=0; i<QLEN; i++){
             tmpQuakes.push_back(0.0);
-            std::cin>>tmpQuakes.at(i);
+//            std::cin>>tmpQuakes.at(i);
         }
         std::cerr<<"recieved all global quakes data"<<std::endl;
         int accVal=0;
@@ -144,14 +154,14 @@ int main(int argc, char** arg){
             if(globalQuakes[k] !=0)
                 globalQuakes[k] = globalQuakes[k]/accVal; // push the hourly average into _DGQuakes for all parameters.
         }
+        std::vector<double> retM(2160*numberOfSites);
         std::cerr<<"about to call forecast.."<<std::endl;
-        double retM[2160*numberOfSites];
-        ConstructedNetwork.forecast(retM, hour, &data, Kp, &globalQuakes);
+        ConstructedNetwork.forecast(retM, hour, data, Kp, globalQuakes);
         std::cerr<<"forecast returned."<<std::endl;
-        int retSize = numberOfSites;
-        std::cout<<retSize<<std::endl;
+//        int retSize = numberOfSites;
+//        std::cout<<retSize<<std::endl;
         for(int i=0; i<2160*numberOfSites; i++){
-            std::cout<<retM[i]<<std::endl;
+//            std::cout<<retM[i]<<std::endl;
         }
         std::cerr<<"ret is returned to stream."<<std::endl;
         std::cout.flush();

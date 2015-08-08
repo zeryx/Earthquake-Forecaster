@@ -12,13 +12,17 @@ template <typename T>
 class hVector{
 public:
     void setMax(long long maxLen){
-        _hVect.resize(maxLen);
+        delete _hVect;
+        _hVect = new thrust::host_vector<double>(maxLen);
         _itr = 0;
         _maxLen = maxLen;
     }
+    ~hVector(){
+        delete _hVect;
+    }
 
 public:
-    thrust::host_vector<T> _hVect;
+    thrust::host_vector<T>* _hVect;
     long long _itr;
     long long _maxLen;
 };
@@ -28,6 +32,14 @@ dataArray<T> convertToKernel(thrust::device_vector<T> &dVect){
     dataArray<T> kArray;
     kArray.array = thrust::device_pointer_cast(dVect.data());
     kArray.size  = (int) dVect.size();
+    return kArray;
+}
+
+template <typename T>
+dataArray<T> convertToKernel(thrust::device_vector<T> *dVect){
+    dataArray<T> kArray;
+    kArray.array = thrust::device_pointer_cast(dVect->data());
+    kArray.size = (int) dVect->size();
     return kArray;
 }
 

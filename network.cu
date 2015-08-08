@@ -74,17 +74,14 @@ __host__ __device__ inline double shift(double x, double max, double min)
 __global__ void genWeights( dataArray<double> ref, long in, dataArray<int> params)
 {
     long idx = blockIdx.x * blockDim.x + threadIdx.x;
-//    long ind = idx*params.array[7];
-    if(idx != params.array[2]+1 && idx != params.array[2] +2 && idx%(params.array[2]+1) != 0 && idx%(params.array[2]+2) != 0)
-    {
+    long ind = idx*params.array[7];
     thrust::minstd_rand0 randEng;
     randEng.seed(idx);
     thrust::uniform_real_distribution<double> uniDist(0,1);
     long seed = idx+ref.size*in;
-//    for(int i=0; i<params.array[2]; i++){
+    for(int i=0; i<params.array[2]; i++){
         randEng.discard(seed+1);
-        ref.array[idx] = uniDist(randEng);
-//    }
+        ref.array[ind+i] = uniDist(randEng);
     }
 }
 
@@ -336,16 +333,16 @@ NetworkGenetic::NetworkGenetic(const int &numInputNodes, const int &numHiddenNeu
 }
 
 void NetworkGenetic::initializeWeights(){
-    int blocksPerGrid; //the blocksize defined by the configurator
+    int blocksNum; //the blocksize defined by the configurator
     int threadsblock = 512; // the actual grid size needed
     int seedItr = 0;
 
-    _NNParams[8] = _memVirtualizer._DGenetics.size()/(_NNParams[7]); // number of individuals on device.
+    _NNParams[8] = _memVirtualizer._DGenetics->size()/(_NNParams[7]); // number of individuals on device.
     //we create a thread for every weight location, so we can do the math faster.
-    std::cerr<<"num of individuals about to have weights genned is: "<<_NNParams[7]<<std::endl;
+    std::cerr<<"num of weights per individual about to be genned is: "<<_NNParams[8]<<std::endl;
     long seed = std::clock() + std::clock()*seedItr++;
-    blocksPerGrid=(_NNParams[7]+threadsblock-1)/threadsblock;
-    genWeights<<<blocksPerGrid, threadsblock>>>(_memVirtualizer.genetics(), seed, convertToKernel(_NNParams));
+    blocksNum=_NNParams[8]/threadsblock;
+    genWeights<<<blocksNum, threadsblock>>>(_memVirtualizer.genetics(), seed, convertToKernel(_NNParams));
     CUDA_SAFE_CALL( cudaPeekAtLastError() );
     CUDA_SAFE_CALL( cudaDeviceSynchronize() );
     //        }while(_memVirtualizer.GeneticsPushToHost(&_genetics));
@@ -411,78 +408,82 @@ void NetworkGenetic::storeWeights(std::string filepath){
     _memVirtualizer.pushToStream(filepath);
 }
 
-void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, double &Kp, std::vector<double> *globalQuakes)
+void NetworkGenetic::forecast(std::vector<double> &ret, int &hour, std::vector<int> &data, double &Kp, std::vector<double> &globalQuakes)
 {
     //were going to normalize the inputs using v` = v-mean/stdev, so we need mean and stdev for each channel.
     double meanCh1=0, meanCh2=0, meanCh3=0, stdCh1=0, stdCh2=0, stdCh3=0;
-    int num=0;
-    std::cerr<<"right before mean & std calc"<<std::endl;
-    for(int i=0; i<3600*_sampleRate; i++){
-        for(int j=0; j < _numofSites; j++){
-            meanCh1 += data->at(3600*_sampleRate*j*3 + 0*3600*_sampleRate+i);
-            meanCh2 += data->at(3600*_sampleRate*j*3 + 1*3600*_sampleRate+i);
-            meanCh3 += data->at(3600*_sampleRate*j*3 + 2*3600*_sampleRate+i);
-            num++;
-        }
-    }
-    meanCh1 = meanCh1/num;
-    meanCh2 = meanCh2/num;
-    meanCh3 = meanCh3/num;
-    stdCh1 = sqrt(meanCh1);
-    stdCh2 = sqrt(meanCh2);
-    stdCh3 = sqrt(meanCh3);
-    std::cerr<<"means are: "<<meanCh1<<" "<<meanCh2<<" "<<meanCh3<<std::endl;
-    std::cerr<<"stdevs are: "<<stdCh1<<" "<<stdCh2<<" "<<stdCh3<<std::endl;
+//    int num=0;
+//    std::cerr<<"right before mean & std calc"<<std::endl;
+//    for(int i=0; i<3600*_sampleRate; i++){
+//        for(int j=0; j < _numofSites; j++){
+//            meanCh1 += data->at(3600*_sampleRate*j*3 + 0*3600*_sampleRate+i);
+//            meanCh2 += data->at(3600*_sampleRate*j*3 + 1*3600*_sampleRate+i);
+//            meanCh3 += data->at(3600*_sampleRate*j*3 + 2*3600*_sampleRate+i);
+//            num++;
+//        }
+//    }
+//    meanCh1 = meanCh1/num;
+//    meanCh2 = meanCh2/num;
+//    meanCh3 = meanCh3/num;
+//    stdCh1 = sqrt(meanCh1);
+//    stdCh2 = sqrt(meanCh2);
+//    stdCh3 = sqrt(meanCh3);
+//    std::cerr<<"means are: "<<meanCh1<<" "<<meanCh2<<" "<<meanCh3<<std::endl;
+//    std::cerr<<"stdevs are: "<<stdCh1<<" "<<stdCh2<<" "<<stdCh3<<std::endl;
     std::cerr<<"channels std and mean calculated"<<std::endl;
     //input data from all sites and all channels normalized
     if(_istraining == true){
         std::cerr<<"about to create device vectors"<<std::endl;
-        thrust::device_vector<int> input;
-        thrust::device_vector<double> retVec;
-        thrust::device_vector<double> gQuakeAvg;
-        thrust::device_vector<thrust::pair<int, int> > dConnect;
+        thrust::device_vector<int>* input;
+        thrust::device_vector<double>* retVec;
+        thrust::device_vector<double>* gQuakeAvg;
+        thrust::device_vector<thrust::pair<int, int> >* dConnect;
         std::cerr<<"about to resize vectors"<<std::endl;
-        try{input.resize(data->size());}
+        std::cerr<<"input data size is: "<<data.size()<<std::endl;
+        std::cerr<<"QuakeAvg size is: "<<globalQuakes.size()<<std::endl;
+        std::cerr<<"connections size is: "<<_connect->size()<<std::endl;
+        try{input = new thrust::device_vector<int>(data.size());}
         catch(std::bad_alloc &e){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, e.what() );exit(-1);}
         catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
-        catch(...){std::cerr<<"problem"<<std::endl;}
-        try{retVec.resize(2160*_numofSites);}
+        try{retVec = new thrust::device_vector<double>(2160*_numofSites);}
         catch(std::bad_alloc &e){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, e.what() );exit(-1);}
         catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
 
-        try{gQuakeAvg.resize(globalQuakes->size());}
+        try{gQuakeAvg = new thrust::device_vector<double>(globalQuakes.size());}
         catch(std::bad_alloc &e){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, e.what() );exit(-1);}
         catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
 
-        try{dConnect.resize(_connect->size());}
+        try{dConnect = new thrust::device_vector<thrust::pair<int, int> >(_connect->size());}
         catch(std::bad_alloc &e){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, e.what() );exit(-1);}
         catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
         std::cerr<<"all vectors resized"<<std::endl;
-
-        try{thrust::copy(_connect->begin(), _connect->end(), dConnect.begin());}
+        size_t free, total;
+        cudaMemGetInfo(&free, &total);
+        std::cout<<"device space left: "<<free<<std::endl;
+        try{thrust::copy(_connect->begin(), _connect->end(), dConnect->begin());}
         catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
 
-        try{thrust::copy(data->begin(), data->end(), input.begin());}
+        try{thrust::copy(data.begin(), data.end(), input->begin());}
         catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
 
-        try{thrust::copy(globalQuakes->begin(), globalQuakes->end(), gQuakeAvg.begin());}
+        try{thrust::copy(globalQuakes.begin(), globalQuakes.end(), gQuakeAvg->begin());}
         catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
 
-        int blocksPerGrid; //the blocksize defined by the configurator
-        int blockSize = 512; // the actual grid size needed
+        int blocksNum; //the blocksize defined by the configurator
+        int threadsPerBlock = 512; // the actual grid size needed
         std::cerr<<"about to run cuda kernel.."<<std::endl;
-        _NNParams[8] = _memVirtualizer._DGenetics.size()/(_NNParams[7]);
+        _NNParams[8] = _memVirtualizer._DGenetics->size()/(_NNParams[7]);
         std::cerr<<"number of threads is :"<<_NNParams[8]<<std::endl;
-        blocksPerGrid=(_NNParams[8]+blockSize-1)/blockSize;
-        Net<<<blockSize, blocksPerGrid>>>(_memVirtualizer.genetics(), convertToKernel(_NNParams),convertToKernel(gQuakeAvg),
+        blocksNum=_NNParams[8]/threadsPerBlock;
+        Net<<<blocksNum, threadsPerBlock>>>(_memVirtualizer.genetics(), convertToKernel(_NNParams),convertToKernel(gQuakeAvg),
                                           convertToKernel(input),convertToKernel(_siteData),convertToKernel(_answers),
                                           convertToKernel(dConnect),Kp,_sampleRate,_numofSites,hour,
                                           meanCh1, meanCh2, meanCh3, stdCh1, stdCh2, stdCh3);
         CUDA_SAFE_CALL(cudaPeekAtLastError());
         CUDA_SAFE_CALL(cudaDeviceSynchronize());
-        int num_blocks = (_NNParams[8]/blockSize)+((_NNParams[8]%blockSize) ? 1 : 0);
+        int num_blocks = (_NNParams[8]/threadsPerBlock)+((_NNParams[8]%threadsPerBlock) ? 1 : 0);
         thrust::device_vector<double> partial_reduce_sums(num_blocks+1);
-        reduce_by_block<<<num_blocks, blockSize, blockSize*sizeof(double)>>>(_memVirtualizer.genetics(), // calculate the partial sums on the GPU.
+        reduce_by_block<<<num_blocks, threadsPerBlock, threadsPerBlock*sizeof(double)>>>(_memVirtualizer.genetics(), // calculate the partial sums on the GPU.
                                                                              convertToKernel(partial_reduce_sums),convertToKernel(_NNParams));
         double fitnessAvg=0;
         for(thrust::device_vector<double>::iterator it = partial_reduce_sums.begin(); // then since there shouldn't be THAT many blocks (~23437) lets calculate it on the CPU.
@@ -491,6 +492,11 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
         }
         fitnessAvg = fitnessAvg /(num_blocks+1);
         std::cerr<<"the average fitness for this round is: "<<fitnessAvg<<std::endl;
+
+        delete dConnect;
+        delete input;
+        delete gQuakeAvg;
+        delete retVec;
     }
     else{
         std::cerr<<"entered not training version.."<<std::endl;
@@ -521,9 +527,9 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
                 std::cerr<<"entering site #"<<j<<std::endl;
                 double latSite = _siteData[j*2];
                 double lonSite = _siteData[j*2+1];
-                double avgLatGQuake = globalQuakes->at(0);
-                double avgLonGQuake = globalQuakes->at(1);
-                double GQuakeAvgMag = globalQuakes->at(3);
+                double avgLatGQuake = globalQuakes.at(0);
+                double avgLonGQuake = globalQuakes.at(1);
+                double GQuakeAvgMag = globalQuakes.at(3);
                 double GQuakeAvgdist = distCalc(latSite, lonSite, avgLatGQuake, avgLonGQuake);
                 double GQuakeAvgBearing = bearingCalc(latSite, lonSite, avgLatGQuake, avgLonGQuake);
                 double CommunityDist = distCalc(latSite, lonSite, CommunityLat, CommunityLon);
@@ -548,9 +554,9 @@ void NetworkGenetic::forecast(double *ret, int &hour, std::vector<int> *data, do
                 int startOfMemGateOut = startOfMemGateIn + _NNParams[5];
                 int startOfMemGateForget = startOfMemGateOut + _NNParams[5];
                 int startOfOutput = startOfMemGateForget + _NNParams[5];
-                input[0] = shift((double)(data->at(3600*_sampleRate*j*3 + 0*(3600*_sampleRate)+step)), meanCh1, stdCh1);
-                input[1] = normalize((double)(data->at(3600*_sampleRate*j*3 + 1*(3600*_sampleRate)+step)), meanCh2, stdCh2);
-                input[2] = normalize((double)(data->at(3600*_sampleRate*j*3 + 2*(3600*_sampleRate)+step)), meanCh3, stdCh3);
+                input[0] = shift((double)(data.at(3600*_sampleRate*j*3 + 0*(3600*_sampleRate)+step)), meanCh1, stdCh1);
+                input[1] = normalize((double)(data.at(3600*_sampleRate*j*3 + 1*(3600*_sampleRate)+step)), meanCh2, stdCh2);
+                input[2] = normalize((double)(data.at(3600*_sampleRate*j*3 + 2*(3600*_sampleRate)+step)), meanCh3, stdCh3);
                 input[3] = shift(GQuakeAvgdist, 40075.1, 0);
                 input[4] = shift(GQuakeAvgBearing, 360, 0);
                 input[5] = shift(GQuakeAvgMag, 9.5, 0);
