@@ -1,6 +1,8 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 #include "memManager.h"
+#include "dataarray.h"
+#include <vector>
 #include <string>
 #include <map>
 #include <thrust/pair.h>
@@ -12,7 +14,7 @@ public:
                    const int &numOutNeurons, const int &numWeights,  std::vector< thrust::pair<int, int> >&connections);
     void errorFunc();
     void initializeWeights(); //initializes _data array and fills with random numbers
-    void allocateHostAndGPUObjects(float pMaxHost, float pMaxDevice);
+    void allocateHostAndGPUObjects(float pMax);
     bool init(int sampleRate, int SiteNum, std::vector<double>siteData);
     void doingTraining(int site, int hour, double lat,
                        double lon, double mag, double dist);
@@ -20,7 +22,8 @@ public:
     void storeWeights(std::string filepath);
     bool checkForWeights(std::string filepath);
 private:
-    MemManager _memVirtualizer; // component that handles memory virtualization and transfer
+    unifiedArray<double> _genetics;
+    unifiedArray<double> _neurons;
     std::vector<thrust::pair<int, int> > *_connect;
     thrust::device_vector<int>_NNParams; // only vector that stays on here
     thrust::device_vector<double> _siteData;

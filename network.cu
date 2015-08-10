@@ -1,4 +1,5 @@
 ﻿#include "network.h"
+#include "getsys.h"
 #include <fstream>
 #include <thrust/device_vector.h>
 #include <thrust/random.h>
@@ -7,6 +8,9 @@
 #include <vector>
 #include <ctime>
 #include <thrust/host_vector.h>
+#include <fstream>
+#include <sstream>
+#include <ostream>
 
 //macros
 //cuda error message handling
@@ -71,10 +75,10 @@ __host__ __device__ inline double shift(double x, double max, double min)
     return ret;
 }
 
-__global__ void genWeights( dataArray<double> ref, long in, dataArray<int> params)
+__global__ void genWeights( unifiedArray<double> ref, long in, dataArray<int> params)
 {
-    long idx = blockIdx.x * blockDim.x + threadIdx.x;
-    long ind = idx*params.array[7];
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int ind = idx*params.array[7];
     thrust::minstd_rand0 randEng;
     randEng.seed(idx);
     thrust::uniform_real_distribution<double> uniDist(0,1);
@@ -85,8 +89,8 @@ __global__ void genWeights( dataArray<double> ref, long in, dataArray<int> param
     }
 }
 
-__global__ void Net(dataArray<double> weights, dataArray<int> params, dataArray<double> globalQuakes,
-                    dataArray<int> inputVal, dataArray<double> siteData,
+__global__ void Net(unifiedArray<double> weights, unifiedArray<double> neurons, dataArray<int> params,
+                    dataArray<double> globalQuakes, dataArray<int> inputVal, dataArray<double> siteData,
                     dataArray<double> answers, dataArray<thrust::pair<int, int> > connections,
                     double Kp, int sampleRate,int numOfSites, int hour,
                     double meanCh1, double meanCh2, double meanCh3, double stdCh1, double stdCh2, double stdCh3)
@@ -94,9 +98,9 @@ __global__ void Net(dataArray<double> weights, dataArray<int> params, dataArray<
 
 
 
-    int idx = blockIdx.x * blockDim.x + threadIdx.x; // for each thread, calculate a individuals weight.
+    int idx = blockIdx.x * blockDim.x + threadIdx.x; // for each thread is one individual
     int ind = idx*params.array[7];
-    typedef thrust::device_ptr<thrust::pair<int, int> > connectPairMatrix;
+    typedef thrust::device_ptr<thrust::pair<int, int> >  connectPairMatrix;
     double CommunityLat = 0;
     double CommunityLon = 0;
     double *When = (double*)malloc(numOfSites*sizeof(double));
@@ -278,57 +282,57 @@ __global__ void Net(dataArray<double> weights, dataArray<int> params, dataArray<
     weights.array[ind + params.array[2]+2] = fitness; // set the fitness number for the individual.
 }
 
-__global__ void reduce_by_block(dataArray<double> weights,
-                          dataArray<double> per_block_results,
-                          dataArray<int> params)
+__global__ void reduce_by_block(unifiedArray<double> weights,
+                                dataArray<double> per_block_results,
+                                dataArray<int> params)
 {
-  extern __shared__ float sdata[];
+    extern __shared__ float sdata[];
 
-  unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
-  int fit = idx*params.array[7]+params.array[2]+2;
+    unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int fit = idx*params.array[7]+params.array[2]+2;
 
-  // load input into __shared__ memory
-  float x = 0;
-  if(idx < params.array[8])
-  {
-    x = weights.array[fit];
-  }
-  sdata[threadIdx.x] = x;
-  __syncthreads();
-
-  // contiguous range pattern
-  for(int offset = blockDim.x / 2;
-      offset > 0;
-      offset >>= 1)
-  {
-    if(threadIdx.x < offset)
+    // load input into __shared__ memory
+    float x = 0;
+    if(idx < params.array[8])
     {
-      // add a partial sum upstream to our own
-      sdata[threadIdx.x] += sdata[threadIdx.x + offset];
+        x = weights.array[fit];
+    }
+    sdata[threadIdx.x] = x;
+    __syncthreads();
+
+    // contiguous range pattern
+    for(int offset = blockDim.x / 2;
+        offset > 0;
+        offset >>= 1)
+    {
+        if(threadIdx.x < offset)
+        {
+            // add a partial sum upstream to our own
+            sdata[threadIdx.x] += sdata[threadIdx.x + offset];
+        }
+
+        // wait until all threads in the block have
+        // updated their partial sums
+        __syncthreads();
     }
 
-    // wait until all threads in the block have
-    // updated their partial sums
-    __syncthreads();
-  }
-
-  // thread 0 writes the final result
-  if(threadIdx.x == 0)
-  {
-    per_block_results.array[blockIdx.x] = sdata[0];
-  }
+    // thread 0 writes the final result
+    if(threadIdx.x == 0)
+    {
+        per_block_results.array[blockIdx.x] = sdata[0];
+    }
 }
 
 NetworkGenetic::NetworkGenetic(const int &numInputNodes, const int &numHiddenNeurons, const int &numMemoryNeurons,
                                const int &numOutNeurons, const int &numWeights, std::vector< thrust::pair<int, int> >&connections){
     this->_NNParams.resize(15, 0); // room to grow
-    _NNParams[1] = numInputNodes + numHiddenNeurons + numMemoryNeurons + numOutNeurons;
+    _NNParams[1] = numInputNodes + numHiddenNeurons + numMemoryNeurons*4 + numOutNeurons; //memory neurons each ahve a rmemeber, forget, and push forward gate neuron.
     _NNParams[2] = numWeights;
     _NNParams[3] = numInputNodes;
     _NNParams[4] = numHiddenNeurons;
     _NNParams[5] = numMemoryNeurons;
     _NNParams[6] = numOutNeurons;
-    _NNParams[7] = numWeights + 1 + 1; //1 for fitness, 1 for community output composite vector
+    _NNParams[7] = _NNParams[2] + 1 + 1; // plus 1 for fitness, plus 1 for community output composite vector
     _connect = &connections;
 }
 
@@ -336,27 +340,24 @@ void NetworkGenetic::initializeWeights(){
     int blocksNum; //the blocksize defined by the configurator
     int threadsblock = 512; // the actual grid size needed
     int seedItr = 0;
-
-    _NNParams[8] = _memVirtualizer._DGenetics->size()/(_NNParams[7]); // number of individuals on device.
+    _NNParams[8] = _genetics.size/(_NNParams[7]); // number of individuals globally.
     //we create a thread for every weight location, so we can do the math faster.
-    std::cerr<<"num of weights per individual about to be genned is: "<<_NNParams[8]<<std::endl;
+    std::cerr<<"num of individuals about to be genned is: "<<_NNParams[8]<<std::endl;
     long seed = std::clock() + std::clock()*seedItr++;
     blocksNum=_NNParams[8]/threadsblock;
-    genWeights<<<blocksNum, threadsblock>>>(_memVirtualizer.genetics(), seed, convertToKernel(_NNParams));
-    CUDA_SAFE_CALL( cudaPeekAtLastError() );
-    CUDA_SAFE_CALL( cudaDeviceSynchronize() );
-    //        }while(_memVirtualizer.GeneticsPushToHost(&_genetics));
-    //        _NNParams[9] = _genetics.size/(_NNParams[8]); // number of individuals on device.
-    //        long seed = std::clock() + std::clock()*seedItr++;
-    //        blocksPerGrid=(_NNParams[9]+threadsblock-1)/threadsblock;
-    //        genWeights<double><<< blocksPerGrid, threadsblock>>>(_genetics, seed, _NNParams[2], _NNParams[8]);
-    //        cudaDeviceSynchronize();
+    genWeights<<<blocksNum, threadsblock>>>(_genetics, seed, convertToKernel(_NNParams));
+    CUDA_SAFE_CALL( cudaPeekAtLastError());
+    CUDA_SAFE_CALL( cudaDeviceSynchronize());
+
+    //since were using unified memory for weights, no need to create our own unified memory, doh!
 }
 
 
-void NetworkGenetic::allocateHostAndGPUObjects(float pMaxHost, float pMaxDevice){
-    _memVirtualizer.memoryAlloc(_NNParams[7], pMaxHost, pMaxDevice);
-
+void NetworkGenetic::allocateHostAndGPUObjects( float pMax){
+    size_t total = GetHostRamInBytes() + GetDeviceRamInBytes();
+    total = total * pMax *sizeof(double)*_NNParams[7]/_NNParams[7];
+    std::cerr<<"total to allocate is: "<<total<<std::endl;
+    _genetics.array = (double*)memManager::alloc(total);
 }
 bool NetworkGenetic::init(int sampleRate, int SiteNum, std::vector<double> siteData){
     _sampleRate = sampleRate;
@@ -377,12 +378,22 @@ bool NetworkGenetic::init(int sampleRate, int SiteNum, std::vector<double> siteD
 }
 
 bool NetworkGenetic::checkForWeights(std::string filepath){
-    std::ifstream weightFile;
+    std::ifstream weightFile(filepath.c_str(), std::ios_base::ate | std::ios_base::binary);
     std::cerr<<"checking for weights.."<<std::endl;
-    weightFile.open(filepath.c_str(), std::ios_base::in);
     if(weightFile){
         std::cerr<<"the weightfile exists"<<std::endl;
-        _memVirtualizer.initFromStream(weightFile);
+        std::string line;
+        int filesize = weightFile.tellg();
+        weightFile.seekg(0, weightFile.beg);
+        int itr =0;
+        _genetics.array = (double*)memManager::alloc(filesize+filesize*0.05);
+        while(std::getline(weightFile, line)){ // each line
+            std::string item;
+            std::stringstream ss(line);
+            while(std::getline(ss, item, ',')){ // each weight
+                _genetics.array[itr] = std::atoi(item.c_str());
+            }
+        }
         weightFile.close();
         return true;
     }
@@ -405,7 +416,13 @@ void NetworkGenetic::doingTraining(int site, int hour, double lat,
 }
 
 void NetworkGenetic::storeWeights(std::string filepath){
-    _memVirtualizer.pushToStream(filepath);
+    std::ofstream ret;
+    ret.open(filepath.c_str(), std::ios_base::out | std::ios_base::trunc);
+    for(int i=0; i<_genetics.size; i++){
+        ret << _genetics.array[i]<<","<<std::endl;
+    }
+    ret.close();
+    memManager::dealloc(_genetics.array);
 }
 
 void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<int> *data, double &Kp, std::vector<double> *globalQuakes)
@@ -433,68 +450,51 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
     std::cerr<<"channels std and mean calculated"<<std::endl;
     //input data from all sites and all channels normalized
     if(_istraining == true){
-        std::cerr<<"about to create device vectors"<<std::endl;
-        thrust::device_vector<int>* input;
-        thrust::device_vector<double>* retVec;
-        thrust::device_vector<double>* gQuakeAvg;
-        thrust::device_vector<thrust::pair<int, int> >* dConnect;
-        std::cerr<<"about to resize vectors"<<std::endl;
-        std::cerr<<"input data size is: "<<data->size()<<std::endl;
-        std::cerr<<"QuakeAvg size is: "<<globalQuakes->size()<<std::endl;
-        std::cerr<<"connections size is: "<<_connect->size()<<std::endl;
-        try{input = new thrust::device_vector<int>(data->size());}
-        catch(std::bad_alloc &e){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, e.what() );exit(-1);}
-        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
-        try{retVec = new thrust::device_vector<double>(2160*_numofSites);}
-        catch(std::bad_alloc &e){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, e.what() );exit(-1);}
-        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
-
-        try{gQuakeAvg = new thrust::device_vector<double>(globalQuakes->size());}
-        catch(std::bad_alloc &e){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, e.what() );exit(-1);}
-        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
-
-        try{dConnect = new thrust::device_vector<thrust::pair<int, int> >(_connect->size());}
-        catch(std::bad_alloc &e){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, e.what() );exit(-1);}
-        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
-        std::cerr<<"all vectors resized"<<std::endl;
-
-        try{thrust::copy(_connect->begin(), _connect->end(), dConnect->begin());}
-        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
-
-        try{thrust::copy(data->begin(), data->end(), input->begin());}
-        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
-
-        try{thrust::copy(globalQuakes->begin(), globalQuakes->end(), gQuakeAvg->begin());}
-        catch(thrust::system_error &err){fprintf (stderr, "thrust error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, err.what() ); exit(-1);}
+        thrust::device_vector<int>* input = new thrust::device_vector<int>(data->size());
+        thrust::device_vector<double>* retVec = new thrust::device_vector<double>(2160*_numofSites);
+        thrust::device_vector<double>* gQuakeAvg = new thrust::device_vector<double>(globalQuakes->size());
+        thrust::device_vector<thrust::pair<int, int> >* dConnect = new thrust::device_vector<thrust::pair<int, int> >(_connect->size());
+        thrust::copy(data->begin(), data->end(), input->begin());
+        thrust::copy(globalQuakes->begin(), globalQuakes->end(), gQuakeAvg->begin());
+        thrust::copy(_connect->begin(), _connect->end(), dConnect->begin());
 
         int blocksNum; //the blocksize defined by the configurator
         int threadsPerBlock = 512; // the actual grid size needed
-        std::cerr<<"about to run cuda kernel.."<<std::endl;
-        _NNParams[8] = _memVirtualizer._DGenetics->size()/(_NNParams[7]);
+        double fitnessAvg=0;
+        int fitItr=0;
+
         std::cerr<<"number of threads is :"<<_NNParams[8]<<std::endl;
         blocksNum=_NNParams[8]/threadsPerBlock;
-        Net<<<blocksNum, threadsPerBlock>>>(_memVirtualizer.genetics(), convertToKernel(_NNParams),convertToKernel(gQuakeAvg),
-                                          convertToKernel(input),convertToKernel(_siteData),convertToKernel(_answers),
-                                          convertToKernel(dConnect),Kp,_sampleRate,_numofSites,hour,
-                                          meanCh1, meanCh2, meanCh3, stdCh1, stdCh2, stdCh3);
+        _genetics.array = (double*)memManager::alloc(_NNParams[1]*_NNParams[8]);//allocate nuerons for every individual.
+        Net<<<blocksNum, threadsPerBlock>>>(_genetics, _neurons, convertToKernel(_NNParams),convertToKernel(gQuakeAvg),
+                                            convertToKernel(input),convertToKernel(_siteData),convertToKernel(_answers),
+                                            convertToKernel(dConnect),Kp,_sampleRate,_numofSites, hour,
+                                            meanCh1, meanCh2, meanCh3, stdCh1, stdCh2, stdCh3);
+
         CUDA_SAFE_CALL(cudaPeekAtLastError());
         CUDA_SAFE_CALL(cudaDeviceSynchronize());
         int num_blocks = (_NNParams[8]/threadsPerBlock)+((_NNParams[8]%threadsPerBlock) ? 1 : 0);
         thrust::device_vector<double> partial_reduce_sums(num_blocks+1);
-        reduce_by_block<<<num_blocks, threadsPerBlock, threadsPerBlock*sizeof(double)>>>(_memVirtualizer.genetics(), // calculate the partial sums on the GPU.
-                                                                             convertToKernel(partial_reduce_sums),convertToKernel(_NNParams));
-        double fitnessAvg=0;
-        for(thrust::device_vector<double>::iterator it = partial_reduce_sums.begin(); // then since there shouldn't be THAT many blocks (~23437) lets calculate it on the CPU.
+        reduce_by_block<<<num_blocks, threadsPerBlock, threadsPerBlock*sizeof(double)>>>(_genetics,
+                                                                                         convertToKernel(partial_reduce_sums),
+                                                                                         convertToKernel(_NNParams));
+
+        CUDA_SAFE_CALL(cudaPeekAtLastError());
+        CUDA_SAFE_CALL(cudaDeviceSynchronize());
+
+        for(thrust::device_vector<double>::iterator it = partial_reduce_sums.begin();
             it != partial_reduce_sums.end(); ++it){
             fitnessAvg += *it;
+            fitItr++;
         }
-        fitnessAvg = fitnessAvg /(num_blocks+1);
+        fitnessAvg = fitnessAvg /fitItr;
         std::cerr<<"the average fitness for this round is: "<<fitnessAvg<<std::endl;
 
         delete dConnect;
         delete input;
         delete gQuakeAvg;
         delete retVec;
+        memManager::dealloc(_neurons.array);
     }
     else{
         std::cerr<<"entered not training version.."<<std::endl;

@@ -7,27 +7,10 @@ struct dataArray{
     thrust::device_ptr<T> array;
     int size;
 };
-
 template <typename T>
-class hVector{
-public:
-    void setMax(long long maxLen){
-        _hVect->resize(maxLen);
-        _itr = 0;
-        _maxLen = maxLen;
-    }
-    hVector(){
-        _hVect = new thrust::host_vector<double>;
-    }
-
-    ~hVector(){
-        delete _hVect;
-    }
-
-public:
-    thrust::host_vector<T>* _hVect;
-    long long _itr;
-    long long _maxLen;
+struct unifiedArray{
+    T* array;
+    int size;
 };
 
 template <typename T>

@@ -77,7 +77,6 @@ int main(int argc, char** arg){
     connections.push_back(make_pair(inputs+2, inputs+hidden+memGateIn+MemGateOut+MemGateForget+2));
     numWeights = connections.size()-3; //minus 3 because the memory neurons connect without weights.
     NetworkGenetic ConstructedNetwork(inputs, hidden, memory, outputs,numWeights, connections);
-    std::cout<<"about to start"<<std::endl;
     int sampleRate, numberOfSites, SLEN;
     std::cin>>sampleRate>>numberOfSites>>SLEN;
     std::vector<double> sitesData;
@@ -92,13 +91,10 @@ int main(int argc, char** arg){
     std::cin>>doTraining;
     if (doTraining == 1)
     {
-        std::cerr<<"looks like were doing training"<<std::endl;
         int gtf_site, gtf_hour;
         double gtf_lat, gtf_long, gtf_mag, gtf_dist;
         std::cin>>gtf_site>>gtf_hour>>gtf_lat>>gtf_long>>gtf_mag>>gtf_dist;
-        std::cerr<<"lets allocate GPU and host objects"<<std::endl;
-        ConstructedNetwork.allocateHostAndGPUObjects(0.50, 0.85);
-        std::cerr<<"checking for weightfile"<<std::endl;
+        ConstructedNetwork.allocateHostAndGPUObjects(0.85);
 
         if(!ConstructedNetwork.checkForWeights("/weights.bin"))
             ConstructedNetwork.initializeWeights();
@@ -134,14 +130,13 @@ int main(int argc, char** arg){
         }
         std::cerr<<"recieved all global quakes data"<<std::endl;
         int accVal=0;
-        globalQuakes->at(5) = hour;
-        for (int i=0; i<QLEN; i++){
+        for (int i=0; i<QLEN/5; i++){
             for(int k=0; k<4; k++){//don't start at 0 because 0 is time.
                 globalQuakes->at(k) += tmpQuakes->at(i*5+k);
                 accVal++;
             }
         }
-        for(int k=1; k<4; k++){
+        for(int k=0; k<4; k++){
             if(globalQuakes->at(k) !=0)
                 globalQuakes->at(k) = globalQuakes->at(k)/accVal; // push the hourly average into _DGQuakes for all parameters.
         }

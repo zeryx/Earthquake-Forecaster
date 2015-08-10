@@ -1,11 +1,10 @@
 #ifndef SYSINFO_H
 #define SYSINFO_H
 #include <sys/sysinfo.h>
-
 #include <iostream>
 #include <fstream>
 #include <cuda_runtime_api.h>
-long long GetHostRamInBytes(void)
+size_t GetHostRamInBytes(void)
 {
     FILE *meminfo = fopen("/proc/meminfo", "r");
     if(meminfo == NULL)
@@ -14,8 +13,8 @@ long long GetHostRamInBytes(void)
     char line[256];
     while(fgets(line, sizeof(line), meminfo))
     {
-        long long  ram;
-        if(sscanf(line, "MemFree: %lli kB", &ram) == 1)
+        size_t  ram;
+        if(sscanf(line, "MemFree: %zu kB", &ram) == 1)
         {
             fclose(meminfo);
             return ram*1000;
@@ -29,11 +28,10 @@ long long GetHostRamInBytes(void)
     exit(1);
 }
 
-long long GetDeviceRamInBytes(void){
+size_t GetDeviceRamInBytes(void){
     size_t free, total;
     cudaMemGetInfo(&free, &total);
-    long ret = free;
-    return ret;
+    return free;
 }
 
 #endif
