@@ -7,6 +7,7 @@
 #include <map>
 #include <thrust/pair.h>
 #include <cuda.h>
+#include "stdlib.h"
 #include <cuda_runtime_api.h>
 class  NetworkGenetic{
 public:
@@ -14,7 +15,7 @@ public:
                    const int &numOutNeurons, const int &numWeights,  std::vector< thrust::pair<int, int> >&connections);
     void errorFunc();
     void initializeWeights(); //initializes _data array and fills with random numbers
-    void allocateHostAndGPUObjects(float pMax);
+    void allocateHostAndGPUObjects(float pMax, size_t deviceRam, size_t hostRam);
     bool init(int sampleRate, int SiteNum, std::vector<double>siteData);
     void doingTraining(int site, int hour, double lat,
                        double lon, double mag, double dist);
@@ -22,7 +23,8 @@ public:
     void storeWeights(std::string filepath);
     bool checkForWeights(std::string filepath);
 private:
-    unifiedArray<double> _genetics;
+    unifiedArray<double> device_genetics;
+    unifiedArray<double> host_genetics;
     unifiedArray<double> _neurons;
     std::vector<thrust::pair<int, int> > *_connect;
     thrust::device_vector<int>_NNParams; // only vector that stays on here
@@ -32,7 +34,9 @@ private:
     bool _istraining;
     int _sampleRate;
     int _numofSites;
-
+    int _numOfStreams;
+    int _streamsize;
+    cudaStream_t* _stream;
 };
 
 

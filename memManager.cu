@@ -1,18 +1,18 @@
 #include "memManager.h"
-
+#include "stdio.h"
 #ifndef CUDA_SAFE_CALL
 #define CUDA_SAFE_CALL(call) do{cudaError_t err = call; if (cudaSuccess != err) {fprintf (stderr, "Cuda error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, cudaGetErrorString(err) ); exit(EXIT_FAILURE);}} while (0)
 #endif
 void* memManager::alloc(size_t len){
     void *ptr;
-    cudaMallocManaged(&ptr, len);
+    CUDA_SAFE_CALL(cudaMallocManaged(&ptr, len));
     return ptr;
 
 }
 
 void memManager::dealloc(void* ptr){
-    cudaDeviceSynchronize();
-    cudaFree(ptr);
+    CUDA_SAFE_CALL(cudaDeviceSynchronize());
+    CUDA_SAFE_CALL(cudaFree(ptr));
 }
 
 

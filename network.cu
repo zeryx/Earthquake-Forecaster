@@ -340,12 +340,12 @@ void NetworkGenetic::initializeWeights(){
     int blocksNum; //the blocksize defined by the configurator
     int threadsblock = 512; // the actual grid size needed
     int seedItr = 0;
-    _NNParams[8] = _genetics.size/(_NNParams[7]); // number of individuals globally.
+    _NNParams[8] = device_genetics.size/(_NNParams[7]); // number of individuals globally.
     //we create a thread for every weight location, so we can do the math faster.
     std::cerr<<"num of individuals about to be genned is: "<<_NNParams[8]<<std::endl;
     long seed = std::clock() + std::clock()*seedItr++;
     blocksNum=_NNParams[8]/threadsblock;
-    genWeights<<<blocksNum, threadsblock>>>(_genetics, seed, convertToKernel(_NNParams));
+    genWeights<<<blocksNum, threadsblock>>>(device_genetics, seed, convertToKernel(_NNParams));
     CUDA_SAFE_CALL( cudaPeekAtLastError());
     CUDA_SAFE_CALL( cudaDeviceSynchronize());
 
@@ -353,11 +353,27 @@ void NetworkGenetic::initializeWeights(){
 }
 
 
-void NetworkGenetic::allocateHostAndGPUObjects( float pMax){
-    size_t total = GetHostRamInBytes() + GetDeviceRamInBytes();
-    total = total * pMax *sizeof(double)*_NNParams[7]/_NNParams[7];
-    std::cerr<<"total to allocate is: "<<total<<std::endl;
-    _genetics.array = (double*)memManager::alloc(total);
+void NetworkGenetic::allocateHostAndGPUObjects( float pMax, size_t hostRam, size_t deviceRam){
+    size_t totalHost = hostRam;
+    size_t totalNeurons = (_NNParams[1]*deviceRam)/_NNParams[7];
+    size_t totalDevice = deviceRam - totalNeurons; // the number of neurons has precident on the number of devices.
+    _numOfStreams = hostRam/deviceRam +1; // number of streams for asynch kernels and mem transfers
+    _streamsize = (totalHost+totalNeurons+totalDevice)/_numOfStreams;
+    std::cerr<<"bytes per stream :"<<_streamsize<<std::endl;
+    totalHost = (totalHost * pMax*sizeof(double)*_NNParams[7])/(_NNParams[7]*sizeof(double));
+    totalDevice = (totalDevice * pMax*_NNParams[7])/(_NNParams[7]);
+    std::cerr<<"total to allocate is: "<<totalHost+totalDevice<<std::endl;
+    _neurons.size = totalNeurons/sizeof(double);
+    device_genetics.size = totalDevice/sizeof(double);
+    host_genetics.size = totalHost/sizeof(double);
+
+    CUDA_SAFE_CALL(cudaMalloc((void**)&device_genetics.array, totalDevice));
+    CUDA_SAFE_CALL(cudaMalloc((void**)&_neurons.array, totalNeurons));
+    CUDA_SAFE_CALL(cudaMallocHost((void**)&host_genetics.array, totalHost));
+
+    cudaStream_t newStream[_numOfStreams];
+    _stream = newStream;
+    CUDA_SAFE_CALL(cudaStreamCreate(_stream));
 }
 bool NetworkGenetic::init(int sampleRate, int SiteNum, std::vector<double> siteData){
     _sampleRate = sampleRate;
@@ -386,13 +402,19 @@ bool NetworkGenetic::checkForWeights(std::string filepath){
         int filesize = weightFile.tellg();
         weightFile.seekg(0, weightFile.beg);
         int itr =0;
-        _genetics.array = (double*)memManager::alloc(filesize+filesize*0.05);
-        while(std::getline(weightFile, line)){ // each line
+        this->allocateHostAndGPUObjects(0.85, GetDeviceRamInBytes(), filesize - GetDeviceRamInBytes());
+        for( int n=0; n<_numOfStreams; n++){
+            int offset = n*_streamsize/sizeof(double);
+           CUDA_SAFE_CALL(cudaMemset(&device_genetics.array, 0, _streamsize));
+        while(std::getline(weightFile, line) && itr <= device_genetics.size){ // each line
             std::string item;
             std::stringstream ss(line);
-            while(std::getline(ss, item, ',')){ // each weight
-                _genetics.array[itr] = std::atoi(item.c_str());
+            while(std::getline(ss, item, ',') && itr <= device_genetics.size){ // each weight
+                device_genetics.array[itr] = std::atoi(item.c_str());
             }
+        }
+        CUDA_SAFE_CALL(cudaMemcpyAsync(&host_genetics.array[offset], &device_genetics.array[offset], _streamsize, cudaMemcpyDeviceToHost, _stream[n]));
+        itr = 0;
         }
         weightFile.close();
         return true;
@@ -418,11 +440,13 @@ void NetworkGenetic::doingTraining(int site, int hour, double lat,
 void NetworkGenetic::storeWeights(std::string filepath){
     std::ofstream ret;
     ret.open(filepath.c_str(), std::ios_base::out | std::ios_base::trunc);
-    for(int i=0; i<_genetics.size; i++){
-        ret << _genetics.array[i]<<","<<std::endl;
+    for(int i=0; i<device_genetics.size; i++){
+        ret << device_genetics.array[i]<<","<<std::endl;
     }
     ret.close();
-    memManager::dealloc(_genetics.array);
+    cudaFree(device_genetics.array);
+    cudaFree(host_genetics.array);
+    cudaFree(_neurons.array);
 }
 
 void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<int> *data, double &Kp, std::vector<double> *globalQuakes)
@@ -465,8 +489,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
 
         std::cerr<<"number of threads is :"<<_NNParams[8]<<std::endl;
         blocksNum=_NNParams[8]/threadsPerBlock;
-        _genetics.array = (double*)memManager::alloc(_NNParams[1]*_NNParams[8]);//allocate nuerons for every individual.
-        Net<<<blocksNum, threadsPerBlock>>>(_genetics, _neurons, convertToKernel(_NNParams),convertToKernel(gQuakeAvg),
+        Net<<<blocksNum, threadsPerBlock>>>(device_genetics, _neurons, convertToKernel(_NNParams),convertToKernel(gQuakeAvg),
                                             convertToKernel(input),convertToKernel(_siteData),convertToKernel(_answers),
                                             convertToKernel(dConnect),Kp,_sampleRate,_numofSites, hour,
                                             meanCh1, meanCh2, meanCh3, stdCh1, stdCh2, stdCh3);
@@ -475,7 +498,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         CUDA_SAFE_CALL(cudaDeviceSynchronize());
         int num_blocks = (_NNParams[8]/threadsPerBlock)+((_NNParams[8]%threadsPerBlock) ? 1 : 0);
         thrust::device_vector<double> partial_reduce_sums(num_blocks+1);
-        reduce_by_block<<<num_blocks, threadsPerBlock, threadsPerBlock*sizeof(double)>>>(_genetics,
+        reduce_by_block<<<num_blocks, threadsPerBlock, threadsPerBlock*sizeof(double)>>>(device_genetics,
                                                                                          convertToKernel(partial_reduce_sums),
                                                                                          convertToKernel(_NNParams));
 
@@ -494,7 +517,6 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         delete input;
         delete gQuakeAvg;
         delete retVec;
-        memManager::dealloc(_neurons.array);
     }
     else{
         std::cerr<<"entered not training version.."<<std::endl;
