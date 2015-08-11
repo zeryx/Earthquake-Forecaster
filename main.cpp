@@ -96,7 +96,7 @@ int main(int argc, char** arg){
         double gtf_lat, gtf_long, gtf_mag, gtf_dist;
         std::cin>>gtf_site>>gtf_hour>>gtf_lat>>gtf_long>>gtf_mag>>gtf_dist;
 
-        if(!ConstructedNetwork.checkForWeights("/weights.bin"))
+        if(ConstructedNetwork.checkForWeights("/weights.bin"))
             ConstructedNetwork.initializeWeights();
         else
             ConstructedNetwork.allocateHostAndGPUObjects(0.85, GetDeviceRamInBytes(), GetHostRamInBytes());

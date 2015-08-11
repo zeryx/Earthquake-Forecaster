@@ -254,7 +254,6 @@ __global__ void Net(unifiedArray<double> weights, dataArray<int> params,
                 outputs[out] = ActFunc(outputs[out]);// then squash itr.
             }
 
-
             When[j] += outputs[0]*((2160-hour)-hour)+2160-hour; // nv = ((ov - omin)*(nmax-nmin) / (omax - omin))+nmin
             HowCertain[j] += outputs[1];
             CommunityMag[j] =  outputs[2]; // set the next sets communityMag = output #3.
@@ -370,6 +369,8 @@ void NetworkGenetic::initializeWeights(){
             std::cerr<<"seed is:"<<seed<<std::endl;
             CUDA_SAFE_CALL(cudaDeviceSynchronize());
             genWeights<<< gridSize, blockSize, 0, _stream[n]>>>(device_genetics, seed, convertToKernel(_NNParams));
+            CUDA_SAFE_CALL(cudaPeekAtLastError());
+
         }
     }
 }
