@@ -1,16 +1,16 @@
 ﻿#include "network.h"
 #include "getsys.h"
-#include <fstream>
 #include <thrust/device_vector.h>
 #include <thrust/random.h>
 #include <thrust/system_error.h>
-#include <utility>
-#include <vector>
-#include <ctime>
 #include <thrust/host_vector.h>
 #include <fstream>
 #include <sstream>
 #include <ostream>
+#include <utility>
+#include <vector>
+#include <ctime>
+#include <assert.h>
 
 //macros
 //cuda error message handling
@@ -81,31 +81,29 @@ __global__ void genWeights( unifiedArray<double> ref, long in, dataArray<int> pa
     int ind = idx*params.array[7];
     thrust::minstd_rand0 randEng;
     randEng.seed(idx);
+    int seed = idx+ref.size*in;
     thrust::uniform_real_distribution<double> uniDist(0,1);
-    long seed = idx+ref.size*in;
     for(int i=0; i<params.array[2]; i++){
         randEng.discard(seed+1);
         ref.array[ind+i] = uniDist(randEng);
     }
 }
 
-__global__ void Net(unifiedArray<double> weights, unifiedArray<double> neurons, dataArray<int> params,
+__global__ void Net(unifiedArray<double> weights, dataArray<int> params,
                     dataArray<double> globalQuakes, dataArray<int> inputVal, dataArray<double> siteData,
                     dataArray<double> answers, dataArray<thrust::pair<int, int> > connections,
                     double Kp, int sampleRate,int numOfSites, int hour,
                     double meanCh1, double meanCh2, double meanCh3, double stdCh1, double stdCh2, double stdCh3)
 {
 
-
-
     int idx = blockIdx.x * blockDim.x + threadIdx.x; // for each thread is one individual
     int ind = idx*params.array[7];
     typedef thrust::device_ptr<thrust::pair<int, int> >  connectPairMatrix;
     double CommunityLat = 0;
     double CommunityLon = 0;
-    double *When = (double*)malloc(numOfSites*sizeof(double));
-    double *HowCertain = (double*)malloc(numOfSites*sizeof(double));
-    double *CommunityMag = (double*)malloc(numOfSites*sizeof(double)); //give all sites equal mag to start, this value is [0,1]
+    double *When = new double[numOfSites];
+    double *HowCertain = new double[numOfSites];
+    double *CommunityMag = new double[numOfSites]; //give all sites equal mag to start, this value is [0,1]
 
     for(int step=0; step<3600*sampleRate; step++){
 
@@ -127,14 +125,7 @@ __global__ void Net(unifiedArray<double> weights, unifiedArray<double> neurons, 
             double GQuakeAvgBearing = bearingCalc(latSite, lonSite, avgLatGQuake, avgLonGQuake);
             double CommunityDist = distCalc(latSite, lonSite, CommunityLat, CommunityLon);
             double CommunityBearing = bearingCalc(latSite, lonSite, CommunityLat, CommunityLon);
-            //replace these with real connections, num of inputs, and num of hidden & memory neurons (mem neurons probably accurate)
-            int *input = (int*)malloc(params.array[3]*sizeof(int)); // number of inputs is 9.
-            double *hidden = (double*)malloc(params.array[4]*sizeof(double)); // for practice sake, lets say each input has its own neuron (might be true!)
-            double *mem = (double*)malloc(params.array[5]*sizeof(double)); // stores the input if gate is high
-            double *memGateIn = (double*)malloc(params.array[5]*sizeof(double)); //connects to the input layer and the memN associated with input, if 1 it sends up stream and deletes, if low it keeps.
-            double *memGateOut = (double*)malloc(params.array[5]*sizeof(double));
-            double *memGateForget = (double*)malloc(params.array[5]*sizeof(double));
-            double *outputs = (double*)malloc(params.array[6]*sizeof(double)); /* 3 outputs, 1 with an hour in the future when the earthquake will hit,
+            /* 3 outputs, 1 with an hour in the future when the earthquake will hit,
                 1 with the porbability of that earthquake happening (between [0,1]) and 1 with the sites magnitude (for community feedback) */
             int n =0;
             int startOfInput = 0;
@@ -144,6 +135,15 @@ __global__ void Net(unifiedArray<double> weights, unifiedArray<double> neurons, 
             int startOfMemGateOut = startOfMemGateIn + params.array[5];
             int startOfMemGateForget = startOfMemGateOut + params.array[5];
             int startOfOutput = startOfMemGateForget + params.array[5];
+            // the weights array carries the neuron scratch space used for the net kernel, I'd like to replace this and reduce the memory allocation asap.
+            double *input = &weights.array[startOfInput]; // number of inputs is 9.
+            double *hidden = &weights.array[startOfHidden]; // for practice sake, lets say each input has its own neuron (might be true!)
+            double *mem = &weights.array[startOfMem]; // stores the input if gate is high
+            double *memGateIn = &weights.array[startOfMemGateIn]; //connects to the input layer and the memN associated with input, if 1 it sends up stream and deletes, if low it keeps.
+            double *memGateOut = &weights.array[startOfMemGateOut];
+            double *memGateForget = &weights.array[startOfMemGateForget];
+            double *outputs = &weights.array[startOfOutput];
+
             input[0] = normalize(inputVal.array[(3600*sampleRate*j*3 + 1*(3600*sampleRate)+step)], meanCh1, stdCh1);//channel 1
             input[1] = normalize(inputVal.array[(3600*sampleRate*j*3 + 2*(3600*sampleRate)+step)], meanCh2, stdCh2);//channel 2
             input[2] = normalize(inputVal.array[(3600*sampleRate*j*3 + 3*(3600*sampleRate)+step)], meanCh3, stdCh3);//channel 3
@@ -310,7 +310,6 @@ __global__ void reduce_by_block(unifiedArray<double> weights,
             // add a partial sum upstream to our own
             sdata[threadIdx.x] += sdata[threadIdx.x + offset];
         }
-
         // wait until all threads in the block have
         // updated their partial sums
         __syncthreads();
@@ -323,6 +322,14 @@ __global__ void reduce_by_block(unifiedArray<double> weights,
     }
 }
 
+__global__ void swapMemory(unifiedArray<double> device, unifiedArray<double>host, int offset){//swap device and host memory in place.
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    double tmp;
+    tmp = device.array[idx];
+    device.array[idx] = host.array[idx+offset];
+    host.array[idx+offset] = tmp;
+}
+
 NetworkGenetic::NetworkGenetic(const int &numInputNodes, const int &numHiddenNeurons, const int &numMemoryNeurons,
                                const int &numOutNeurons, const int &numWeights, std::vector< thrust::pair<int, int> >&connections){
     this->_NNParams.resize(15, 0); // room to grow
@@ -332,48 +339,76 @@ NetworkGenetic::NetworkGenetic(const int &numInputNodes, const int &numHiddenNeu
     _NNParams[4] = numHiddenNeurons;
     _NNParams[5] = numMemoryNeurons;
     _NNParams[6] = numOutNeurons;
-    _NNParams[7] = _NNParams[2] + 1 + 1; // plus 1 for fitness, plus 1 for community output composite vector
+    _NNParams[7] = _NNParams[2] + _NNParams[1] + 1 + 1; // plus 1 for fitness, plus 1 for community output composite vector
     _connect = &connections;
 }
 
 void NetworkGenetic::initializeWeights(){
-    int blocksNum; //the blocksize defined by the configurator
-    int threadsblock = 512; // the actual grid size needed
+    int gridSize; //the blocksize defined by the configurator
+    int blockSize = 512; // number of blocks in the grid
     int seedItr = 0;
-    _NNParams[8] = device_genetics.size/(_NNParams[7]); // number of individuals globally.
-    //we create a thread for every weight location, so we can do the math faster.
-    std::cerr<<"num of individuals about to be genned is: "<<_NNParams[8]<<std::endl;
-    long seed = std::clock() + std::clock()*seedItr++;
-    blocksNum=_NNParams[8]/threadsblock;
-    genWeights<<<blocksNum, threadsblock>>>(device_genetics, seed, convertToKernel(_NNParams));
-    CUDA_SAFE_CALL( cudaPeekAtLastError());
-    CUDA_SAFE_CALL( cudaDeviceSynchronize());
+    int global_offset=0;
+    for(int n=0; n<_numOfStreams; n++){
+        if(n <_numOfStreams-1){
+            long seed = std::clock() + std::clock()*seedItr++;
+            gridSize=(_streamSize/_NNParams[7])/(blockSize);
+            std::cerr<<"number of blocks is: "<<gridSize<<std::endl;
+            std::cerr<<"total num of individuals in this device: "<<gridSize*blockSize<<std::endl;
+            std::cerr<<"stream number #"<<n<<std::endl;
+            std::cerr<<"seed is:"<<seed<<std::endl;
+            std::cerr<<"global offset: "<<global_offset<<std::endl;
+            genWeights<<< gridSize, blockSize, 0, _stream[n]>>>(device_genetics, seed, convertToKernel(_NNParams));
+            CUDA_SAFE_CALL(cudaPeekAtLastError());
+            CUDA_SAFE_CALL(cudaMemcpyAsync(&host_genetics.array[global_offset], &device_genetics.array[0], _streambytes, cudaMemcpyDeviceToHost, _stream[n]));
 
-    //since were using unified memory for weights, no need to create our own unified memory, doh!
+            global_offset += _streamSize;
+        }
+        else{//host ram is full, fill the GPU now and then were done.
+            long seed = std::clock() + std::clock()*seedItr++;
+            gridSize=(_streambytes/_NNParams[7])/(blockSize); // round down isntead of up.
+            std::cerr<<"stream number #"<<n<<std::endl;
+            std::cerr<<"seed is:"<<seed<<std::endl;
+            CUDA_SAFE_CALL(cudaDeviceSynchronize());
+            genWeights<<< gridSize, blockSize, 0, _stream[n]>>>(device_genetics, seed, convertToKernel(_NNParams));
+        }
+    }
 }
 
 
-void NetworkGenetic::allocateHostAndGPUObjects( float pMax, size_t hostRam, size_t deviceRam){
+void NetworkGenetic::allocateHostAndGPUObjects( float pMax, size_t deviceRam, size_t hostRam){
     size_t totalHost = hostRam;
-    size_t totalNeurons = (_NNParams[1]*deviceRam)/_NNParams[7];
-    size_t totalDevice = deviceRam - totalNeurons; // the number of neurons has precident on the number of devices.
-    _numOfStreams = hostRam/deviceRam +1; // number of streams for asynch kernels and mem transfers
-    _streamsize = (totalHost+totalNeurons+totalDevice)/_numOfStreams;
-    std::cerr<<"bytes per stream :"<<_streamsize<<std::endl;
-    totalHost = (totalHost * pMax*sizeof(double)*_NNParams[7])/(_NNParams[7]*sizeof(double));
-    totalDevice = (totalDevice * pMax*_NNParams[7])/(_NNParams[7]);
-    std::cerr<<"total to allocate is: "<<totalHost+totalDevice<<std::endl;
-    _neurons.size = totalNeurons/sizeof(double);
-    device_genetics.size = totalDevice/sizeof(double);
+    size_t totalWeights = deviceRam; // the number of neurons has precident on the number of devices.
+    size_t totalNeurons;
+    std::cerr<<"total free device ram : "<<deviceRam<<std::endl;
+    std::cerr<<"total free host ram : "<<hostRam<<std::endl;
+    totalHost = (totalHost*pMax*_NNParams[7])/(_NNParams[7]);
+    totalWeights = (totalWeights*pMax*_NNParams[7])/(_NNParams[7]);
+    totalWeights = totalWeights - _NNParams[1]*(totalWeights/_NNParams[7]);
+    totalNeurons = (_NNParams[1])*(totalWeights/_NNParams[7]);
+    //make each of the memory arguments divisible by 512 (threads per block)
+    _streambytes = (totalNeurons+totalWeights);
+    _streamSize = _streambytes/sizeof(double);
+    assert(_streambytes == (totalNeurons + totalWeights));
+    _numOfStreams = ceil((totalNeurons + totalWeights +totalHost)/_streambytes); // number of streams = total array alloc / number of streams.
+    assert(_streambytes * _numOfStreams <= totalNeurons+totalWeights+totalHost);
+    std::cerr<<"bytes per stream :"<<_streambytes<<std::endl;
+    std::cerr<<"number of streams: "<<_numOfStreams<<std::endl;
+    device_genetics.size = (totalWeights+totalNeurons)/sizeof(double);
     host_genetics.size = totalHost/sizeof(double);
-
-    CUDA_SAFE_CALL(cudaMalloc((void**)&device_genetics.array, totalDevice));
-    CUDA_SAFE_CALL(cudaMalloc((void**)&_neurons.array, totalNeurons));
-    CUDA_SAFE_CALL(cudaMallocHost((void**)&host_genetics.array, totalHost));
-
-    cudaStream_t newStream[_numOfStreams];
-    _stream = newStream;
-    CUDA_SAFE_CALL(cudaStreamCreate(_stream));
+    std::cerr<<"device ram to allocate: "<<totalWeights<<std::endl;
+    std::cerr<<"host ram to allocate: "<<totalHost<<std::endl;
+    std::cerr<<"neuron ram to allocate: "<<totalNeurons<<std::endl;
+    CUDA_SAFE_CALL(cudaDeviceReset());
+    CUDA_SAFE_CALL(cudaSetDeviceFlags(cudaDeviceMapHost));
+    CUDA_SAFE_CALL(cudaHostAlloc((void**)&host_genetics.array, totalHost, cudaHostAllocMapped | cudaHostAllocPortable));
+    CUDA_SAFE_CALL(cudaHostGetDevicePointer((void**)&host_genetics_device.array, (void*)host_genetics.array, 0 ));
+    CUDA_SAFE_CALL(cudaMalloc((void**) &device_genetics.array, totalWeights + totalNeurons));
+    std::cerr<<"all allocated, moving on."<<std::endl;
+    _stream.resize(_numOfStreams);
+    for(int i=0; i<_numOfStreams; i++){
+        CUDA_SAFE_CALL(cudaStreamCreate(&_stream.at(i)));
+        CUDA_SAFE_CALL( cudaStreamQuery(_stream.at(i)));
+    }
 }
 bool NetworkGenetic::init(int sampleRate, int SiteNum, std::vector<double> siteData){
     _sampleRate = sampleRate;
@@ -404,17 +439,17 @@ bool NetworkGenetic::checkForWeights(std::string filepath){
         int itr =0;
         this->allocateHostAndGPUObjects(0.85, GetDeviceRamInBytes(), filesize - GetDeviceRamInBytes());
         for( int n=0; n<_numOfStreams; n++){
-            int offset = n*_streamsize/sizeof(double);
-           CUDA_SAFE_CALL(cudaMemset(&device_genetics.array, 0, _streamsize));
-        while(std::getline(weightFile, line) && itr <= device_genetics.size){ // each line
-            std::string item;
-            std::stringstream ss(line);
-            while(std::getline(ss, item, ',') && itr <= device_genetics.size){ // each weight
-                device_genetics.array[itr] = std::atoi(item.c_str());
+            int offset = n*_streambytes/sizeof(double);
+            CUDA_SAFE_CALL(cudaMemset(&device_genetics.array, 0, _streambytes));
+            while(std::getline(weightFile, line) && itr <= device_genetics.size){ // each line
+                std::string item;
+                std::stringstream ss(line);
+                while(std::getline(ss, item, ',') && itr <= device_genetics.size){ // each weight
+                    device_genetics.array[itr] = std::atoi(item.c_str());
+                }
             }
-        }
-        CUDA_SAFE_CALL(cudaMemcpyAsync(&host_genetics.array[offset], &device_genetics.array[offset], _streamsize, cudaMemcpyDeviceToHost, _stream[n]));
-        itr = 0;
+            CUDA_SAFE_CALL(cudaMemcpyAsync(&host_genetics.array[offset], &device_genetics.array[offset], _streambytes, cudaMemcpyDeviceToHost, _stream[n]));
+            itr = 0;
         }
         weightFile.close();
         return true;
@@ -444,9 +479,13 @@ void NetworkGenetic::storeWeights(std::string filepath){
         ret << device_genetics.array[i]<<","<<std::endl;
     }
     ret.close();
-    cudaFree(device_genetics.array);
-    cudaFree(host_genetics.array);
-    cudaFree(_neurons.array);
+    CUDA_SAFE_CALL(cudaDeviceSynchronize());
+    for(int i=0; i<_numOfStreams; i++){
+        CUDA_SAFE_CALL(cudaStreamDestroy(_stream[i]));
+    }
+    CUDA_SAFE_CALL(cudaFree(device_genetics.array));
+    CUDA_SAFE_CALL(cudaFree(host_genetics.array));
+
 }
 
 void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<int> *data, double &Kp, std::vector<double> *globalQuakes)
@@ -482,33 +521,39 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         thrust::copy(globalQuakes->begin(), globalQuakes->end(), gQuakeAvg->begin());
         thrust::copy(_connect->begin(), _connect->end(), dConnect->begin());
 
-        int blocksNum; //the blocksize defined by the configurator
-        int threadsPerBlock = 512; // the actual grid size needed
+        int gridSize; //the blocksize defined by the configurator
+        int blockSize = 512; // the actual grid size needed
         double fitnessAvg=0;
         int fitItr=0;
+        gridSize=(_streamSize/_NNParams[7])/(blockSize);
+        int host_offset = 0;
+        for(int n=0; n<_numOfStreams; n++){
 
-        std::cerr<<"number of threads is :"<<_NNParams[8]<<std::endl;
-        blocksNum=_NNParams[8]/threadsPerBlock;
-        Net<<<blocksNum, threadsPerBlock>>>(device_genetics, _neurons, convertToKernel(_NNParams),convertToKernel(gQuakeAvg),
-                                            convertToKernel(input),convertToKernel(_siteData),convertToKernel(_answers),
-                                            convertToKernel(dConnect),Kp,_sampleRate,_numofSites, hour,
-                                            meanCh1, meanCh2, meanCh3, stdCh1, stdCh2, stdCh3);
+            Net<<<gridSize, blockSize, 0, _stream[n]>>>(device_genetics, convertToKernel(_NNParams),convertToKernel(gQuakeAvg),
+                                                        convertToKernel(input),convertToKernel(_siteData),convertToKernel(_answers),
+                                                        convertToKernel(dConnect),Kp,_sampleRate,_numofSites, hour,
+                                                        meanCh1, meanCh2, meanCh3, stdCh1, stdCh2, stdCh3);
 
-        CUDA_SAFE_CALL(cudaPeekAtLastError());
-        CUDA_SAFE_CALL(cudaDeviceSynchronize());
-        int num_blocks = (_NNParams[8]/threadsPerBlock)+((_NNParams[8]%threadsPerBlock) ? 1 : 0);
-        thrust::device_vector<double> partial_reduce_sums(num_blocks+1);
-        reduce_by_block<<<num_blocks, threadsPerBlock, threadsPerBlock*sizeof(double)>>>(device_genetics,
-                                                                                         convertToKernel(partial_reduce_sums),
-                                                                                         convertToKernel(_NNParams));
-
-        CUDA_SAFE_CALL(cudaPeekAtLastError());
-        CUDA_SAFE_CALL(cudaDeviceSynchronize());
-
-        for(thrust::device_vector<double>::iterator it = partial_reduce_sums.begin();
-            it != partial_reduce_sums.end(); ++it){
-            fitnessAvg += *it;
-            fitItr++;
+            CUDA_SAFE_CALL(cudaPeekAtLastError());
+            std::cerr<<"net completed."<<std::endl;
+            int gridSize = (_NNParams[8]/blockSize)+((_NNParams[8]%blockSize) ? 1 : 0);
+            thrust::device_vector<double> partial_reduce_sums(gridSize+1);
+            reduce_by_block<<<gridSize, blockSize, blockSize*sizeof(double), _stream[n]>>>(device_genetics,
+                                                                                           convertToKernel(partial_reduce_sums),
+                                                                                           convertToKernel(_NNParams));
+            std::cerr<<"reduce by block completed."<<std::endl;
+            gridSize=_streamSize/blockSize; //swap in place, every double is a job.
+            CUDA_SAFE_CALL(cudaPeekAtLastError());
+            CUDA_SAFE_CALL(cudaStreamSynchronize(_stream[n]));
+            swapMemory<<<gridSize, blockSize, 0, _stream[n]>>>(device_genetics, host_genetics_device, host_offset);
+            std::cerr<<"memory swap completed"<<std::endl;
+            CUDA_SAFE_CALL(cudaPeekAtLastError());
+                    for(thrust::device_vector<double>::iterator it = partial_reduce_sums.begin();
+                    it != partial_reduce_sums.end(); ++it){
+                fitnessAvg += *it;
+                fitItr++;
+            }
+            host_offset += _streamSize;
         }
         fitnessAvg = fitnessAvg /fitItr;
         std::cerr<<"the average fitness for this round is: "<<fitnessAvg<<std::endl;

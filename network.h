@@ -25,7 +25,7 @@ public:
 private:
     unifiedArray<double> device_genetics;
     unifiedArray<double> host_genetics;
-    unifiedArray<double> _neurons;
+    unifiedArray<double> host_genetics_device;
     std::vector<thrust::pair<int, int> > *_connect;
     thrust::device_vector<int>_NNParams; // only vector that stays on here
     thrust::device_vector<double> _siteData;
@@ -34,9 +34,10 @@ private:
     bool _istraining;
     int _sampleRate;
     int _numofSites;
-    int _numOfStreams;
-    int _streamsize;
-    cudaStream_t* _stream;
+    size_t _numOfStreams;
+    size_t _streambytes;
+    size_t _streamSize;
+    std::vector<cudaStream_t> _stream;
 };
 
 
