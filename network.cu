@@ -99,7 +99,6 @@ __global__ void Net(unifiedArray<double> weights, dataArray<int> params,
     int idx = blockIdx.x * blockDim.x + threadIdx.x; // for each thread is one individual
     int ind = idx*params.array[7];
     typedef thrust::device_ptr<thrust::pair<int, int> >  connectPairMatrix;
-
 //    double *When = new double[numOfSites];
 //    double *HowCertain = new double[numOfSites];
 //    double *CommunityMag = new double[numOfSites]; //give all sites equal mag to start, this value is [0,1]
@@ -354,13 +353,11 @@ void NetworkGenetic::initializeWeights(){
     int global_offset=0;
     int device_offset=0;
     for(int n=0; n<_numOfStreams; n++){
-        if(_numOfStreams%4==0 && _numOfStreams !=0)
+        if(n%4==0 && n !=0)
             device_offset =0;
         if(n <_numOfStreams-4){ // if theres space left on the host, gen and push to host
             long seed = std::clock() + std::clock()*seedItr++;
-            gridSize=(_streamSize/_NNParams[7])/(blockSize);
-            std::cerr<<"number of blocks is: "<<gridSize<<std::endl;
-            std::cerr<<"total num of individuals in this device: "<<gridSize*blockSize<<std::endl;
+            gridSize=(_streamSize/_NNParams[7])/blockSize;
             std::cerr<<"stream number #"<<n<<std::endl;
             std::cerr<<"seed is:"<<seed<<std::endl;
             std::cerr<<"global offset: "<<global_offset<<std::endl;
@@ -368,7 +365,6 @@ void NetworkGenetic::initializeWeights(){
             genWeights<<< gridSize, blockSize, 0, _stream[n]>>>(device_genetics, seed, convertToKernel(_NNParams), device_offset);
             CUDA_SAFE_CALL(cudaPeekAtLastError());
             CUDA_SAFE_CALL(cudaMemcpyAsync(&host_genetics.array[global_offset], &device_genetics.array[device_offset], _streambytes, cudaMemcpyDeviceToHost, _stream[n]));
-
         }
         else{//host ram is full, fill the GPU now and then were done.
             long seed = std::clock() + std::clock()*seedItr++;
@@ -380,6 +376,10 @@ void NetworkGenetic::initializeWeights(){
         }
         global_offset += _streamSize;
         device_offset += _streamSize;
+    }
+    CUDA_SAFE_CALL(cudaDeviceSynchronize());
+    for(int i=0; i<host_genetics.size; i++){
+        std::cerr<<i<<"is :"<<host_genetics.array[i]<<std::endl;
     }
 }
 
@@ -396,11 +396,11 @@ void NetworkGenetic::allocateHostAndGPUObjects( float pMax, size_t deviceRam, si
     while(totalDevice%_NNParams[7] || totalDevice%sizeof(double) || totalDevice%512)
         totalDevice = totalDevice -1;
     //make each of the memory arguments divisible by 512 (threads per block)
-    _streambytes = (totalDevice)/4; // stream size is equal to the total genetics device memory alloced/4
     std::cerr<<"bytes per stream :"<<_streambytes<<std::endl;
-    _streamSize = _streambytes/sizeof(double);
+    _streamSize = totalDevice/(sizeof(double)*4);
+    _streambytes = _streamSize*sizeof(double);
     assert(_streambytes == _streamSize*sizeof(double));
-    _numOfStreams = ceil((totalDevice +totalHost)/_streambytes); // number of streams = total array alloc / number of streams.
+    _numOfStreams = ceil((totalDevice/sizeof(double) +totalHost/sizeof(double))/_streamSize); // number of streams = total array alloc / number of streams.
     assert(_streambytes * _numOfStreams <= totalDevice+totalHost);
     std::cerr<<"number of streams: "<<_numOfStreams<<std::endl;
     device_genetics.size = (totalDevice)/sizeof(double);
@@ -536,6 +536,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         double fitnessAvg=0;
         int fitItr=0;
         size_t host_offset = 0;
+        size_t device_offset=0;
         for(int n=0; n<_numOfStreams; n++){
             std::cerr<<"regular grid size: "<<regularGridSize<<std::endl;
             Net<<<regularGridSize, blockSize, 0, _stream[n]>>>(device_genetics, convertToKernel(_NNParams),convertToKernel(gQuakeAvg),

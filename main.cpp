@@ -76,8 +76,8 @@ int main(int argc, char** arg){
     connections.push_back(make_pair(inputs+2, inputs+hidden+memGateIn+MemGateOut+MemGateForget+0));
     connections.push_back(make_pair(inputs+2, inputs+hidden+memGateIn+MemGateOut+MemGateForget+1));
     connections.push_back(make_pair(inputs+2, inputs+hidden+memGateIn+MemGateOut+MemGateForget+2));
-    numWeights = connections.size()-3; //minus 3 because the memory neurons connect without weights.
-    NetworkGenetic ConstructedNetwork(inputs, hidden, memory, outputs,numWeights, connections);
+    numWeights = connections.size()-memory; //minus 3 because the memory neurons connect without weights.
+    NetworkGenetic ConstructedNetwork(inputs, hidden, memory, outputs, numWeights, connections);
     int sampleRate, numberOfSites, SLEN;
     std::cin>>sampleRate>>numberOfSites>>SLEN;
     std::vector<double> sitesData;
@@ -100,6 +100,7 @@ int main(int argc, char** arg){
             ConstructedNetwork.initializeWeights();
         else
             ConstructedNetwork.allocateHostAndGPUObjects(0.85, GetDeviceRamInBytes(), GetHostRamInBytes());
+            ConstructedNetwork.initializeWeights();
         std::cerr<<"weights initialized, setting training"<<std::endl;
         ConstructedNetwork.doingTraining(gtf_site, gtf_hour, gtf_lat, gtf_long, gtf_mag, gtf_dist);
     }

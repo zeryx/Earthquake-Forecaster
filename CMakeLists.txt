@@ -5,5 +5,5 @@ INCLUDE(FindCUDA)
 FILE(GLOB SOURCES "*.cu" "*.cpp" "*.c" "*.h")
 CUDA_ADD_EXECUTABLE(${PROJECT_NAME} ${SOURCES})
 LIST(APPEND CMAKE_CXX_FLAGS "-std=c++11 -O3 -ffast-math -Wall")
-LIST(APPEND CUDA_NVCC_FLAGS --compiler-options  -g -lineinfo -fno-strict-aliasing -use_fast_math -Xptxas -dlcm=cg)
-LIST(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_30,code=sm_30)
+LIST(APPEND CUDA_NVCC_FLAGS --compiler-options  -g -lineinfo -use_fast_math)
+
