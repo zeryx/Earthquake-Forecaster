@@ -2,8 +2,6 @@
 #include "getsys.h"
 #include <thrust/device_vector.h>
 #include <thrust/random.h>
-#include <thrust/system_error.h>
-#include <thrust/host_vector.h>
 #include <fstream>
 #include <sstream>
 #include <ostream>
@@ -15,7 +13,7 @@
 //macros
 //cuda error message handling
 #ifndef CUDA_SAFE_CALL
-#define CUDA_SAFE_CALL(call) do{cudaError_t err = call; if (cudaSuccess != err) {fprintf (stderr, "Cuda error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, cudaGetErrorString(err) ); exit(EXIT_FAILURE);}} while (0)
+#define CUDA_SAFE_CALL(call) do{cudaError_t err = call; if (cudaSuccess != err) {fprintf (stderr, "Cuda error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, cudaGetErrorString(err) ); cudaDeviceReset(); exit(EXIT_FAILURE);}} while (0)
 #endif
 //neural functions
 __host__ __device__ inline double sind(double x)
@@ -75,7 +73,7 @@ __host__ __device__ inline double shift(double x, double max, double min)
     return ret;
 }
 
-__global__ void genWeights( unifiedArray<double> ref, long in, dataArray<int> params, size_t offset)
+__global__ void genWeights( kernelArray<double> ref, long in, kernelArray<int> params, size_t offset)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int ind = idx*params.array[7]+offset;
@@ -89,9 +87,9 @@ __global__ void genWeights( unifiedArray<double> ref, long in, dataArray<int> pa
     }
 }
 
-__global__ void Net(unifiedArray<double> weights, dataArray<int> params,
-                    dataArray<double> globalQuakes, dataArray<int> inputVal, dataArray<double> siteData,
-                    dataArray<double> answers, dataArray<thrust::pair<int, int> > connections,
+__global__ void Net(kernelArray<double> weights, kernelArray<int> params,
+                    kernelArray<double> globalQuakes, kernelArray<int> inputVal, kernelArray<double> siteData,
+                    kernelArray<double> answers, kernelArray<thrust::pair<int, int> > connections,
                     double Kp, int sampleRate,int numOfSites, int hour,
                     double meanCh1, double meanCh2, double meanCh3, double stdCh1, double stdCh2, double stdCh3)
 {
@@ -99,12 +97,12 @@ __global__ void Net(unifiedArray<double> weights, dataArray<int> params,
     int idx = blockIdx.x * blockDim.x + threadIdx.x; // for each thread is one individual
     int ind = idx*params.array[7];
     typedef thrust::device_ptr<thrust::pair<int, int> >  connectPairMatrix;
-//    double *When = new double[numOfSites];
-//    double *HowCertain = new double[numOfSites];
-//    double *CommunityMag = new double[numOfSites]; //give all sites equal mag to start, this value is [0,1]
-//    memset(&When[0], 0, numOfSites*sizeof(double));
-//    memset(&HowCertain[0], 0, numOfSites*sizeof(double));
-//    memset(&CommunityMag[0], 0, numOfSites*sizeof(double));
+    double *When = new double[numOfSites];
+    double *HowCertain = new double[numOfSites];
+    double *CommunityMag = new double[numOfSites]; //give all sites equal mag to start, this value is [0,1]
+    memset(&When[0], 0, numOfSites*sizeof(double));
+    memset(&HowCertain[0], 0, numOfSites*sizeof(double));
+    memset(&CommunityMag[0], 0, numOfSites*sizeof(double));
 //    for(int step=0; step<3600*sampleRate; step++){
 
 //        double CommunityLat = 0;
@@ -130,13 +128,13 @@ __global__ void Net(unifiedArray<double> weights, dataArray<int> params,
 //            /* 3 outputs, 1 with an hour in the future when the earthquake will hit,
 //                    1 with the porbability of that earthquake happening (between [0,1]) and 1 with the sites magnitude (for community feedback) */
 //            int n =0; // n is the weight number
-//            int startOfInput = ind + params.array[2];;
-//            int startOfHidden = startOfInput +params.array[3];
-//            int startOfMem = startOfHidden + params.array[4];
-//            int startOfMemGateIn = startOfMem + params.array[5];
-//            int startOfMemGateOut = startOfMemGateIn + params.array[5];
-//            int startOfMemGateForget = startOfMemGateOut + params.array[5];
-//            int startOfOutput = startOfMemGateForget + params.array[5];
+//            int startOfInput = ind + params[2];;
+//            int startOfHidden = startOfInput +params[3];
+//            int startOfMem = startOfHidden + params[4];
+//            int startOfMemGateIn = startOfMem + params[5];
+//            int startOfMemGateOut = startOfMemGateIn + params[5];
+//            int startOfMemGateForget = startOfMemGateOut + params[5];
+//            int startOfOutput = startOfMemGateForget + params[5];
             // the weights array carries the neuron scratch space used for the net kernel, I'd like to replace this and reduce the memory allocation asap.
 //            double *input = &weights.array[startOfInput]; // number of inputs is 9.
 //            double *hidden = &weights.array[startOfHidden]; // for practice sake, lets say each input has its own neuron (might be true!)
@@ -156,21 +154,21 @@ __global__ void Net(unifiedArray<double> weights, dataArray<int> params,
 //            input[7] = shift(CommunityDist,40075.1/2, 0);
 //            input[8] = shift(CommunityBearing, 360, 0);
             //lets reset all neuron values for this new timestep (except memory neurons)
-//            for(int gate=0; gate<params.array[5]; gate++){
+//            for(int gate=0; gate<params[5]; gate++){
 //                memGateIn[gate] = 0;
 //                memGateOut[gate] = 0;
 //                memGateForget[gate] = 0;
 //            }
-//            for(int hid=0; hid<params.array[4]; hid++){
+//            for(int hid=0; hid<params[4]; hid++){
 //                hidden[hid] = 0;
 //            }
-//            for(int out=0; out<params.array[6]; out++){
+//            for(int out=0; out<params[6]; out++){
 //                outputs[out] = 0;
 //            }
 
 //            //now that everything that should be zeroed is zeroed, lets start the network.
 //            //mem gates & LSTM nodes --
-//            for(int gate = 0; gate<params.array[5]; gate++){//calculate memory gate node values, you can connect inputs & hidden neurons to them.
+//            for(int gate = 0; gate<params[5]; gate++){//calculate memory gate node values, you can connect inputs & hidden neurons to them.
 //                for(connectPairMatrix it = connections.array; it!= connections.array+connections.size; ++it){//for memGateIn
 //                    thrust::pair<int, int>itr = static_cast<thrust::pair<int, int> >(*it); // this needs to be created to use the iterator it correctly.
 //                    if(itr.second == gate+startOfMemGateIn && itr.second < startOfHidden){ //for inputs
@@ -203,7 +201,7 @@ __global__ void Net(unifiedArray<double> weights, dataArray<int> params,
 //                memGateForget[gate] = ActFunc(memGateForget[gate]);
 //            }
 //            //since we calculated the values for memGateIn and memGateOut, and MemGateForget..
-//            for (int gate = 0; gate<params.array[5]; gate++){ // if memGateIn is greater than 0.3, then let mem = the sum inputs attached to memGateIn
+//            for (int gate = 0; gate<params[5]; gate++){ // if memGateIn is greater than 0.3, then let mem = the sum inputs attached to memGateIn
 //                if(memGateIn[gate] > 0.5){ //gate -startOfMemGateIn = [0, num of mem neurons]
 //                    for(connectPairMatrix it = connections.array; it!= connections.array+connections.size; ++it){
 //                        thrust::pair<int, int>itr = static_cast<thrust::pair<int, int> >(*it);
@@ -227,7 +225,7 @@ __global__ void Net(unifiedArray<double> weights, dataArray<int> params,
 //            }
 
 //            // hidden neuron nodes --
-//            for(int hid=0; hid<params.array[4]; hid++){ // for all hidden neurons at layer 1, lets sum the inputs, the memory values were already added.
+//            for(int hid=0; hid<params[4]; hid++){ // for all hidden neurons at layer 1, lets sum the inputs, the memory values were already added.
 //                for(connectPairMatrix it = connections.array; it!= connections.array+connections.size; ++it){ // Add the inputs to the hidden neurons
 //                    thrust::pair<int, int>itr = static_cast<thrust::pair<int, int> >(*it);
 //                    if(itr.second == hid+startOfHidden && itr.first < startOfHidden && itr.first >= startOfInput){ // if an input connects with this hidden neuron
@@ -245,7 +243,7 @@ __global__ void Net(unifiedArray<double> weights, dataArray<int> params,
 //            }
 //            //output nodes --
 
-//            for(int out =0; out<params.array[6]; out++){// add hidden neurons to the output nodes
+//            for(int out =0; out<params[6]; out++){// add hidden neurons to the output nodes
 //                for(connectPairMatrix it = connections.array; it!= connections.array+connections.size; ++it){
 //                    thrust::pair<int, int>itr = static_cast<thrust::pair<int, int> >(*it);
 //                    if(itr.second == out+startOfOutput){
@@ -283,12 +281,12 @@ __global__ void Net(unifiedArray<double> weights, dataArray<int> params,
 //    delete[] CommunityMag;
 //    double SiteToQuakeDist = distCalc(latSite, lonSite, answers.array[2], answers.array[3]); // [2] is latitude, [3] is longitude.
 //    double fitness = 1/(abs(whenGuess - answers.array[1]-hour)*SiteToQuakeDist);//larger is better, negative numbers are impossible.
-//    weights.array[ind + params.array[7]-1] = fitness; // set the fitness number for the individual.
+//    weights.array[ind + params[7]-1] = fitness; // set the fitness number for the individual.
 }
 
-__global__ void reduce_by_block(unifiedArray<double> weights,
-                                dataArray<double> per_block_results,
-                                dataArray<int> params, int n)
+__global__ void reduce_by_block(kernelArray<double> weights,
+                                kernelArray<double> per_block_results,
+                                kernelArray<int> params, int n)
 {
     extern __shared__ float sdata[];
 
@@ -326,7 +324,7 @@ __global__ void reduce_by_block(unifiedArray<double> weights,
     }
 }
 
-__global__ void swapMemory(unifiedArray<double> device, unifiedArray<double>host, size_t offset){//swap device and host memory in place.
+__global__ void swapMemory(kernelArray<double> device, kernelArray<double>host, size_t offset){//swap device and host memory in place.
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     double tmp = device.array[idx];
     device.array[idx] = host.array[idx+offset];
@@ -335,52 +333,53 @@ __global__ void swapMemory(unifiedArray<double> device, unifiedArray<double>host
 
 NetworkGenetic::NetworkGenetic(const int &numInputNodes, const int &numHiddenNeurons, const int &numMemoryNeurons,
                                const int &numOutNeurons, const int &numWeights, std::vector< thrust::pair<int, int> >&connections){
-    this->_NNParams.resize(15, 0); // room to grow
-    _NNParams[1] = numInputNodes + numHiddenNeurons + numMemoryNeurons*4 + numOutNeurons; //memory neurons each ahve a rmemeber, forget, and push forward gate neuron.
-    _NNParams[2] = numWeights;
-    _NNParams[3] = numInputNodes;
-    _NNParams[4] = numHiddenNeurons;
-    _NNParams[5] = numMemoryNeurons;
-    _NNParams[6] = numOutNeurons;
-    _NNParams[7] = _NNParams[2] + _NNParams[1] + 1 + 1; // plus 1 for fitness, plus 1 for community output composite vector
+
+    this->_hostParams.resize(15);
+    _hostParams[1] = numInputNodes + numHiddenNeurons + numMemoryNeurons*4 + numOutNeurons; //memory neurons each ahve a rmemeber, forget, and push forward gate neuron.
+    _hostParams[2] = numWeights;
+    _hostParams[3] = numInputNodes;
+    _hostParams[4] = numHiddenNeurons;
+    _hostParams[5] = numMemoryNeurons;
+    _hostParams[6] = numOutNeurons;
+    _hostParams[7] = _hostParams[2] + _hostParams[1] + 1 + 1; // plus 1 for fitness, plus 1 for community output composite vector
     _connect = &connections;
 }
 
-void NetworkGenetic::initializeWeights(){
+void NetworkGenetic::generateWeights(){
     int gridSize; //the blocksize defined by the configurator
     int blockSize = 512; // number of blocks in the grid
-    int seedItr = 0;
     int global_offset=0;
     int device_offset=0;
     for(int n=0; n<_numOfStreams; n++){
         if(n%4==0 && n !=0)
             device_offset =0;
         if(n <_numOfStreams-4){ // if theres space left on the host, gen and push to host
-            long seed = std::clock() + std::clock()*seedItr++;
-            gridSize=(_streamSize/_NNParams[7])/blockSize;
+            long seed = std::clock() + std::clock()*n;
+            gridSize=(_streamSize/_deviceParams.array[7])/blockSize;
             std::cerr<<"stream number #"<<n<<std::endl;
             std::cerr<<"seed is:"<<seed<<std::endl;
             std::cerr<<"global offset: "<<global_offset<<std::endl;
             std::cerr<<"device offset: "<<device_offset<<std::endl;
-            genWeights<<< gridSize, blockSize, 0, _stream[n]>>>(device_genetics, seed, convertToKernel(_NNParams), device_offset);
+            genWeights<<< gridSize, blockSize, 0, _stream[n]>>>(device_genetics, seed, _deviceParams, device_offset);
             CUDA_SAFE_CALL(cudaPeekAtLastError());
             CUDA_SAFE_CALL(cudaMemcpyAsync(&host_genetics.array[global_offset], &device_genetics.array[device_offset], _streambytes, cudaMemcpyDeviceToHost, _stream[n]));
         }
         else{//host ram is full, fill the GPU now and then were done.
-            long seed = std::clock() + std::clock()*seedItr++;
-            gridSize=(_streambytes/_NNParams[7])/(blockSize); // round down isntead of up.
+            long seed = std::clock() + std::clock()*n;
+            gridSize=(_streamSize/_deviceParams.array[7])/(blockSize); // round down isntead of up.
             std::cerr<<"stream number #"<<n<<std::endl;
             std::cerr<<"seed is:"<<seed<<std::endl;
-            genWeights<<< gridSize, blockSize, 0, _stream[n]>>>(device_genetics, seed, convertToKernel(_NNParams), device_offset);
+            genWeights<<< gridSize, blockSize, 0, _stream[n]>>>(device_genetics, seed, _deviceParams, device_offset);
             CUDA_SAFE_CALL(cudaPeekAtLastError());
         }
         global_offset += _streamSize;
         device_offset += _streamSize;
     }
     CUDA_SAFE_CALL(cudaDeviceSynchronize());
-    for(int i=0; i<host_genetics.size; i++){
-        std::cerr<<i<<"is :"<<host_genetics.array[i]<<std::endl;
-    }
+
+        std::cerr<<"is : "<<host_genetics.array[(host_genetics.size/_deviceParams.array[7])*1000]<<std::endl;
+
+    exit(1);
 }
 
 
@@ -390,15 +389,19 @@ void NetworkGenetic::allocateHostAndGPUObjects( float pMax, size_t deviceRam, si
     std::cerr<<"total free device ram : "<<deviceRam<<std::endl;
     std::cerr<<"total free host ram : "<<hostRam<<std::endl;
     totalHost = totalHost*pMax;
-    while(totalHost%_NNParams[7] || totalHost%sizeof(double) || totalHost%512) // get the largest number divisible by the individual size, the threads in a block, and the size of a double
+     CUDA_SAFE_CALL(cudaSetDeviceFlags(cudaDeviceMapHost));
+     CUDA_SAFE_CALL(cudaMalloc((void**)&_deviceParams.array, _hostParams.size()*sizeof(int)));
+     _deviceParams.size = _hostParams.size();
+     thrust::copy(_hostParams.begin(), _hostParams.end(), _deviceParams.array); // copy the params to device.
+    while(totalHost%_deviceParams.array[7] || totalHost%sizeof(double) || totalHost%(sizeof(double)*4) || totalHost%512) // get the largest number divisible by the individual size, the threads in a block, and the size of a double
         totalHost= totalHost -1;
     totalDevice = floor(totalDevice*pMax);
-    while(totalDevice%_NNParams[7] || totalDevice%sizeof(double) || totalDevice%512)
+    while(totalDevice%_deviceParams.array[7] || totalDevice%sizeof(double) || totalDevice%(sizeof(double)*4) || totalDevice%512)
         totalDevice = totalDevice -1;
     //make each of the memory arguments divisible by 512 (threads per block)
-    std::cerr<<"bytes per stream :"<<_streambytes<<std::endl;
     _streamSize = totalDevice/(sizeof(double)*4);
     _streambytes = _streamSize*sizeof(double);
+    std::cerr<<"bytes per stream :"<<_streambytes<<std::endl;
     assert(_streambytes == _streamSize*sizeof(double));
     _numOfStreams = ceil((totalDevice/sizeof(double) +totalHost/sizeof(double))/_streamSize); // number of streams = total array alloc / number of streams.
     assert(_streambytes * _numOfStreams <= totalDevice+totalHost);
@@ -407,9 +410,7 @@ void NetworkGenetic::allocateHostAndGPUObjects( float pMax, size_t deviceRam, si
     host_genetics.size = totalHost/sizeof(double);
     std::cerr<<"device ram to allocate: "<<totalDevice<<std::endl;
     std::cerr<<"host ram to allocate: "<<totalHost<<std::endl;
-    CUDA_SAFE_CALL(cudaDeviceReset());
-    CUDA_SAFE_CALL(cudaSetDeviceFlags(cudaDeviceMapHost));
-    CUDA_SAFE_CALL(cudaHostAlloc((void**)&host_genetics.array, totalHost, cudaHostAllocMapped | cudaHostAllocWriteCombined | cudaHostAllocPortable));
+    CUDA_SAFE_CALL(cudaHostAlloc((void**)&host_genetics.array, totalHost, cudaHostAllocMapped | cudaHostAllocWriteCombined));
     CUDA_SAFE_CALL(cudaHostGetDevicePointer((void**)&host_genetics_device.array, (void*)host_genetics.array, 0 ));
     CUDA_SAFE_CALL(cudaMalloc((void**) &device_genetics.array, totalDevice));
     std::cerr<<"all allocated, moving on."<<std::endl;
@@ -494,7 +495,7 @@ void NetworkGenetic::storeWeights(std::string filepath){
     }
     CUDA_SAFE_CALL(cudaFree(device_genetics.array));
     CUDA_SAFE_CALL(cudaFree(host_genetics.array));
-
+    CUDA_SAFE_CALL(cudaDeviceReset());
 }
 
 void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<int> *data, double &Kp, std::vector<double> *globalQuakes)
@@ -522,16 +523,33 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
     std::cerr<<"channels std and mean calculated"<<std::endl;
     //input data from all sites and all channels normalized
     if(_istraining == true){
-        thrust::device_vector<int>* input = new thrust::device_vector<int>(data->size());
-        thrust::device_vector<double>* retVec = new thrust::device_vector<double>(2160*_numofSites);
-        thrust::device_vector<double>* gQuakeAvg = new thrust::device_vector<double>(globalQuakes->size());
-        thrust::device_vector<thrust::pair<int, int> >* dConnect = new thrust::device_vector<thrust::pair<int, int> >(_connect->size());
-        thrust::copy(data->begin(), data->end(), input->begin());
-        thrust::copy(globalQuakes->begin(), globalQuakes->end(), gQuakeAvg->begin());
-        thrust::copy(_connect->begin(), _connect->end(), dConnect->begin());
-
+        kernelArray<double>retVec, gQuakeAvg, answers, siteData, partial_reduce_sums;
+        kernelArray<int> input;
+        kernelArray<thrust::pair<int, int> > dConnect;
         int blockSize = 512; // the actual grid size needed
-        int regularGridSize = (_streamSize/_NNParams[7])/(blockSize);
+        size_t reduceGridSize = (_streamSize/_deviceParams.array[7])/blockSize + (((_streamSize/_deviceParams.array[7])%blockSize) ? 1 : 0);
+        int regularGridSize = (_streamSize/_deviceParams.array[7])/(blockSize);
+
+        CUDA_SAFE_CALL(cudaMalloc((void**)&input.array, data->size()*sizeof(int)));
+        CUDA_SAFE_CALL(cudaMalloc((void**)&retVec.array, ret->size()*sizeof(double)));
+        CUDA_SAFE_CALL(cudaMalloc((void **)&gQuakeAvg.array, globalQuakes->size()*sizeof(double)));
+        CUDA_SAFE_CALL(cudaMalloc((void**)&answers.array, _answers.size()*sizeof(double)));
+        CUDA_SAFE_CALL(cudaMalloc((void**)&dConnect.array, _connect->size()*sizeof(thrust::pair<int, int>)));
+        CUDA_SAFE_CALL(cudaMalloc((void**)&siteData.array, _siteData.size()*sizeof(double)));
+        CUDA_SAFE_CALL(cudaMalloc((void**)&partial_reduce_sums.array,blockSize+1*sizeof(double)));
+        input.size = data->size();
+        retVec.size = 2160*_numofSites;
+        gQuakeAvg.size = globalQuakes->size();
+        answers.size = _answers.size();
+        dConnect.size = _connect->size();
+        siteData.size = _siteData.size();
+        partial_reduce_sums.size = blockSize+1;
+        thrust::copy(data->begin(), data->end(), input.array);
+        thrust::copy(globalQuakes->begin(), globalQuakes->end(), gQuakeAvg.array);
+        thrust::copy(_connect->begin(), _connect->end(), dConnect.array);
+        thrust::copy(_siteData.begin(), _siteData.end(), siteData.array);
+        thrust::fill(retVec.array, retVec.array+retVec.size, 0);
+        thrust::fill(partial_reduce_sums.array, partial_reduce_sums.array+partial_reduce_sums.size, 0);
 
         double fitnessAvg=0;
         int fitItr=0;
@@ -539,19 +557,17 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         size_t device_offset=0;
         for(int n=0; n<_numOfStreams; n++){
             std::cerr<<"regular grid size: "<<regularGridSize<<std::endl;
-            Net<<<regularGridSize, blockSize, 0, _stream[n]>>>(device_genetics, convertToKernel(_NNParams),convertToKernel(gQuakeAvg),
-                                                        convertToKernel(input),convertToKernel(_siteData),convertToKernel(_answers),
-                                                        convertToKernel(dConnect),Kp,_sampleRate,_numofSites, hour,
+            Net<<<regularGridSize, blockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, gQuakeAvg,
+                                                        input, siteData, answers,
+                                                        dConnect,Kp,_sampleRate,_numofSites, hour,
                                                         meanCh1, meanCh2, meanCh3, stdCh1, stdCh2, stdCh3);
             CUDA_SAFE_CALL(cudaStreamSynchronize(_stream[n]));
             CUDA_SAFE_CALL(cudaPeekAtLastError());
             std::cerr<<"net completed."<<std::endl;
-            size_t reduceGridSize = (_streamSize/_NNParams[7])/blockSize + (((_streamSize/_NNParams[7])%blockSize) ? 1 : 0);
-            thrust::device_vector<double> partial_reduce_sums(reduceGridSize+1);
             std::cerr<<"reduce grid size: "<<reduceGridSize<<std::endl;
             reduce_by_block<<<reduceGridSize, blockSize, blockSize*sizeof(double), _stream[n]>>>(device_genetics,
-                                                                                           convertToKernel(partial_reduce_sums),
-                                                                                           convertToKernel(_NNParams), _streamSize/_NNParams[7]);
+                                                                                           partial_reduce_sums,
+                                                                                           _deviceParams, _streamSize/_deviceParams.array[7]);
             CUDA_SAFE_CALL(cudaPeekAtLastError());
             CUDA_SAFE_CALL(cudaStreamSynchronize(_stream[n]));
             std::cerr<<"reduce by block completed."<<std::endl;
@@ -561,8 +577,8 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
             CUDA_SAFE_CALL(cudaPeekAtLastError());
             CUDA_SAFE_CALL(cudaStreamSynchronize(_stream[n]));
             std::cerr<<"memory swap completed"<<std::endl;
-            for(int itr =0; itr<partial_reduce_sums.size(); itr++){
-                fitnessAvg += partial_reduce_sums[itr];
+            for(int itr =0; itr<partial_reduce_sums.size; itr++){
+                fitnessAvg += partial_reduce_sums.array[itr];
                 fitItr++;
             }
             host_offset += _streamSize;
@@ -570,16 +586,19 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         fitnessAvg = fitnessAvg /fitItr;
         std::cerr<<"the average fitness for this round is: "<<fitnessAvg<<std::endl;
 
-        delete dConnect;
-        delete input;
-        delete gQuakeAvg;
-        delete retVec;
+        delete dConnect.array;
+        delete input.array;
+        delete gQuakeAvg.array;
+        delete retVec.array;
+        delete answers.array;
+        delete siteData.array;
+        delete partial_reduce_sums.array;
     }
     else{
         std::cerr<<"entered not training version.."<<std::endl;
         typedef std::vector<thrust::pair<int, int> > connectPairMatrix;
         //replace this later
-        _best.resize(_NNParams[2]);
+        _best.resize(_hostParams[2]);
         for(std::vector<double>::iterator it = _best.begin(); it != _best.end(); ++it){
             std::srand(std::time(NULL)+*it);
             *it = (double)(std::rand())/(RAND_MAX);
@@ -614,23 +633,23 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
                 std::vector<double> input;
                 std::vector<double> hidden, outputs, mem, memGateOut, memGateIn, memGateForget;
                 //replace these with real connections, num of inputs, and num of hidden & memory neurons (mem neurons probably accurate)
-                input.resize(_NNParams[3], 0); // number of inputs is 9.
-                hidden.resize(_NNParams[4], 0); // for practice sake, lets say each input has its own neuron (might be true!)
-                mem.resize(_NNParams[5], 0); // stores the input if gate is high
-                memGateOut.resize(_NNParams[5], 0); //connects to the input layer and the memN associated with input, if 1 it sends up stream and deletes, if low it keeps.
-                memGateIn.resize(_NNParams[5], 0);
-                memGateForget.resize(_NNParams[5], 0);
-                outputs.resize(_NNParams[6], 0); /* 3 outputs, 1 with an hour in the future when the earthquake will hit,
+                input.resize(_hostParams[3], 0); // number of inputs is 9.
+                hidden.resize(_hostParams[4], 0); // for practice sake, lets say each input has its own neuron (might be true!)
+                mem.resize(_hostParams[5], 0); // stores the input if gate is high
+                memGateOut.resize(_hostParams[5], 0); //connects to the input layer and the memN associated with input, if 1 it sends up stream and deletes, if low it keeps.
+                memGateIn.resize(_hostParams[5], 0);
+                memGateForget.resize(_hostParams[5], 0);
+                outputs.resize(_hostParams[6], 0); /* 3 outputs, 1 with an hour in the future when the earthquake will hit,
                     1 with the porbability of that earthquake happening (between [0,1]) and 1 with the sites magnitude (for community feedback) */
                 std::cerr<<"all neuron vectors are sized, all pre-net calculations done."<<std::endl;
                 int n =0;
                 int startOfInput = 0;
-                int startOfHidden = startOfInput +_NNParams[3];
-                int startOfMem = startOfHidden + _NNParams[4];
-                int startOfMemGateIn = startOfMem + _NNParams[5];
-                int startOfMemGateOut = startOfMemGateIn + _NNParams[5];
-                int startOfMemGateForget = startOfMemGateOut + _NNParams[5];
-                int startOfOutput = startOfMemGateForget + _NNParams[5];
+                int startOfHidden = startOfInput +_hostParams[3];
+                int startOfMem = startOfHidden + _hostParams[4];
+                int startOfMemGateIn = startOfMem + _hostParams[5];
+                int startOfMemGateOut = startOfMemGateIn + _hostParams[5];
+                int startOfMemGateForget = startOfMemGateOut + _hostParams[5];
+                int startOfOutput = startOfMemGateForget + _hostParams[5];
                 input[0] = normalize((double)(data->at(3600*_sampleRate*j*3 + 0*(3600*_sampleRate)+step)), meanCh1, stdCh1);
                 input[1] = normalize((double)(data->at(3600*_sampleRate*j*3 + 1*(3600*_sampleRate)+step)), meanCh2, stdCh2);
                 input[2] = normalize((double)(data->at(3600*_sampleRate*j*3 + 2*(3600*_sampleRate)+step)), meanCh3, stdCh3);
@@ -641,22 +660,22 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
                 input[7] = shift(CommunityDist,40075.1/2, 0);
                 input[8] = shift(CommunityBearing, 360, 0);
                 //lets reset all neuron values for this new timestep (except memory neurons)
-                for(int gate=0; gate<_NNParams[5]; gate++){
+                for(int gate=0; gate<_hostParams[5]; gate++){
                     memGateIn.at(gate) = 0;
                     memGateOut.at(gate) = 0;
                     memGateForget.at(gate) = 0;
                 }
-                for(int hid=0; hid<_NNParams[4]; hid++){
+                for(int hid=0; hid<_hostParams[4]; hid++){
                     hidden[hid] = 0;
                 }
-                for(int out=0; out<_NNParams[6]; out++){
+                for(int out=0; out<_hostParams[6]; out++){
                     outputs[out] = 0;
                 }
                 std::cerr<<"memGate, hidden, and output neurons are zeroed."<<std::endl;
                 //now that everything that should be zeroed is zeroed, lets start the network.
                 //mem gates & LSTM nodes --
                 std::cerr<<"preparing to set the values for memoryGates."<<std::endl;
-                for(int gate = 0; gate<_NNParams[5]; gate++){//calculate memory gate node values, you can connect inputs & hidden neurons to them.
+                for(int gate = 0; gate<_hostParams[5]; gate++){//calculate memory gate node values, you can connect inputs & hidden neurons to them.
                     for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){//for memGateIn
                         if(it->second == gate+startOfMemGateIn && it->first < startOfHidden){ //for inputs
                             std::cerr<<"weights for memGateIn #"<<gate<<" is: "<<_best[n];
@@ -692,7 +711,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
                     std::cerr<<"memGateForget val: "<<memGateForget.at(gate)<<std::endl;
                 }
                 //since we calculated the values for memGateIn and memGateOut, and MemGateForget..
-                for (int gate = 0; gate<_NNParams[5]; gate++){ // if memGateIn is greater than 0.3, then let mem = the sum inputs attached to memGateIn
+                for (int gate = 0; gate<_hostParams[5]; gate++){ // if memGateIn is greater than 0.3, then let mem = the sum inputs attached to memGateIn
                     if(memGateIn.at(gate) > 0.5){ //gate -startOfMemGateIn = [0, num of mem neurons]
                         for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){
                             if(it->second == gate+startOfMemGateIn && it->first < gate+startOfHidden){//only pass inputs
@@ -715,7 +734,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
                 }
 
                 // hidden neuron nodes --
-                for(int hid=0; hid<_NNParams[4]; hid++){ // for all hidden neurons at layer 1, lets sum the inputs, the memory values were already added.
+                for(int hid=0; hid<_hostParams[4]; hid++){ // for all hidden neurons at layer 1, lets sum the inputs, the memory values were already added.
                     for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){ // Add the inputs to the hidden neurons
                         if(it->second == hid+startOfHidden && it->first < startOfHidden){ // if an input connects with this hidden neuron
                             hidden[hid] += input[it->first]*_best[n++];
@@ -732,7 +751,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
                 }
                 //output nodes --
 
-                for(int out =0; out<_NNParams[6]; out++){// add hidden neurons to the output nodes
+                for(int out =0; out<_hostParams[6]; out++){// add hidden neurons to the output nodes
                     for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){
                         if(it->second == out+startOfOutput){
                             outputs[out] += hidden[it->first-startOfHidden]*_best[n++];

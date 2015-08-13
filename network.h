@@ -14,7 +14,7 @@ public:
     NetworkGenetic(const int &numInNeurons, const int &numHiddenNeurons, const int &numMemoryNeurons,
                    const int &numOutNeurons, const int &numWeights,  std::vector< thrust::pair<int, int> >&connections);
     void errorFunc();
-    void initializeWeights(); //initializes _data array and fills with random numbers
+    void generateWeights(); //initializes _data array and fills with random numbers
     void allocateHostAndGPUObjects(float pMax, size_t deviceRam, size_t hostRam);
     bool init(int sampleRate, int SiteNum, std::vector<double>siteData);
     void doingTraining(int site, int hour, double lat,
@@ -23,14 +23,15 @@ public:
     void storeWeights(std::string filepath);
     bool checkForWeights(std::string filepath);
 private:
-    unifiedArray<double> device_genetics;
-    unifiedArray<double> host_genetics;
-    unifiedArray<double> host_genetics_device;
+    kernelArray<double> device_genetics;
+    kernelArray<double> host_genetics;
+    kernelArray<double> host_genetics_device;
     std::vector<thrust::pair<int, int> > *_connect;
-    thrust::device_vector<int>_NNParams; // only vector that stays on here
-    thrust::device_vector<double> _siteData;
-    thrust::device_vector<double> _answers;
+    std::vector<double> _siteData;
+    std::vector<double> _answers;
     std::vector<double> _best;
+    std::vector<int>_hostParams;
+    kernelArray<int>_deviceParams;
     bool _istraining;
     int _sampleRate;
     int _numofSites;

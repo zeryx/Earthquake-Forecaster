@@ -97,11 +97,11 @@ int main(int argc, char** arg){
         std::cin>>gtf_site>>gtf_hour>>gtf_lat>>gtf_long>>gtf_mag>>gtf_dist;
 
         if(ConstructedNetwork.checkForWeights("/weights.bin"))
-            ConstructedNetwork.initializeWeights();
+            ConstructedNetwork.generateWeights();
         else
             ConstructedNetwork.allocateHostAndGPUObjects(0.85, GetDeviceRamInBytes(), GetHostRamInBytes());
-            ConstructedNetwork.initializeWeights();
-        std::cerr<<"weights initialized, setting training"<<std::endl;
+            ConstructedNetwork.generateWeights();
+        std::cerr<<"weights generated, setting training"<<std::endl;
         ConstructedNetwork.doingTraining(gtf_site, gtf_hour, gtf_lat, gtf_long, gtf_mag, gtf_dist);
     }
     while(1)
