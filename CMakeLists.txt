@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 find_package(CUDA REQUIRED)
 INCLUDE(FindCUDA)
 FILE(GLOB SOURCES "*.cu" "*.cpp" "*.c" "*.h")
+
 CUDA_ADD_EXECUTABLE(${PROJECT_NAME} ${SOURCES})
 LIST(APPEND CMAKE_CXX_FLAGS "-std=c++11 -O3 -ffast-math -Wall")
 LIST(APPEND CUDA_NVCC_FLAGS --compiler-options  -g -lineinfo -use_fast_math)

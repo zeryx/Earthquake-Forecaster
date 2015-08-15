@@ -15,7 +15,7 @@ int main(int argc, char** arg){
     int MemGateForget = 3;
     int outputs = 3;
     int numWeights;
-    std::vector< thrust::pair<int, int> >connections; //each vector starts at 0, and then is < than the num of each val
+    std::vector< std::pair<int, int> >connections; //each vector starts at 0, and then is < than the num of each val
     connections.push_back(make_pair(0, inputs+0));
     connections.push_back(make_pair(0, inputs+hidden+memory+0)); // connect input 1 to memorygateIn 1
     connections.push_back(make_pair(0, inputs+hidden+memory+memGateIn+0)); // connect input 1 to memory gateoutput 1
@@ -80,11 +80,11 @@ int main(int argc, char** arg){
     NetworkGenetic ConstructedNetwork(inputs, hidden, memory, outputs, numWeights, connections);
     int sampleRate, numberOfSites, SLEN;
     std::cin>>sampleRate>>numberOfSites>>SLEN;
-    std::vector<double> sitesData;
+    std::vector<double> *sitesData = new std::vector<double>;
 
     for (int i=0; i < SLEN; i++){
-        sitesData.push_back(0);
-        std::cin>>sitesData.at(i);
+        sitesData->push_back(0);
+        std::cin>>sitesData->at(i);
     }
     int initRet= ConstructedNetwork.init(sampleRate, numberOfSites, sitesData);
     std::cout<<initRet<<std::endl;
@@ -98,10 +98,11 @@ int main(int argc, char** arg){
 
         if(ConstructedNetwork.checkForWeights("/weights.bin"))
             ConstructedNetwork.generateWeights();
-        else
+        else{
             ConstructedNetwork.allocateHostAndGPUObjects(0.85, GetDeviceRamInBytes(), GetHostRamInBytes());
             ConstructedNetwork.generateWeights();
-        std::cerr<<"weights generated, setting training"<<std::endl;
+        }
+        std::cerr<<"weights generation completed, setting training"<<std::endl;
         ConstructedNetwork.doingTraining(gtf_site, gtf_hour, gtf_lat, gtf_long, gtf_mag, gtf_dist);
     }
     while(1)
@@ -112,8 +113,8 @@ int main(int argc, char** arg){
         std::vector<int> *data = new std::vector<int>;
         std::vector<double> *globalQuakes = new std::vector<double>(5);
         std::cin>>hour;
-        if(hour== -1)
-            break;
+        if(hour== -1 || hour ==20)
+            exit(1);
         std::cin>>DLEN;
         for(int i=0; i<DLEN; i++){
             data->push_back(0);
@@ -144,7 +145,7 @@ int main(int argc, char** arg){
                 globalQuakes->at(k) = globalQuakes->at(k)/accVal; // push the hourly average into _DGQuakes for all parameters.
         }
         delete tmpQuakes;
-        std::vector<double> *retM = new std::vector<double>(2160*numberOfSites);
+        std::vector<double> *retM = new std::vector<double>(2160*numberOfSites, 0);
         std::cerr<<"about to call forecast.."<<std::endl;
         ConstructedNetwork.forecast(retM, hour, data, Kp, globalQuakes);
         std::cerr<<"forecast returned."<<std::endl;
@@ -160,4 +161,6 @@ int main(int argc, char** arg){
     }
     if(doTraining == 1)
         ConstructedNetwork.storeWeights("/weights.bin");
+    delete sitesData;
+    return 0;
 }
