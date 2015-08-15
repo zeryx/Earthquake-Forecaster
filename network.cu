@@ -63,8 +63,7 @@ __host__ __device__ inline double ActFunc(double x)
 }
 __host__ __device__ inline double normalize(double x, double mean, double stdev)
 {
-    double ret = (fabs(x-mean))/(stdev*2);
-    return ret;
+    return (fabs(x-mean))/(stdev*2);;
 }
 
 __host__ __device__ inline double shift(double x, double max, double min)
@@ -107,7 +106,7 @@ __global__ void Net(kernelArray<double> weights, kernelArray<int> params,
     typedef std::pair<int, int>*  connectPairMatrix;
 
     int startOfInput = ind + params.array[2];
-    int startOfHidden = startOfInput +params.array[3];
+    int startOfHidden = startOfInput + params.array[3];
     int startOfMem = startOfHidden + params.array[4];
     int startOfMemGateIn = startOfMem + params.array[5];
     int startOfMemGateOut = startOfMemGateIn + params.array[5];
@@ -145,16 +144,15 @@ __global__ void Net(kernelArray<double> weights, kernelArray<int> params,
             /* 3 outputs, 1 with an hour in the future when the earthquake will hit,
                         1 with the porbability of that earthquake happening (between [0,1]) and 1 with the sites magnitude (for community feedback) */
             int n =0; // n is the weight number
-
-//            input[0] = normalize(inputVal.array[(3600*sampleRate*j*3 + 0*(3600*sampleRate)+step)], meanCh1, stdCh1);//channel 1
-//            input[1] = normalize(inputVal.array[(3600*sampleRate*j*3 + 2*(3600*sampleRate)+step)], meanCh2, stdCh2);//channel 2
-//            input[2] = normalize(inputVal.array[(3600*sampleRate*j*3 + 3*(3600*sampleRate)+step)], meanCh3, stdCh3);//channel 3
-            input[3] = shift(GQuakeAvgdist, 40075.1, 0);
-            input[4] = shift(GQuakeAvgBearing, 360, 0);
-            input[5] = shift(GQuakeAvgMag, 9.5, 0);
-            input[6] = shift(Kp, 10, 0);
-//            input[7] = shift(CommunityDist,40075.1/2, 0);
-//            input[8] = shift(CommunityBearing, 360, 0);
+            //            input[0] = normalize(inputVal.array[(3600*sampleRate*j*3 + 0*(3600*sampleRate)+step)], meanCh1, stdCh1);//channel 1
+            //            input[1] = normalize(inputVal.array[(3600*sampleRate*j*3 + 2*(3600*sampleRate)+step)], meanCh2, stdCh2);//channel 2
+            //            input[2] = normalize(inputVal.array[(3600*sampleRate*j*3 + 3*(3600*sampleRate)+step)], meanCh3, stdCh3);//channel 3
+            //            input[3] = shift(GQuakeAvgdist, 40075.1, 0);
+            //            input[4] = shift(GQuakeAvgBearing, 360, 0);
+            //            input[5] = shift(GQuakeAvgMag, 9.5, 0);
+            //            input[6] = shift(Kp, 10, 0);
+            //            input[7] = shift(CommunityDist,40075.1/2, 0);
+            //            input[8] = shift(CommunityBearing, 360, 0);
             //            //lets reset all neuron values for this new timestep (except memory neurons)
             //            for(int gate=0; gate<params.array[5]; gate++){
             //                memGateIn[gate] = 0;
@@ -261,26 +259,26 @@ __global__ void Net(kernelArray<double> weights, kernelArray<int> params,
             //            CommunityMag[j*threadIdx.x] =  outputs[2]; // set the next sets communityMag = output #3.
         }
     }
-//    for(int j=0; j<numOfSites; j++){ // now lets get the average when and howcertain values.
-//        When[j*threadIdx.x] = When[j*threadIdx.x]/3600*sampleRate;
-//        HowCertain[j*threadIdx.x] = HowCertain[j*threadIdx.x]/3600*sampleRate;
-//    }
+    //    for(int j=0; j<numOfSites; j++){ // now lets get the average when and howcertain values.
+    //        When[j*threadIdx.x] = When[j*threadIdx.x]/3600*sampleRate;
+    //        HowCertain[j*threadIdx.x] = HowCertain[j*threadIdx.x]/3600*sampleRate;
+    //    }
     /*calculate performance for this individual - score = 1/(abs(whenGuess-whenReal)*distToQuake), for whenGuess = when[j] where HowCertain is max for set.
     distToQuake is from the current sites parameters, it emphasizes higher scores for the closest site, a smaller distance is a higher score. */
-//    int maxCertainty=0;
-//    double whenGuess=0;
-//    double latSite=0;
-//    double lonSite=0;
-//    for(int j=0; j<numOfSites; j++){
-//        if(HowCertain[j*threadIdx.x] > maxCertainty){
-//            whenGuess = When[j*threadIdx.x];
-//            latSite = siteData.array[j*2];
-//            lonSite = siteData.array[j*2+1];
-//        }
-//    }
-//    double SiteToQuakeDist = distCalc(latSite, lonSite, answers.array[2], answers.array[3]); // [2] is latitude, [3] is longitude.
-//    double fitness = 1/(abs(whenGuess - answers.array[1]-hour)*SiteToQuakeDist);//larger is better, negative numbers are impossible.
-//    weights.array[ind + params.array[7]-1] = fitness; // set the fitness number for the individual.
+    //    int maxCertainty=0;
+    //    double whenGuess=0;
+    //    double latSite=0;
+    //    double lonSite=0;
+    //    for(int j=0; j<numOfSites; j++){
+    //        if(HowCertain[j*threadIdx.x] > maxCertainty){
+    //            whenGuess = When[j*threadIdx.x];
+    //            latSite = siteData.array[j*2];
+    //            lonSite = siteData.array[j*2+1];
+    //        }
+    //    }
+    //    double SiteToQuakeDist = distCalc(latSite, lonSite, answers.array[2], answers.array[3]); // [2] is latitude, [3] is longitude.
+    //    double fitness = 1/(abs(whenGuess - answers.array[1]-hour)*SiteToQuakeDist);//larger is better, negative numbers are impossible.
+    //    weights.array[ind + params.array[7]-1] = fitness; // set the fitness number for the individual.
 }
 
 __global__ void reduce_by_block(kernelArray<double> weights,
@@ -323,11 +321,15 @@ __global__ void reduce_by_block(kernelArray<double> weights,
     }
 }
 
-__global__ void swapMemory(kernelArray<double> device, kernelArray<double>host, size_t host_offset, size_t device_offset){//swap device and host memory in place.
+__global__ void swapMemory(kernelArray<double> host, kernelArray<double>device, kernelArray<int>params, size_t host_offset, size_t device_offset){//swap device and host memory in place.
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    double tmp = device.array[idx+device_offset];
-    device.array[idx+device_offset] = host.array[idx+host_offset];
-    host.array[idx+host_offset] = tmp;
+    int ind_dev = idx*params.array[7]+device_offset;
+    int ind_host = idx*params.array[7]+host_offset;
+    for(int i=0; i<params.array[7]; i++){
+        double tmp = device.array[ind_dev+i];
+        device.array[ind_dev+i] = host.array[ind_host+i];
+        host.array[ind_host+i] = tmp;
+    }
 }
 
 NetworkGenetic::NetworkGenetic(const int &numInputNodes, const int &numHiddenNeurons, const int &numMemoryNeurons,
@@ -528,23 +530,25 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         kernelArray<double>retVec, gQuakeAvg, answers, siteData, partial_reduce_sums;
         kernelArray<int> input;
         kernelArray<std::pair<int, int> > dConnect;
-        int blockSize = 64; // the actual grid size needed
-        size_t reduceGridSize = (_streamSize/_hostParams.array[7])/blockSize + (((_streamSize/_hostParams.array[7])%blockSize) ? 1 : 0);
-        size_t regularGridSize = (_streamSize/_hostParams.array[7])/blockSize;
+        int netBlockSize = 64; // the actual grid size needed
+        int regBlockSize = 512;
+        size_t reduceGridSize = (_streamSize/_hostParams.array[7])/regBlockSize + (((_streamSize/_hostParams.array[7])%regBlockSize) ? 1 : 0);
+        size_t regGridSize = (_streamSize/_hostParams.array[7])/regBlockSize;
+        size_t netGridSize = (_streamSize/_hostParams.array[7])/netBlockSize;
         CUDA_SAFE_CALL(cudaMalloc((void**)&input.array, data->size()*sizeof(int)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&retVec.array, ret->size()*sizeof(double)));
         CUDA_SAFE_CALL(cudaMalloc((void **)&gQuakeAvg.array, globalQuakes->size()*sizeof(double)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&answers.array, _answers.size()*sizeof(double)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&dConnect.array, _connect->size()*sizeof(std::pair<int, int>)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&siteData.array, _siteData->size()*sizeof(double)));
-        CUDA_SAFE_CALL(cudaMalloc((void**)&partial_reduce_sums.array, _numOfStreams*(blockSize+1)*sizeof(double)));
+        CUDA_SAFE_CALL(cudaMalloc((void**)&partial_reduce_sums.array, _numOfStreams*(regBlockSize+1)*sizeof(double)));
         input.size = data->size();
         retVec.size = 2160*_numofSites;
         gQuakeAvg.size = globalQuakes->size();
         answers.size = _answers.size();
         dConnect.size = _connect->size();
         siteData.size = _siteData->size();
-        partial_reduce_sums.size = _numOfStreams*(blockSize+1);
+        partial_reduce_sums.size = _numOfStreams*(regBlockSize+1);
         CUDA_SAFE_CALL(cudaMemcpyAsync(input.array, data->data(), input.size, cudaMemcpyHostToDevice, _stream[0]));
         CUDA_SAFE_CALL(cudaMemcpyAsync(gQuakeAvg.array, globalQuakes->data(), gQuakeAvg.size, cudaMemcpyHostToDevice, _stream[1]));
         CUDA_SAFE_CALL(cudaMemcpyAsync(dConnect.array, _connect->data(), dConnect.size, cudaMemcpyHostToDevice, _stream[2]));
@@ -564,10 +568,10 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
             std::cerr<<"stream number: "<<n<<std::endl;
             std::cerr<<"host offset: "<<host_offset<<std::endl;
             std::cerr<<"device offset: "<<device_offset<<std::endl;
-            Net<<<regularGridSize, blockSize, blockSize*sizeof(double)*3*_numofSites, _stream[n]>>>(device_genetics, _deviceParams, gQuakeAvg,
-                                                                                                    input, siteData, answers,
-                                                                                                    dConnect,Kp,_sampleRate,_numofSites, hour,
-                                                                                                    meanCh1, meanCh2, meanCh3, stdCh1, stdCh2, stdCh3, device_offset);
+            Net<<<netGridSize, netBlockSize, netBlockSize*sizeof(double)*3*_numofSites, _stream[n]>>>(device_genetics, _deviceParams, gQuakeAvg,
+                                                                                                      input, siteData, answers,
+                                                                                                      dConnect,Kp,_sampleRate,_numofSites, hour,
+                                                                                                      meanCh1, meanCh2, meanCh3, stdCh1, stdCh2, stdCh3, device_offset);
             CUDA_SAFE_CALL(cudaPeekAtLastError());
             CUDA_SAFE_CALL(cudaDeviceSynchronize());
             std::cerr<<"net completed."<<std::endl;
@@ -576,8 +580,8 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
             //                                                                                                 partial_reduce_sums,
             //                                                                                                 _deviceParams, _streamSize/_deviceParams.array[7], device_offset, reduceGridSize*n);
             //            CUDA_SAFE_CALL(cudaPeekAtLastError());
-            //            std::cerr<<"reduce by block completed."<<std::endl;
-            swapMemory<<<regularGridSize, blockSize, 0, _stream[n]>>>(device_genetics, host_genetics_device, host_offset, device_offset);
+            std::cerr<<"swap grid size:"<<regGridSize<<std::endl;
+            swapMemory<<<regGridSize, regBlockSize, 0, _stream[n]>>>(host_genetics_device, device_genetics, _deviceParams, host_offset, device_offset);
             CUDA_SAFE_CALL(cudaPeekAtLastError());
             CUDA_SAFE_CALL(cudaDeviceSynchronize());
             std::cerr<<"memory swap completed"<<std::endl;
@@ -593,10 +597,10 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
             std::cerr<<"stream number: "<<n<<std::endl;
             std::cerr<<"host offset: "<<host_offset<<std::endl;
             std::cerr<<"device offset: "<<device_offset<<std::endl;
-            Net<<<regularGridSize, blockSize, blockSize*sizeof(double)*3*_numofSites, _stream[n]>>>(device_genetics, _deviceParams, gQuakeAvg,
-                                                                                                    input, siteData, answers,
-                                                                                                    dConnect,Kp,_sampleRate,_numofSites, hour,
-                                                                                                    meanCh1, meanCh2, meanCh3, stdCh1, stdCh2, stdCh3, device_offset);
+            Net<<<regGridSize, regBlockSize, regBlockSize*sizeof(double)*3*_numofSites, _stream[n]>>>(device_genetics, _deviceParams, gQuakeAvg,
+                                                                                                      input, siteData, answers,
+                                                                                                      dConnect,Kp,_sampleRate,_numofSites, hour,
+                                                                                                      meanCh1, meanCh2, meanCh3, stdCh1, stdCh2, stdCh3, device_offset);
             device_offset += _streamSize;
         }
         //        fitnessAvg = fitnessAvg /fitItr;
