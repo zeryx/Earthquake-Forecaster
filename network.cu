@@ -120,6 +120,13 @@ __global__ void Net(kernelArray<double> weights, kernelArray<int> params,
     double *memGateOut = &weights.array[startOfMemGateOut];
     double *memGateForget = &weights.array[startOfMemGateForget];
     double *outputs = &weights.array[startOfOutput];
+    input[0] = 1;
+    hidden[0] = 1;
+    mem[0] = 1;
+    memGateIn[0] = 1;
+    memGateOut[0] = 1;
+    memGateForget[0] = 1;
+    outputs[1] = 2;
     for(int step=0; step<3600*sampleRate; step++){
 
         double CommunityLat = 0;
