@@ -14,7 +14,7 @@ NetworkGenetic::NetworkGenetic(const int &numInputNodes, const int &numHiddenNeu
                                const int &numOutNeurons, const int &numWeights, std::vector< std::pair<int, int> >&connections){
 
     _hostParams.array = new int[20];
-    _hostParams.size=15;
+    _hostParams.size=20;
     _hostParams.array[1] = numInputNodes + numHiddenNeurons + numMemoryNeurons*4 + numOutNeurons;
     _hostParams.array[2] = numWeights;
     _hostParams.array[3] = _hostParams.array[2] + _hostParams.array[1] + 1 + 1; // plus 1 for fitness, plus 1 for community output composite vector
@@ -60,6 +60,10 @@ void NetworkGenetic::generateWeights(){
         CUDA_SAFE_CALL(cudaMemcpyAsync(&host_genetics.array[global_offset], &device_genetics.array[device_offset], _streambytes, cudaMemcpyDeviceToHost, _stream[n]));
         global_offset += _streamSize;
         device_offset += _streamSize;
+    }
+    CUDA_SAFE_CALL(cudaDeviceSynchronize());
+    for(int i=(_hostParams.array[2]*_hostParams.array[4]-10000); i<_hostParams.array[2]*_hostParams.array[4]; i++){
+        std::cerr<<host_genetics.array[i]<<std::endl;
     }
     cudaDeviceReset();
     exit(1);
@@ -117,7 +121,9 @@ void NetworkGenetic::setParams(){
         _hostParams.array[9] = _hostParams.array[8] + _hostParams.array[4] * _hostParams.array[15]; // memoryIn Gate nodes offset. (mem_offset + numMem*numIndividuals)
         _hostParams.array[10] = _hostParams.array[9] + _hostParams.array[4] * _hostParams.array[16];// memoryOut Gate nodes offset. (memIn_offset + numMemIn*numIndividuals)
         _hostParams.array[11] = _hostParams.array[10] + _hostParams.array[4] *_hostParams.array[17]; // output neurons offset. (memOut_offset + numMemOut*numIndividuals)
-        CUDA_SAFE_CALL(cudaMalloc((void**)_deviceParams.array, _hostParams.size*sizeof(int)));
+        std::cerr<<"allocating params memory"<<std::endl;
+        CUDA_SAFE_CALL(cudaMalloc((void**)&_deviceParams.array, _hostParams.size*sizeof(int)));
+        std::cerr<<"setting params memory"<<std::endl;
         CUDA_SAFE_CALL(cudaMemcpy(_deviceParams.array, _hostParams.array, _hostParams.size*sizeof(int), cudaMemcpyHostToDevice));
         _deviceParams.size = _hostParams.size;
 }

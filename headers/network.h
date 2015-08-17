@@ -38,7 +38,7 @@ private:
     int _numofSites;
     int _numOfStreams;
     size_t _streambytes;
-    size_t _streamSize;
+    int _streamSize;
     std::vector<cudaStream_t> _stream;
 };
 
