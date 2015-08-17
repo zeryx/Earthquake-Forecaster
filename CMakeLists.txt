@@ -5,13 +5,22 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/headers)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/kernels)
 LINK_DIRECTORIES(/usr/local/cuda/lib64)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_CACHEFILE_DIR ${CMAKE_BINARY_BIN}/mk)
+
+
 set(CUDA_SEPARABLE_COMPILATION ON)
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}; "-O3 -ffast-math -Wall")
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; --compiler-options  -g -lineinfo -use_fast_math)
+
 FILE(GLOB SOURCES "src/*")
 FILE(GLOB HEADERS  "headers/*")
 FILE(GLOB KERNELS "kernels/*")
-CUDA_ADD_LIBRARY(neuralKernels ${KERNELS})
-target_link_libraries(cuda cudart cudadevrt)
+
+CUDA_ADD_LIBRARY(NN ${KERNELS} src/network.cu)
+target_link_libraries(NN cudart cudadevrt)
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
-target_link_libraries(${PROJECT_NAME} cuda)
+target_link_libraries(${PROJECT_NAME} NN)
