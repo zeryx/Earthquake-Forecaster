@@ -16,6 +16,7 @@ public:
                    const int &numOutNeurons, const int &numWeights,  std::vector< std::pair<int, int> >&connections);
     void errorFunc();
     void generateWeights(); //initializes _data array and fills with random numbers
+        void setParams();
     void allocateHostAndGPUObjects(float pMax, size_t deviceRam, size_t hostRam);
     bool init(int sampleRate, int SiteNum, std::vector<double> *siteData);
     void doingTraining(int site, int hour, double lat,
@@ -26,7 +27,6 @@ public:
 private:
     kernelArray<double> device_genetics;
     kernelArray<double> host_genetics;
-    kernelArray<double> host_genetics_device;
     std::vector<std::pair<int, int> > *_connect;
     std::vector<double> *_siteData;
     std::vector<double> _answers;
@@ -36,7 +36,7 @@ private:
     bool _istraining;
     int _sampleRate;
     int _numofSites;
-    size_t _numOfStreams;
+    int _numOfStreams;
     size_t _streambytes;
     size_t _streamSize;
     std::vector<cudaStream_t> _stream;

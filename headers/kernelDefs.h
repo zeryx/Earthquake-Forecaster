@@ -30,7 +30,8 @@ __global__ void NetKern(kernelArray<double> weights, kernelArray<int> params, ke
 
 __global__ void reduceKern(kernelArray<double> weights,
                                 kernelArray<double> per_block_results,
-                                kernelArray<int> params, int n, int device_offset, int blockOffset);
+                                kernelArray<int> params, int device_offset, int blockOffset);
+
 __global__ void evoKern(kernelArray<double> weights, kernelArray<int> params, int device_offset);
 
 

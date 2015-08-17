@@ -1,6 +1,6 @@
 #include <kernelDefs.h>
 
-__global__ void reduceKern(kernelArray<double> weights,kernelArray<double> per_block_results,kernelArray<int> params, int n, int device_offset, int blockOffset){
+__global__ void reduceKern(kernelArray<double> weights,kernelArray<double> per_block_results,kernelArray<int> params,  int device_offset, int blockOffset){
     extern __shared__ float sdata[];
 
     unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -8,7 +8,7 @@ __global__ void reduceKern(kernelArray<double> weights,kernelArray<double> per_b
 
     // load input into __shared__ memory
     float x = 0;
-    if(idx < n)
+    if(idx < params.array[4])
     {
         x = weights.array[ind + params.array[2]];
     }

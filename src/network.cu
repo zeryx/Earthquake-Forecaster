@@ -8,46 +8,48 @@
 #include <ctime>
 #include <cstdio>
 #include <assert.h>
-#include <cstdlib>
 
 
 NetworkGenetic::NetworkGenetic(const int &numInputNodes, const int &numHiddenNeurons, const int &numMemoryNeurons,
                                const int &numOutNeurons, const int &numWeights, std::vector< std::pair<int, int> >&connections){
 
-    _hostParams.array = new int[15];
+    _hostParams.array = new int[20];
     _hostParams.size=15;
     _hostParams.array[1] = numInputNodes + numHiddenNeurons + numMemoryNeurons*4 + numOutNeurons;
     _hostParams.array[2] = numWeights;
     _hostParams.array[3] = _hostParams.array[2] + _hostParams.array[1] + 1 + 1; // plus 1 for fitness, plus 1 for community output composite vector
-//    _hostParams.array[4] = weights offset
-//    _hostParams.array[5] = input offset
-//    _hostParams.array[6] = hidden neurons offset
-//    _hostParams.array[7] = memory neurons offset
-//    _hostParams.array[8] = memoryIn neurons offset
-//    _hostParams.array[9] = memoryOut neurons offset
-//    _hostParams.array[10] = memoryForget neurons offset
-//    _hostParams.array[11] = output neurons offset
-//    _hostParams.array[12] = input neurons per individual
-//    _hostParams.array[13] = memory neurons per individual
-//    _hostParams.array[14] = memoryIn neurons per individual
-//    _hostParams.array[15] = memoryOut neurons per individual
-//    _hostParams.array[16] = output neurons per individual
+//    _hostParams.array[4] = number of individuals in stream
+//    _hostParams.array[5] = weights offset
+//    _hostParams.array[6] = input offset
+//    _hostParams.array[7] = hidden neurons offset
+//    _hostParams.array[8] = memory neurons offset
+//    _hostParams.array[9] = memoryIn neurons offset
+//    _hostParams.array[10] = memoryOut neurons offset
+//    _hostParams.array[11] = memoryForget neurons offset
+//    _hostParams.array[12] = output neurons offset
+    _hostParams.array[13] = numInputNodes;
+    _hostParams.array[14] =numMemoryNeurons;            //memory neurons per individual
+    _hostParams.array[15] =numMemoryNeurons;            //memoryIn neurons per individual
+    _hostParams.array[16] =numMemoryNeurons;            //memoryOut neurons per individual
+        _hostParams.array[17] =numOutNeurons;           //output neurons per individual
     _connect = &connections;
 }
 
 void NetworkGenetic::generateWeights(){
-    int blockSize = 512; // number of blocks in the grid
-    int gridSize=(_streamSize/_hostParams.array[3])/blockSize;
+    int blockSize = 1024; // number of blocks in the grid
+    int gridSize=(_streamSize - _hostParams.array[4]*_hostParams.array[1])/blockSize; //number of weights in stream/blocksize
     size_t global_offset=0;
     size_t device_offset=0;
+    std::cerr<<"blocks in this grid: "<<gridSize<<std::endl;
     for(int n=0; n<_numOfStreams; n++){//fill the host first.
         if(n%4==0 && n !=0)
             device_offset =0;
-        std::cerr<<"declaring seed..."<<std::endl;
         uint32_t seed;
         FILE *fp;
         fp = std::fopen("/dev/urandom", "r");
-        std::fread(&seed, 4, 1, fp);
+        size_t chk;
+        chk =std::fread(&seed, 4, 1, fp);
+        if(chk <1){std::cerr<<"couldn't read /dev/urandom"<<std::endl; exit(1);}
         std::fclose(fp);
         std::cerr<<"stream number #"<<n<<std::endl;
         std::cerr<<"seed is:"<<seed<<std::endl;
@@ -67,21 +69,19 @@ void NetworkGenetic::generateWeights(){
 void NetworkGenetic::allocateHostAndGPUObjects( float pMax, size_t deviceRam, size_t hostRam){
     CUDA_SAFE_CALL(cudaDeviceReset());
     CUDA_SAFE_CALL(cudaDeviceSetSharedMemConfig(cudaSharedMemBankSizeFourByte));
-    CUDA_SAFE_CALL(cudaMalloc((void**)&_deviceParams.array, _hostParams.size*sizeof(int)));
-    _deviceParams.size = _hostParams.size;
-    CUDA_SAFE_CALL(cudaMemcpy(&_deviceParams.array[0], &_hostParams.array[0], _hostParams.size*sizeof(int), cudaMemcpyHostToDevice));
     size_t totalHost = hostRam*pMax;
     size_t totalDevice = deviceRam*pMax;
     std::cerr<<"total free device ram : "<<deviceRam<<std::endl;
     std::cerr<<"total free host ram : "<<hostRam<<std::endl;
+    //each memory block is divisible by the size of an individual, the size of double, and the blocksize
     while(totalHost%_hostParams.array[3] || totalHost%sizeof(double) || totalHost%(sizeof(double)*4) || totalHost%512) // get the largest number divisible by the individual size, the threads in a block, and the size of a double
         totalHost= totalHost -1;
     while(totalDevice%_hostParams.array[3] || totalDevice%sizeof(double) || totalDevice%(sizeof(double)*4) || totalDevice%512)
         totalDevice = totalDevice -1;
-    //make each of the memory arguments divisible by 512 (threads per block)
+
     _streamSize = totalDevice/(sizeof(double)*4);
     _streambytes = _streamSize*sizeof(double);
-    std::cerr<<"bytes per stream :"<<_streambytes<<std::endl;
+
     assert(_streambytes == _streamSize*sizeof(double));
     _numOfStreams = ceil((totalHost/sizeof(double))/_streamSize); // number of streams = totalHost/streamBytes, device does not store extra weights for simplicity.
     assert(_streambytes * _numOfStreams <= totalDevice+totalHost);
@@ -91,7 +91,6 @@ void NetworkGenetic::allocateHostAndGPUObjects( float pMax, size_t deviceRam, si
     std::cerr<<"device ram to allocate: "<<totalDevice<<std::endl;
     std::cerr<<"host ram to allocate: "<<totalHost<<std::endl;
     CUDA_SAFE_CALL(cudaHostAlloc((void**)&host_genetics.array, totalHost, cudaHostAllocWriteCombined));
-    CUDA_SAFE_CALL(cudaHostGetDevicePointer((void**)&host_genetics_device.array, (void*)host_genetics.array, 0 ));
     CUDA_SAFE_CALL(cudaMalloc((void**) &device_genetics.array, totalDevice));
     std::cerr<<"all allocated, moving on."<<std::endl;
     _stream.resize(_numOfStreams);
@@ -99,13 +98,28 @@ void NetworkGenetic::allocateHostAndGPUObjects( float pMax, size_t deviceRam, si
         CUDA_SAFE_CALL(cudaStreamCreate(&_stream.at(i)));
         CUDA_SAFE_CALL( cudaStreamQuery(_stream.at(i)));
     }
-}
+    this->setParams();
+ }
 bool NetworkGenetic::init(int sampleRate, int SiteNum, std::vector<double> *siteData){
     _sampleRate = sampleRate;
     _numofSites = SiteNum;
     _siteData = siteData;
     _istraining = false;
     return true;
+}
+
+void NetworkGenetic::setParams(){
+        _hostParams.array[4] = _streamSize/_hostParams.array[3];
+        _hostParams.array[5] = 0;
+        _hostParams.array[6] = _hostParams.array[5] + _hostParams.array[4] * _hostParams.array[2];  // input neurons offset. (weights_offset + numweights*numindividuals)
+        _hostParams.array[7] = _hostParams.array[6] + _hostParams.array[4] * _hostParams.array[13]; // hidden neurons offset. (input_offset +numInputs*numIndividuals)
+        _hostParams.array[8] = _hostParams.array[7] + _hostParams.array[4] * _hostParams.array[14]; // memory neurons offset. (hidden_offset + numHidden*numIndividuals)
+        _hostParams.array[9] = _hostParams.array[8] + _hostParams.array[4] * _hostParams.array[15]; // memoryIn Gate nodes offset. (mem_offset + numMem*numIndividuals)
+        _hostParams.array[10] = _hostParams.array[9] + _hostParams.array[4] * _hostParams.array[16];// memoryOut Gate nodes offset. (memIn_offset + numMemIn*numIndividuals)
+        _hostParams.array[11] = _hostParams.array[10] + _hostParams.array[4] *_hostParams.array[17]; // output neurons offset. (memOut_offset + numMemOut*numIndividuals)
+        CUDA_SAFE_CALL(cudaMalloc((void**)_deviceParams.array, _hostParams.size*sizeof(int)));
+        CUDA_SAFE_CALL(cudaMemcpy(_deviceParams.array, _hostParams.array, _hostParams.size*sizeof(int), cudaMemcpyHostToDevice));
+        _deviceParams.size = _hostParams.size;
 }
 
 bool NetworkGenetic::checkForWeights(std::string filepath){
@@ -246,10 +260,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
             CUDA_SAFE_CALL(cudaPeekAtLastError());
             //            CUDA_SAFE_CALL(cudaDeviceSynchronize());
             std::cerr<<"net completed."<<std::endl;
-            //            std::cerr<<"reduce grid size: "<<reduceGridSize<<std::endl;
-//                        reduceKern<<<reduceGridSize, blockSize, blockSize*sizeof(double), _stream[n]>>>(device_genetics,
-            //                                                                                                 partial_reduce_sums,
-            //                                                                                                 _deviceParams, _streamSize/_deviceParams.array[3], device_offset, reduceGridSize*n);
+            reduceKern<<<reduceGridSize, regBlockSize, regBlockSize*sizeof(double), _stream[n]>>>(device_genetics, partial_reduce_sums, _deviceParams, device_offset, reduceGridSize*n);
             //            CUDA_SAFE_CALL(cudaPeekAtLastError());
             CUDA_SAFE_CALL(cudaMemcpyAsync(&host_genetics.array[host_offset], &device_genetics.array[device_offset], _streambytes, cudaMemcpyDeviceToHost, _stream[n]));
             CUDA_SAFE_CALL(cudaPeekAtLastError());

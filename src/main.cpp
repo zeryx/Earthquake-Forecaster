@@ -76,6 +76,7 @@ int main(int argc, char** arg){
     connections.push_back(make_pair(inputs+2, inputs+hidden+memGateIn+MemGateOut+MemGateForget+1));
     connections.push_back(make_pair(inputs+2, inputs+hidden+memGateIn+MemGateOut+MemGateForget+2));
     numWeights = connections.size()-memory; //minus 3 because the memory neurons connect without weights.
+    std::cerr<<"num of weights is: "<<numWeights<<std::endl;
     NetworkGenetic ConstructedNetwork(inputs, hidden, memory, outputs, numWeights, connections);
     int sampleRate, numberOfSites, SLEN;
     std::cin>>sampleRate>>numberOfSites>>SLEN;
