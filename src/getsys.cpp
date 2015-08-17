@@ -1,7 +1,7 @@
 #include "getsys.h"
 #include <iostream>
 #include <fstream>
-
+#include <cstdlib>
 size_t GetHostRamInBytes()
 {
     FILE *meminfo = fopen("/proc/meminfo", "r");

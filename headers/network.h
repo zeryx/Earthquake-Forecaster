@@ -1,13 +1,15 @@
 #ifndef NETWORK_H
 #define NETWORK_H
-#include "memManager.h"
-#include "dataarray.h"
+#include <dataarray.h>
 #include <vector>
 #include <string>
 #include <map>
 #include <cuda.h>
-#include "stdlib.h"
-#include <cuda_runtime_api.h>
+#include <utility>
+#ifndef CUDA_SAFE_CALL
+#define CUDA_SAFE_CALL(call) do{cudaError_t err = call; if (cudaSuccess != err) {fprintf (stderr, "Cuda error in file '%s' in line %i : %s.\n",__FILE__, __LINE__, cudaGetErrorString(err) ); cudaDeviceReset(); exit(EXIT_FAILURE);}} while (0)
+#endif
+
 class  NetworkGenetic{
 public:
     NetworkGenetic(const int &numInNeurons, const int &numHiddenNeurons, const int &numMemoryNeurons,

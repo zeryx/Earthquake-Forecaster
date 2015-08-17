@@ -1,7 +1,6 @@
-#include "network.h"
-#include "getsys.h"
+#include <network.h>
+#include <getsys.h>
 #include <iostream>
-#include <utility>
 #include <vector>
 #include <thrust/pair.h>
 
