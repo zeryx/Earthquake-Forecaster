@@ -8,8 +8,7 @@
 #include <ctime>
 #include <cstdio>
 #include <assert.h>
-
-
+#include <cstdlib>
 
 
 NetworkGenetic::NetworkGenetic(const int &numInputNodes, const int &numHiddenNeurons, const int &numMemoryNeurons,
@@ -60,6 +59,8 @@ void NetworkGenetic::generateWeights(){
         global_offset += _streamSize;
         device_offset += _streamSize;
     }
+    cudaDeviceReset();
+    exit(1);
 }
 
 
