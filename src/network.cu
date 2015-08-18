@@ -36,7 +36,7 @@ NetworkGenetic::NetworkGenetic(const int &numInputNodes, const int &numHiddenNeu
 }
 
 void NetworkGenetic::generateWeights(){
-    int blockSize = 1024; // number of blocks in the grid
+    int blockSize = 512; // number of blocks in the grid
     int gridSize=(_streamSize - _hostParams.array[4]*_hostParams.array[1])/blockSize; //number of weights in stream/blocksize
     size_t global_offset=0;
     size_t device_offset=0;
