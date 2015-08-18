@@ -20,6 +20,5 @@ FILE(GLOB HEADERS  "headers/*")
 FILE(GLOB KERNELS "kernels/*")
 
 CUDA_ADD_LIBRARY(NN ${KERNELS} src/network.cu)
-target_link_libraries(NN cudart cudadevrt)
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 target_link_libraries(${PROJECT_NAME} NN)

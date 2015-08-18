@@ -19,7 +19,7 @@ __host__ __device__ double cosd(double x);
 
 __host__ __device__ double sind(double x);
 
-//kernels
+//main kernels
 __global__ void genWeightsKern( kernelArray<double> ref, uint32_t in, kernelArray<int> params, size_t offset);
 
 __global__ void NetKern(kernelArray<double> weights, kernelArray<int> params, kernelArray<double> globalQuakes,
@@ -35,6 +35,8 @@ __global__ void reduceKern(kernelArray<double> weights,
 __global__ void evoKern(kernelArray<double> weights, kernelArray<int> params, int device_offset);
 
 
+//utility kernels
+__global__ void interKern(kernelArray<int> in, kernelArray<int> out,  int sampleRate, int numOfSites);
 
 
 
