@@ -58,9 +58,9 @@ __global__ void NetKern(kernelArray<double> weights, kernelArray<int> params, ke
                         1 with the porbability of that earthquake happening (between [0,1]) and 1 with the sites magnitude (for community feedback) */
 //                int n =0; // n is the weight number
 
-                input[0*ind] = normalize(inputVal.array[site_offset[j]+channel_offset[1]+step], meanCh2, stdCh1);//channel 1
-                input[1*ind] = normalize(inputVal.array[site_offset[j]+channel_offset[1]+step], meanCh2, stdCh2);//channel 2
-                input[2*ind] = normalize(inputVal.array[site_offset[j]+channel_offset[2]+step], meanCh3, stdCh3);//channel 3
+                input[0*ind] = normalize(inputVal.array[site_offset[j]+channel_offset[1]+i], meanCh2, stdCh1);//channel 1
+                input[1*ind] = normalize(inputVal.array[site_offset[j]+channel_offset[1]+i], meanCh2, stdCh2);//channel 2
+                input[2*ind] = normalize(inputVal.array[site_offset[j]+channel_offset[2]+i], meanCh3, stdCh3);//channel 3
                             input[3*ind] = shift(GQuakeAvgdist, 40075.1, 0);
                             input[4*ind] = shift(GQuakeAvgBearing, 360, 0);
                             input[5*ind] = shift(GQuakeAvgMag, 9.5, 0);

@@ -245,7 +245,6 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         kernelArray<double>retVec, gQuakeAvg, answers, siteData, partial_reduce_sums;
         kernelArray<int> rawInput, correctedInput;
         kernelArray<std::pair<int, int> > dConnect;
-        int *dsiteOffset, *dchanOffset;
         int regBlockSize = 512;
         size_t reduceGridSize = (_streamSize/_hostParams.array[3])/regBlockSize + (((_streamSize/_hostParams.array[3])%regBlockSize) ? 1 : 0);
         size_t netGridSize = (_streamSize/_hostParams.array[3])/regBlockSize;
@@ -294,7 +293,6 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
             CUDA_SAFE_CALL(cudaPeekAtLastError());
             for(int step=0; step<3600; step=step+100){
                 NetKern<<<netGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, gQuakeAvg, correctedInput, siteData, answers, dConnect, Kp,_sampleRate,_numofSites, _site_offset, _channel_offset, hour, meanCh1, meanCh2, meanCh3, stdCh1, stdCh2, stdCh3, device_offset, step);
-                CUDA_SAFE_CALL(cudaStreamSynchronize(_stream[n]));
                 CUDA_SAFE_CALL(cudaPeekAtLastError());
             }
             //            reduceKern<<<reduceGridSize, regBlockSize, regBlockSize*sizeof(double), _stream[n]>>>(device_genetics, partial_reduce_sums, _deviceParams, device_offset, reduceGridSize*n);
