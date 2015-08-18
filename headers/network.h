@@ -22,6 +22,7 @@ public:
     void doingTraining(int site, int hour, double lat,
                        double lon, double mag, double dist);
     void forecast(std::vector<double> *ret, int& hour, std::vector<int> *data, double &K, std::vector<double> *globalQuakes);
+    void reformatTraining(kernelArray<int>old_input, kernelArray<int>new_input);
     void storeWeights(std::string filepath);
     bool checkForWeights(std::string filepath);
 private:
@@ -39,6 +40,8 @@ private:
     int _numOfStreams;
     size_t _streambytes;
     int _streamSize;
+    int *_channel_offset;
+    int *_site_offset;
     std::vector<cudaStream_t> _stream;
 };
 

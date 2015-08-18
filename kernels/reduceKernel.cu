@@ -4,14 +4,13 @@ __global__ void reduceKern(kernelArray<double> weights,kernelArray<double> per_b
     extern __shared__ float sdata[];
 
     unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    int ind = idx*params.array[7] + device_offset;
+    int ind = params.array[14] + idx + device_offset;
 
     // load input into __shared__ memory
     float x = 0;
-    if(idx < params.array[4])
-    {
-        x = weights.array[ind + params.array[2]];
-    }
+
+        x = weights.array[ind];
+
     sdata[threadIdx.x] = x;
     __syncthreads();
 

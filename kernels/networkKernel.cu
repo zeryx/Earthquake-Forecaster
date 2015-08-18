@@ -1,43 +1,48 @@
 #include <kernelDefs.h>
 
-__global__ void NetKern(kernelArray<double> weights, kernelArray<int> params, kernelArray<double> globalQuakes, kernelArray<int> inputVal, kernelArray<double> siteData, kernelArray<double> answers, kernelArray<std::pair<int, int> > connections, double Kp, int sampleRate,int numOfSites, int hour, double meanCh1, double meanCh2, double meanCh3, double stdCh1, double stdCh2, double stdCh3, size_t offset){
-    extern __shared__ float scratch[];
-    float *When = &scratch[numOfSites*threadIdx.x];
-    float *HowCertain = &scratch[numOfSites*blockDim.x + numOfSites*threadIdx.x];
-    float *CommunityMag = &scratch[numOfSites*blockDim.x*2 + numOfSites*threadIdx.x];
-    for(int i=0; i<numOfSites; i++){
-        When[i]=0;
-        HowCertain[i]=0;
-        CommunityMag[i]=1;
-    }
+__global__ void NetKern(kernelArray<double> weights, kernelArray<int> params, kernelArray<double> globalQuakes,
+                        kernelArray<int> inputVal, kernelArray<double> siteData, kernelArray<double> answers,
+                        kernelArray<std::pair<int, int> > connections, double Kp, int sampleRate,int numOfSites,
+                        int* site_offset, int* channel_offset,int hour, double meanCh1, double meanCh2,
+                        double meanCh3, double stdCh1, double stdCh2, double stdCh3, size_t device_offset, int step){
+
     int idx = blockIdx.x * blockDim.x + threadIdx.x; // for each thread is one individual
-    int ind = idx*params.array[3]+offset;
     typedef std::pair<int, int>*  connectPairMatrix;
 
-    int startOfInput = ind + params.array[2];
-    int startOfHidden = startOfInput + params.array[3];
-    int startOfMem = startOfHidden + params.array[4];
-    int startOfMemGateIn = startOfMem + params.array[5];
-    int startOfMemGateOut = startOfMemGateIn + params.array[5];
-    int startOfMemGateForget = startOfMemGateOut + params.array[5];
-    int startOfOutput = startOfMemGateForget + params.array[5];
-    //the weights array carries the neuron scratch space used for the net kernel, I'd like to replace this and reduce the memory allocation asap.
-    double *input = &weights.array[startOfInput]; // number of inputs is 9.
-    double *hidden = &weights.array[startOfHidden]; // for practice sake, lets say each input has its own neuron (might be true!)
-    double *mem = &weights.array[startOfMem]; // stores the input if gate is high
-    double *memGateIn = &weights.array[startOfMemGateIn]; //connects to the input layer and the memN associated with input, if 1 it sends up stream and deletes, if low it keeps.
+//    float *When = &scratch[numOfSites*threadIdx.x];
+//    float *HowCertain = &scratch[numOfSites*blockDim.x + numOfSites*threadIdx.x];
+//    float *CommunityMag = &scratch[numOfSites*blockDim.x*2 + numOfSites*threadIdx.x];
+//    for(int i=0; i<numOfSites; i++){
+//        When[i]=0;
+//        HowCertain[i]=0;
+//        CommunityMag[i]=1;
+//    }
+    int ind = params.array[4]; // number of individuals on device
+    int startOfInput = params.array[6] + idx + device_offset; // 6 is the offset to the start of the input neurons
+    int startOfHidden = params.array[7] + idx + device_offset;
+    int startOfMem = params.array[8] + idx+ device_offset;
+    int startOfMemGateIn = params.array[9] + idx + device_offset;
+    int startOfMemGateOut = params.array[10] + idx + device_offset;
+    int startOfMemGateForget = params.array[11] + idx + device_offset;
+    int startOfOutput = params.array[12] + idx + device_offset;
+    int startOfFitness = params.array[14] + idx + device_offset;
+    double *input = &weights.array[startOfInput];
+    double *hidden = &weights.array[startOfHidden];
+    double *mem = &weights.array[startOfMem];
+    double *memGateIn = &weights.array[startOfMemGateIn];
     double *memGateOut = &weights.array[startOfMemGateOut];
     double *memGateForget = &weights.array[startOfMemGateForget];
     double *outputs = &weights.array[startOfOutput];
-    for(int step=0; step<3600*sampleRate; step++){
-            double CommunityLat = 0;
-            double CommunityLon = 0;
-            for(int j=0; j<sampleRate; j++){//sitesWeighted Lat/Lon values are determined based on all previous zsites mag output value.
-                CommunityLat += siteData.array[j*2]*CommunityMag[j];
-                CommunityLon += siteData.array[j*2+1]*CommunityMag[j];
-            }
-            CommunityLat = CommunityLat/numOfSites;
-            CommunityLon = CommunityLon/numOfSites;
+    double *fitness = &weights.array[startOfFitness];
+    for(int i=step; i<100; i++){
+//            double CommunityLat = 0;
+//            double CommunityLon = 0;
+//            for(int j=0; j<sampleRate; j++){//sitesWeighted Lat/Lon values are determined based on all previous zsites mag output value.
+//                CommunityLat += siteData.array[j*2]*CommunityMag[j];
+//                CommunityLon += siteData.array[j*2+1]*CommunityMag[j];
+//            }
+//            CommunityLat = CommunityLat/numOfSites;
+//            CommunityLon = CommunityLon/numOfSites;
             for(int j=0; j<numOfSites; j++){ //each site is run independently of others, but shares an output from the previous step
 
                 double latSite = siteData.array[j*2];
@@ -47,21 +52,22 @@ __global__ void NetKern(kernelArray<double> weights, kernelArray<int> params, ke
                 double GQuakeAvgMag = globalQuakes.array[3];
                 double GQuakeAvgdist = distCalc(latSite, lonSite, avgLatGQuake, avgLonGQuake);
                 double GQuakeAvgBearing = bearingCalc(latSite, lonSite, avgLatGQuake, avgLonGQuake);
-                double CommunityDist = distCalc(latSite, lonSite, CommunityLat, CommunityLon);
-                double CommunityBearing = bearingCalc(latSite, lonSite, CommunityLat, CommunityLon);
+//                double CommunityDist = distCalc(latSite, lonSite, CommunityLat, CommunityLon);
+//                double CommunityBearing = bearingCalc(latSite, lonSite, CommunityLat, CommunityLon);
                 /* 3 outputs, 1 with an hour in the future when the earthquake will hit,
                         1 with the porbability of that earthquake happening (between [0,1]) and 1 with the sites magnitude (for community feedback) */
-                int n =0; // n is the weight number
-                input[0] = normalize(inputVal.array[3600*sampleRate*j*3 + 0*(3600*sampleRate)+step], meanCh2, stdCh1);//channel 1
-                input[1] = normalize(inputVal.array[3600*sampleRate*j*3 + 1*(3600*sampleRate)+step], meanCh2, stdCh2);//channel 2
-                input[2] = normalize(inputVal.array[3600*sampleRate*j*3 + 2*(3600*sampleRate)+step], meanCh3, stdCh3);//channel 3
-                //            input[3] = shift(GQuakeAvgdist, 40075.1, 0);
-                //            input[4] = shift(GQuakeAvgBearing, 360, 0);
-                //            input[5] = shift(GQuakeAvgMag, 9.5, 0);
-                //            input[6] = shift(Kp, 10, 0);
-                //            input[7] = shift(CommunityDist,40075.1/2, 0);
-                //            input[8] = shift(CommunityBearing, 360, 0);
-                //            //lets reset all neuron values for this new timestep (except memory neurons)
+//                int n =0; // n is the weight number
+
+                input[0*ind] = normalize(inputVal.array[site_offset[j]+channel_offset[1]+step], meanCh2, stdCh1);//channel 1
+                input[1*ind] = normalize(inputVal.array[site_offset[j]+channel_offset[1]+step], meanCh2, stdCh2);//channel 2
+                input[2*ind] = normalize(inputVal.array[site_offset[j]+channel_offset[2]+step], meanCh3, stdCh3);//channel 3
+                            input[3*ind] = shift(GQuakeAvgdist, 40075.1, 0);
+                            input[4*ind] = shift(GQuakeAvgBearing, 360, 0);
+                            input[5*ind] = shift(GQuakeAvgMag, 9.5, 0);
+                            input[6*ind] = shift(Kp, 10, 0);
+//                            input[7*ind] = shift(CommunityDist,40075.1/2, 0);
+//                            input[8*ind] = shift(CommunityBearing, 360, 0);
+                            //lets reset all neuron values for this new timestep (except memory neurons)
                 //            for(int gate=0; gate<params.array[5]; gate++){
                 //                memGateIn[gate] = 0;
                 //                memGateOut[gate] = 0;

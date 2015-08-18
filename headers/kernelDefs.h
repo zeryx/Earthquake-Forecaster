@@ -25,8 +25,8 @@ __global__ void genWeightsKern( kernelArray<double> ref, uint32_t in, kernelArra
 __global__ void NetKern(kernelArray<double> weights, kernelArray<int> params, kernelArray<double> globalQuakes,
                     kernelArray<int> inputVal, kernelArray<double> siteData, kernelArray<double> answers,
                     kernelArray<std::pair<int, int> > connections, double Kp, int sampleRate,int numOfSites,
-                    int hour, double meanCh1, double meanCh2, double meanCh3, double stdCh1, double stdCh2,
-                    double stdCh3, size_t offset);
+                    int* site_offset, int* channel_offset,int hour, double meanCh1, double meanCh2,
+                    double meanCh3, double stdCh1, double stdCh2, double stdCh3, size_t device_offset, int step);
 
 __global__ void reduceKern(kernelArray<double> weights,
                                 kernelArray<double> per_block_results,
@@ -36,7 +36,7 @@ __global__ void evoKern(kernelArray<double> weights, kernelArray<int> params, in
 
 
 //utility kernels
-__global__ void interKern(kernelArray<int> in, kernelArray<int> out,  int sampleRate, int numOfSites);
+__global__ void interKern(kernelArray<int> in, kernelArray<int> out, int* site_offset, int* channel_offset,  int sampleRate, int numOfSites);
 
 
 
