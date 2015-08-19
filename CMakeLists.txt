@@ -12,8 +12,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 
 set(CUDA_SEPARABLE_COMPILATION ON)
-set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}; "-std=c++11 -O3 -ffast-math -Wall")
-set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};  -std=c++11 --compiler-options  -g -lineinfo -use_fast_math)
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}; " -O3 -ffast-math -Wall")
+set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};  --compiler-options  -g -lineinfo -use_fast_math)
 
 FILE(GLOB SOURCES "src/*")
 FILE(GLOB HEADERS  "headers/*")
