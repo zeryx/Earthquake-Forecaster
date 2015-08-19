@@ -1,31 +1,29 @@
 #include <kernelDefs.h>
 
 __host__ __device__ double bearingCalc(double lat1, double lon1, double lat2, double lon2){
-    double dLon = (lon2 - lon1);
 
-    double y = asin(dLon) * acos(lat2);
-    double x = acos(lat1) * asin(lat2) - asin(lat1) * acos(lat2) * acos(dLon);
+    double y = sin(lon2-lon1) * cos(lat2);
+    double x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(lon2-lon1);
 
     double brng = atan2(y, x);
 
-    brng = brng*M_PI/180;
-    brng += 360;
-    while(brng>= 360)
+    brng = brng*180/M_PI;
+    brng += 180;
+    while(brng>=360)
         brng -= 360;
-    brng = 360 - brng;
-
     return brng;
 }
 
 __host__ __device__ double distCalc(double lat1, double lon1, double lat2, double lon2){
     double earthRad = 6371.01;
-    double deltalon = abs(lon1 - lon2);
-    if(deltalon > 180)
-        deltalon = 360 - deltalon;
-    double ret = earthRad * atan2( sqrt( pow( cosd(lat1) * sind(deltalon), 2) +
-                                         pow( cosd(lat2) * sind(lat1) - sind(lat2) * cosd(lat1) * cosd(deltalon), 2) ),
-                                   sind(lat2) * sind(lat1) + cosd(lat2) * cosd(lat1) * cosd(deltalon));
-    return ret;
+    double dLon = (lon1 - lon2);
+    double dlat = (lat1 - lat2);
+    lat1 = lat1;
+    lat2 = lat2;
+    double x = sin(dlat/2) * sin(dlat/2) + cos(lat1) * cos(lat2) * sin(dLon/2) * sin(dLon/2);
+    double c = 2*atan2(sqrt(x), sqrt(1-x));
+
+    return earthRad*c;
 }
 
 __host__ __device__ double normalize(double x, double mean, double stdev){

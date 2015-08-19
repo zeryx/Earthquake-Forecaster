@@ -99,7 +99,7 @@ int main(int argc, char** arg){
         if(ConstructedNetwork.checkForWeights("/weights.bin"))
             ConstructedNetwork.generateWeights();
         else{
-            ConstructedNetwork.allocateHostAndGPUObjects(0.85, GetDeviceRamInBytes(), GetHostRamInBytes());
+            ConstructedNetwork.allocateHostAndGPUObjects(0.75, GetDeviceRamInBytes(), GetHostRamInBytes());
             ConstructedNetwork.generateWeights();
         }
         std::cerr<<"weights generation completed, setting training"<<std::endl;

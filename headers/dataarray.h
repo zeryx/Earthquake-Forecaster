@@ -1,5 +1,5 @@
-#ifndef dataArray_H
-#define dataArray_H
+#ifndef DATAARRAYS_H
+#define DATAARRAYS_H
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
 template <typename T>
