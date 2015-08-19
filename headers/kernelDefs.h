@@ -25,8 +25,7 @@ __global__ void genWeightsKern( kernelArray<double> ref, uint32_t in, kernelArra
 __global__ void NetKern(kernelArray<double> weights, kernelArray<int> params, kernelArray<double> globalQuakes,
                     kernelArray<int> inputVal, kernelArray<double> siteData, kernelArray<double> answers,
                     kernelArray<std::pair<int, int> > connections, double Kp, int sampleRate,int numOfSites,
-                    int* site_offset, int* channel_offset,int hour, double meanCh1, double meanCh2,
-                    double meanCh3, double stdCh1, double stdCh2, double stdCh3, size_t device_offset, int step);
+                    int* site_offset, int* channel_offset,int hour, kernelArray<double> meanCh, kernelArray<double> stdCh, size_t device_offset);
 
 __global__ void reduceKern(kernelArray<double> weights,
                                 kernelArray<double> per_block_results,

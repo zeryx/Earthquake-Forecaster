@@ -4,7 +4,7 @@ __global__ void reduceKern(kernelArray<double> weights,kernelArray<double> per_b
     extern __shared__ float sdata[];
 
     unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    int ind = params.array[14] + idx + device_offset;
+    int ind = params.array[19] + idx + device_offset;
 
     // load input into __shared__ memory
     float x = 0;
