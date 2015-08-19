@@ -33,7 +33,7 @@ __global__ void NetKern(kernelArray<double> weights, kernelArray<int> params, ke
     double *memGateForget = &weights.array[startOfMemGateForget];
     double *outputs = &weights.array[startOfOutput];
     double *fitness = &weights.array[startOfFitness];
-    for(int i=0; i<50; i++){
+    for(int i=0; i<100; i++){
         double CommunityLat = 0;
         double CommunityLon = 0;
         for(int j=0; j<sampleRate; j++){//sitesWeighted Lat/Lon values are determined based on all previous zsites mag output value.
