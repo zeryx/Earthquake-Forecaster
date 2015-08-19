@@ -3,9 +3,9 @@
 #include <cuda_runtime.h>
 #include "dataarray.h"
 #include <utility>
-extern __constant__ int input[40*20*3];
-extern __constant__ int site_offset[20];
-extern __constant__ int channel_offset[3];
+extern __constant__ int input[];
+extern __constant__ int site_offset[];
+extern __constant__ int channel_offset[];
 //functions
 __host__ __device__ double bearingCalc(double lat1, double lon1, double lat2, double lon2);
 
