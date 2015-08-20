@@ -7,7 +7,7 @@
 extern __constant__ int input[];
 extern __constant__ int site_offset[];
 extern __constant__ int channel_offset[];
-extern __constant__ int trainingsize[];
+extern __constant__ int trainingsize;
 
 //functions
 __host__ __device__ float bearingCalc(float lat1, float lon1, float lat2, float lon2);
