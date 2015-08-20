@@ -28,9 +28,11 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, kernel
                         double Kp,int numOfSites,int hour, kernelArray<double> meanCh, kernelArray<double> stdCh,
                         size_t device_offset);
 
-__global__ void reduceKern(kernelArray<double> weights,
+__global__ void reduceFirstKern(kernelArray<double> weights,
                                 kernelArray<double> per_block_results,
                                 kernelArray<int> params, int device_offset);
+
+__global__ void reduceSecondKern(kernelArray<double> per_block_results, double result);
 
 __global__ void evoKern(kernelArray<double> weights, kernelArray<int> params, int device_offset);
 

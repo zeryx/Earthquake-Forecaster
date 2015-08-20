@@ -254,8 +254,8 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         kernelArray<int> rawInput, correctedInput;
         kernelArray<std::pair<const int, const int> > dConnect;
         int regBlockSize = 512;
-        size_t reduceGridSize = (_hostParams.array[10])/regBlockSize + (((_hostParams.array[10])%regBlockSize) ? 1 : 0);
-        size_t netGridSize = (_hostParams.array[10])/regBlockSize;
+        int reduceGridSize = (_hostParams.array[10])/regBlockSize + (((_hostParams.array[10])%regBlockSize) ? 1 : 0);
+        int netGridSize = (_hostParams.array[10])/regBlockSize;
         double *partial_host = new double[_numOfStreams*reduceGridSize];
         rawInput.size = data->size();
         retVec.size = 2160*_numofSites;
@@ -293,36 +293,28 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
                 device_offset=0;
             }
             double fitnessAvg=0;
-            int fitItr=0;
+            if(n>=2)
+                CUDA_SAFE_CALL(cudaStreamSynchronize(_stream[n-2]));
             std::cerr<<"stream number: "<<n<<std::endl;
             std::cerr<<"host offset: "<<host_offset<<std::endl;
             std::cerr<<"device offset: "<<device_offset<<std::endl;
-            CUDA_SAFE_CALL(cudaMemcpy(&device_genetics.array[device_offset], &host_genetics.array[host_offset], _streambytes, cudaMemcpyHostToDevice));
+            CUDA_SAFE_CALL(cudaMemcpyAsync(&device_genetics.array[device_offset], &host_genetics.array[host_offset], _streambytes, cudaMemcpyHostToDevice, _stream[n]));
             CUDA_SAFE_CALL(cudaPeekAtLastError());
-            CUDA_SAFE_CALL(cudaDeviceSynchronize());
             CUDA_SAFE_CALL(cudaFuncSetCacheConfig(NetKern, cudaFuncCachePreferL1));
-            NetKern<<<netGridSize, regBlockSize>>>(device_genetics,_deviceParams, gQuakeAvg, siteData, answers, dConnect, Kp,_numofSites,hour, dmeanCh, dstdCh, device_offset);
+            NetKern<<<netGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics,_deviceParams, gQuakeAvg, siteData, answers, dConnect, Kp,_numofSites,hour, dmeanCh, dstdCh, device_offset);
             CUDA_SAFE_CALL(cudaPeekAtLastError());
-            CUDA_SAFE_CALL(cudaDeviceSynchronize());
-            std::cerr<<"net passed."<<std::endl;
-            reduceKern<<<reduceGridSize, regBlockSize, regBlockSize*sizeof(double)>>>(device_genetics, partial_reduce_sums, _deviceParams, device_offset);
+            reduceFirstKern<<<reduceGridSize, regBlockSize, regBlockSize*sizeof(double), _stream[n]>>>(device_genetics, partial_reduce_sums, _deviceParams, device_offset);
             CUDA_SAFE_CALL(cudaPeekAtLastError());
-            CUDA_SAFE_CALL(cudaDeviceSynchronize());
-            CUDA_SAFE_CALL(cudaMemcpy(partial_host, partial_reduce_sums.array, _numOfStreams*reduceGridSize, cudaMemcpyDeviceToHost));
-            std::cerr<<"reduce passed."<<std::endl;
-            CUDA_SAFE_CALL(cudaDeviceSynchronize());
-            for(int i=0; i<_numOfStreams*reduceGridSize; i++){
-                fitnessAvg += partial_host[i];
-                fitItr++;
-            }
-            std::cerr<<"fitness avg  is:" << fitnessAvg/fitItr<<std::endl;
-            CUDA_SAFE_CALL(cudaDeviceSynchronize());
-            CUDA_SAFE_CALL(cudaMemcpy(&host_genetics.array[host_offset], &device_genetics.array[device_offset], _streambytes, cudaMemcpyDeviceToHost));
+            reduceSecondKern<<<1, 1, 0, _stream[n]>>>(partial_reduce_sums, fitnessAvg);
+            CUDA_SAFE_CALL(cudaPeekAtLastError());
+            CUDA_SAFE_CALL(cudaMemcpyAsync(&host_genetics.array[host_offset], &device_genetics.array[device_offset], _streambytes, cudaMemcpyDeviceToHost, _stream[n]));
             CUDA_SAFE_CALL(cudaPeekAtLastError());
             host_offset += _streamSize;
             device_offset += _streamSize;
         }
         CUDA_SAFE_CALL(cudaDeviceSynchronize());
+        cudaDeviceReset();
+        exit(1);
         CUDA_SAFE_CALL(cudaFree(dConnect.array));
         CUDA_SAFE_CALL(cudaFree(gQuakeAvg.array));
         CUDA_SAFE_CALL(cudaFree(retVec.array));
