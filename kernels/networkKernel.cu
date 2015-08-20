@@ -26,7 +26,7 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, kernel
         Vec.array[startOfHowCertain+i*ind]=0;
         Vec.array[startOfCommunityMag+i*ind]=1;
     }
-    for(int i=0; i<40; i++){
+    for(int i=0; i<trainingsize[0]; i++){
         float CommunityLat = 0;
         float CommunityLon = 0;
         for(int j=0; j<numOfSites; j++){//sitesWeighted Lat/Lon values are determined based on all previous zsites mag output value.
