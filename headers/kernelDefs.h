@@ -39,7 +39,6 @@ __global__ void evoKern(kernelArray<double> weights, kernelArray<int> params, in
 
 
 //utility kernels
-__global__ void interKern(kernelArray<int> in, kernelArray<int> out, int sampleRate, int numOfSites);
 
 
 

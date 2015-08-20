@@ -201,11 +201,10 @@ void NetworkGenetic::storeWeights(std::string filepath){
     CUDA_SAFE_CALL(cudaDeviceReset());
 }
 
-void NetworkGenetic::reformatTraining(kernelArray<int> old_input){ // increase the timestep and reduce resolution, takes too long.
-
+void NetworkGenetic::reformatTraining(std::vector<int>* old_input){ // increase the timestep and reduce resolution, takes too long.
     int trainingSize = 35;
-    int *siteOffset = new int[_numofSites], *chanOffset = new int[3];
-    kernelArray<int> tmpInput;
+    int * new_input = new int[trainingSize*3*_numofSites];
+    int *siteOffset = new int[15], *chanOffset = new int[3];
     siteOffset[0] = 0;
     for(int i=1; i<_numofSites; i++){
         siteOffset[i] = trainingSize*3 + siteOffset[i-1];
@@ -214,17 +213,25 @@ void NetworkGenetic::reformatTraining(kernelArray<int> old_input){ // increase t
     for(int i=1; i<3; i++){
         chanOffset[i] = trainingSize + chanOffset[i-1];
     }
+    for(int step=0; step<trainingSize; step++){
+        for(int k=0; k<_numofSites; k++){
+            int meanch[3]{0};
+            for(int i=0; i<_sampleRate*3600/trainingSize; i++){
+                for(int j=0; j<3; j++){
+                    meanch[j] += old_input->at(k*_sampleRate*3600*3 + 0*_sampleRate*3600 + step+i);
+                }
+            }
+            for(int j=0; j<3; j++){
+                new_input[siteOffset[k]+chanOffset[j]+step] = meanch[j];//channel 1
+            }
+        }
+    }
 
-    CUDA_SAFE_CALL(cudaMalloc((void**)&tmpInput.array, trainingSize*3*_numOfStreams*sizeof(int)));
+
     CUDA_SAFE_CALL(cudaMemcpyToSymbol(site_offset, siteOffset, _numofSites*sizeof(int)));
     CUDA_SAFE_CALL(cudaMemcpyToSymbol(channel_offset, chanOffset, 3*sizeof(int)));
     CUDA_SAFE_CALL(cudaMemcpyToSymbol(trainingsize, &trainingSize, sizeof(int)));
-    interKern<<<1, trainingSize>>>(old_input, tmpInput, _sampleRate, _numofSites);
-    CUDA_SAFE_CALL(cudaPeekAtLastError());
-    CUDA_SAFE_CALL(cudaDeviceSynchronize());
-    CUDA_SAFE_CALL(cudaMemcpyToSymbol(input, tmpInput.array, trainingSize*_numofSites*3*sizeof(int),cudaMemcpyDeviceToDevice));
-    CUDA_SAFE_CALL(cudaFree(old_input.array));
-    CUDA_SAFE_CALL(cudaFree(tmpInput.array));
+    CUDA_SAFE_CALL(cudaMemcpyToSymbol(input, new_input, trainingSize*_numofSites*3*sizeof(int),cudaMemcpyDeviceToDevice));
     delete[] siteOffset;
     delete[] chanOffset;
 }
@@ -252,19 +259,16 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
     if(_istraining == true){
         std::cerr<<"beginning of training"<<std::endl;
         kernelArray<double>retVec, gQuakeAvg, answers, siteData, partial_reduce_sums, dmeanCh, dstdCh;
-        kernelArray<int> rawInput;
         kernelArray<std::pair<const int, const int> > dConnect;
         int regBlockSize = 512;
         int reduceGridSize = (_hostParams.array[10])/regBlockSize + (((_hostParams.array[10])%regBlockSize) ? 1 : 0);
         int netGridSize = (_hostParams.array[10])/regBlockSize;
-        rawInput.size = data->size();
         retVec.size = 2160*_numofSites;
         gQuakeAvg.size = globalQuakes->size();
         answers.size = _answers.size();
         dConnect.size = _connect->size();
         siteData.size = _siteData->size();
         partial_reduce_sums.size = _numOfStreams*(reduceGridSize);
-        CUDA_SAFE_CALL(cudaMalloc((void**)&rawInput.array, data->size()*sizeof(int)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&retVec.array, ret->size()*sizeof(double)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&gQuakeAvg.array, globalQuakes->size()*sizeof(double)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&answers.array, _answers.size()*sizeof(double)));
@@ -273,7 +277,6 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         CUDA_SAFE_CALL(cudaMalloc((void**)&partial_reduce_sums.array, partial_reduce_sums.size*sizeof(double)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&dmeanCh.array, 3*sizeof(double)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&dstdCh.array, 3*sizeof(double)));
-        CUDA_SAFE_CALL(cudaMemcpy(rawInput.array, data->data(), data->size()*sizeof(int), cudaMemcpyHostToDevice));
         CUDA_SAFE_CALL(cudaMemcpy(gQuakeAvg.array, globalQuakes->data(), globalQuakes->size()*sizeof(double), cudaMemcpyHostToDevice));
         CUDA_SAFE_CALL(cudaMemcpy(dConnect.array, _connect->data(), _connect->size()*sizeof(std::pair<int, int>), cudaMemcpyHostToDevice));
         CUDA_SAFE_CALL(cudaMemcpy(siteData.array, _siteData->data(), _siteData->size()*sizeof(double), cudaMemcpyHostToDevice));
@@ -283,7 +286,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         CUDA_SAFE_CALL(cudaMemset(retVec.array, 0, retVec.size*sizeof(double)));
         std::cerr<<"synchronizing device before correcting input data.."<<std::endl;
         std::cerr<<"device synchronized, correcting input data."<<std::endl;
-        this->reformatTraining(rawInput);
+        this->reformatTraining(data);
         std::cerr<<"input data corrected, running main sequence."<<std::endl;
         size_t host_offset = 0;
         size_t device_offset=0;

@@ -22,7 +22,7 @@ public:
     void doingTraining(int site, int hour, double lat,
                        double lon, double mag, double dist);
     void forecast(std::vector<double> *ret, int& hour, std::vector<int> *data, double &K, std::vector<double> *globalQuakes);
-    void reformatTraining(kernelArray<int>old_input);
+    void reformatTraining(std::vector<int> *old_input);
     void storeWeights(std::string filepath);
     bool checkForWeights(std::string filepath);
 private:
