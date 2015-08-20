@@ -8,28 +8,28 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, kernel
                         kernelArray<std::pair<int, int> > connections, double Kp,int numOfSites,
                         int hour, kernelArray<double> meanCh, kernelArray<double> stdCh, size_t device_offset){
 
-    int idx = blockIdx.x * blockDim.x + threadIdx.x; // for each thread is one individual
+    const int idx = blockIdx.x * blockDim.x + threadIdx.x; // for each thread is one individual
     typedef std::pair<int, int>*  connectPairMatrix;
-    int ind = params.array[10]; // number of individuals on device
-    int startOfInput = params.array[12] + idx + device_offset; // 6 is the offset to the start of the input neurons
-    int startOfHidden = params.array[13] + idx + device_offset;
-    int startOfMem = params.array[14] + idx+ device_offset;
-    int startOfMemGateIn = params.array[15] + idx + device_offset;
-    int startOfMemGateOut = params.array[16] + idx + device_offset;
-    int startOfMemGateForget = params.array[17] + idx + device_offset;
-    int startOfOutput = params.array[18] + idx + device_offset;
-    int startOfFitness = params.array[19] + idx + device_offset;
-    int startOfCommunityMag = params.array[20] +idx +device_offset;
-    int startOfWhen = params.array[21] + idx + device_offset;
-    int startOfHowCertain = params.array[22] + idx + device_offset;
+    const int ind = params.array[10]; // number of individuals on device
+    const int startOfInput = params.array[12] + idx + device_offset; // 6 is the offset to the start of the input neurons
+    const int startOfHidden = params.array[13] + idx + device_offset;
+    const int startOfMem = params.array[14] + idx+ device_offset;
+    const int startOfMemGateIn = params.array[15] + idx + device_offset;
+    const int startOfMemGateOut = params.array[16] + idx + device_offset;
+    const int startOfMemGateForget = params.array[17] + idx + device_offset;
+    const int startOfOutput = params.array[18] + idx + device_offset;
+    const int startOfFitness = params.array[19] + idx + device_offset;
+    const int startOfCommunityMag = params.array[20] +idx +device_offset;
+    const int startOfWhen = params.array[21] + idx + device_offset;
+    const int startOfHowCertain = params.array[22] + idx + device_offset;
     for(int i=0; i<numOfSites; i++){
         Vec.array[startOfWhen+i*ind]=0;
         Vec.array[startOfHowCertain+i*ind]=0;
         Vec.array[startOfCommunityMag+i*ind]=1;
     }
     for(int i=0; i<40; i++){
-        double CommunityLat = 0;
-        double CommunityLon = 0;
+        float CommunityLat = 0;
+        float CommunityLon = 0;
         for(int j=0; j<numOfSites; j++){//sitesWeighted Lat/Lon values are determined based on all previous zsites mag output value.
             CommunityLat += siteData.array[j*2]*Vec.array[startOfCommunityMag+j*ind];
             CommunityLon += siteData.array[j*2+1]*Vec.array[startOfCommunityMag+j*ind];
@@ -38,15 +38,15 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, kernel
         CommunityLon = CommunityLon/numOfSites;
         for(int j=0; j<numOfSites; j++){ //each site is run independently of others, but shares an output from the previous step
 
-            double latSite = siteData.array[j*2];
-            double lonSite = siteData.array[j*2+1];
-            double avgLatGQuake = globalQuakes.array[0];
-            double avgLonGQuake = globalQuakes.array[1];
-            double GQuakeAvgMag = globalQuakes.array[3];
-            double GQuakeAvgdist = distCalc(latSite, lonSite, avgLatGQuake, avgLonGQuake);
-            double GQuakeAvgBearing = bearingCalc(latSite, lonSite, avgLatGQuake, avgLonGQuake);
-            double CommunityDist = distCalc(latSite, lonSite, CommunityLat, CommunityLon);
-            double CommunityBearing = bearingCalc(latSite, lonSite, CommunityLat, CommunityLon);
+            float  latSite = siteData.array[j*2];
+            float lonSite = siteData.array[j*2+1];
+            float avgLatGQuake = globalQuakes.array[0];
+            float avgLonGQuake = globalQuakes.array[1];
+            float GQuakeAvgMag = globalQuakes.array[3];
+            float GQuakeAvgdist = distCalc(latSite, lonSite, avgLatGQuake, avgLonGQuake);
+            float GQuakeAvgBearing = bearingCalc(latSite, lonSite, avgLatGQuake, avgLonGQuake);
+            float CommunityDist = distCalc(latSite, lonSite, CommunityLat, CommunityLon);
+            float CommunityBearing = bearingCalc(latSite, lonSite, CommunityLat, CommunityLon);
             /* 3 outputs, 1 with an hour in the future when the earthquake will hit,
                         1 with the porbability of that earthquake happening (between [0,1]) and 1 with the sites magnitude (for community feedback) */
             int n =0; // n is the weight number
@@ -172,9 +172,9 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, kernel
     /*calculate performance for this individual - score = 1/(abs(whenGuess-whenReal)*distToQuake), for whenGuess = Vec.array[startOfWhen+j] where HowCertain is max for set.
     distToQuake is from the current sites parameters, it emphasizes higher scores for the closest site, a smaller distance is a higher score. */
     int maxCertainty=0;
-    double whenGuess=0;
-    double latSite=0;
-    double lonSite=0;
+    float whenGuess=0;
+    float latSite=0;
+    float lonSite=0;
     for(int j=0; j<numOfSites; j++){
         if(Vec.array[startOfHowCertain+j*ind] > maxCertainty){
             whenGuess = Vec.array[startOfWhen+j*ind];
@@ -182,6 +182,6 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, kernel
             lonSite = siteData.array[j*2+1];
         }
     }
-    double SiteToQuakeDist = distCalc(latSite, lonSite, answers.array[1], answers.array[2]); // [2] is latitude, [3] is longitude.
+    float SiteToQuakeDist = distCalc(latSite, lonSite, answers.array[1], answers.array[2]); // [2] is latitude, [3] is longitude.
     Vec.array[startOfFitness] = 1/(fabs(whenGuess - answers.array[0]-hour)*SiteToQuakeDist);//larger is better, negative numbers are impossible.
 }
