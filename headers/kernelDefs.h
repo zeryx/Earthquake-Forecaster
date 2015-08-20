@@ -7,19 +7,16 @@ extern __constant__ int input[];
 extern __constant__ int site_offset[];
 extern __constant__ int channel_offset[];
 //functions
-__host__ __device__ double bearingCalc(double lat1, double lon1, double lat2, double lon2);
+__host__ __device__ float bearingCalc(float lat1, float lon1, float lat2, float lon2);
 
-__host__ __device__ double distCalc(double lat1, double lon1, double lat2, double lon2);
+__host__ __device__ float distCalc(float lat1, float lon1, float lat2, float lon2);
 
-__host__ __device__ double normalize(double x, double mean, double stdev);
+__host__ __device__ float normalize(float x, float mean, float stdev);
 
-__host__ __device__ double shift(double x, double max, double min);
+__host__ __device__ float shift(float x, float max, float min);
 
-__host__ __device__ double ActFunc(double x);
+__host__ __device__ float ActFunc(float x);
 
-__host__ __device__ double cosd(double x);
-
-__host__ __device__ double sind(double x);
 
 //main kernels
 __global__ void genWeightsKern( kernelArray<double> ref, uint32_t in, kernelArray<int> params, size_t offset);
