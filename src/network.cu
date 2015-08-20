@@ -252,7 +252,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         std::cerr<<"beginning of training"<<std::endl;
         kernelArray<double>retVec, gQuakeAvg, answers, siteData, partial_reduce_sums, dmeanCh, dstdCh;
         kernelArray<int> rawInput, correctedInput;
-        kernelArray<std::pair<int, int> > dConnect;
+        kernelArray<std::pair<const int, const int> > dConnect;
         int regBlockSize = 512;
         size_t reduceGridSize = (_hostParams.array[10])/regBlockSize + (((_hostParams.array[10])%regBlockSize) ? 1 : 0);
         size_t netGridSize = (_hostParams.array[10])/regBlockSize;
@@ -300,6 +300,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
             CUDA_SAFE_CALL(cudaMemcpy(&device_genetics.array[device_offset], &host_genetics.array[host_offset], _streambytes, cudaMemcpyHostToDevice));
             CUDA_SAFE_CALL(cudaPeekAtLastError());
             CUDA_SAFE_CALL(cudaDeviceSynchronize());
+            CUDA_SAFE_CALL(cudaFuncSetCacheConfig(NetKern, cudaFuncCachePreferL1));
             NetKern<<<netGridSize, regBlockSize>>>(device_genetics,_deviceParams, gQuakeAvg, siteData, answers, dConnect, Kp,_numofSites,hour, dmeanCh, dstdCh, device_offset);
             CUDA_SAFE_CALL(cudaPeekAtLastError());
             CUDA_SAFE_CALL(cudaDeviceSynchronize());

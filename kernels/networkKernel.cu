@@ -4,12 +4,11 @@ __constant__ int site_offset[20];
 __constant__ int channel_offset[3];
 
 __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, kernelArray<double> globalQuakes,
-                        kernelArray<double> siteData, kernelArray<double> answers,
-                        kernelArray<std::pair<int, int> > connections, double Kp,int numOfSites,
+                        kernelArray<double> siteData, kernelArray<double> answers, kernelArray<std::pair<const int, const int> > connections, double Kp,int numOfSites,
                         int hour, kernelArray<double> meanCh, kernelArray<double> stdCh, size_t device_offset){
 
     const int idx = blockIdx.x * blockDim.x + threadIdx.x; // for each thread is one individual
-    typedef std::pair<int, int>*  connectPairMatrix;
+    typedef std::pair<const int, const int>*  connectPairMatrix;
     const int ind = params.array[10]; // number of individuals on device
     const int startOfInput = params.array[12] + idx + device_offset; // 6 is the offset to the start of the input neurons
     const int startOfHidden = params.array[13] + idx + device_offset;
@@ -75,31 +74,28 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, kernel
             //now that everything that should be zeroed is zeroed, lets start the network.
             //mem gates & LSTM nodes --
             for(int gate = 0; gate<params.array[5]; gate++){//calculate memory gate node values, you can connect inputs & hidden neurons to them.
-                for(connectPairMatrix it = connections.array; it!= connections.array+connections.size; ++it){//for memGateIn
-                    std::pair<int, int>itr = static_cast<std::pair<int, int> >(*it); // this needs to be created to use the iterator it correctly.
-                    if(itr.second == gate+startOfMemGateIn && itr.second < startOfHidden){ //for inputs
-                        Vec.array[startOfMemGateIn+gate*ind] += Vec.array[startOfInput+(itr.first-startOfInput)*ind]*Vec.array[(n++)*ind]; // memGateIn vect starts at 0
+                for(connectPairMatrix it = connections.array; it!= connections.array + connections.size; ++it){//for memGateIn
+                    if(static_cast<std::pair<const int, const int> >(*it).second == gate+startOfMemGateIn && static_cast<std::pair<const int, const int> >(*it).second < startOfHidden){ //for inputs
+                        Vec.array[startOfMemGateIn+gate*ind] += Vec.array[startOfInput+(static_cast<std::pair<const int, const int> >(*it).first-startOfInput)*ind]*Vec.array[(n++)*ind]; // memGateIn vect starts at 0
                     }
-                    else if(itr.second == gate+startOfMemGateIn && itr.second >startOfHidden && itr.second <startOfMem){//for hidden neurons
-                        Vec.array[startOfMemGateIn+gate*ind] += Vec.array[startOfHidden+(itr.first-startOfHidden)*ind]*Vec.array[(n++)*ind];
-                    }
-                }
-                for(connectPairMatrix it = connections.array; it!= connections.array+connections.size; ++it){//for memGateOut
-                    std::pair<int, int>itr = static_cast<std::pair<int, int> >(*it);
-                    if(itr.second == gate+startOfMemGateOut && itr.second < startOfHidden){//for inputs
-                        Vec.array[startOfMemGateOut+gate*ind] += Vec.array[startOfInput+(itr.first-startOfInput)*ind]*Vec.array[(n++)*ind];
-                    }
-                    else if(itr.second == gate+startOfMemGateOut && itr.second >startOfHidden && itr.second <startOfMem){//for hidden neurons
-                        Vec.array[startOfMemGateOut+gate*ind] += Vec.array[startOfHidden+(itr.first-startOfHidden)*ind]*Vec.array[(n++)*ind];
+                    else if(static_cast<std::pair<const int, const int> >(*it).second == gate+startOfMemGateIn && static_cast<std::pair<const int, const int> >(*it).second >startOfHidden && static_cast<std::pair<const int, const int> >(*it).second <startOfMem){//for hidden neurons
+                        Vec.array[startOfMemGateIn+gate*ind] += Vec.array[startOfHidden+(static_cast<std::pair<const int, const int> >(*it).first-startOfHidden)*ind]*Vec.array[(n++)*ind];
                     }
                 }
-                for(connectPairMatrix it = connections.array; it!= connections.array+connections.size; ++it){//for  memGateForget
-                    std::pair<int, int>itr = static_cast<std::pair<int, int> >(*it);
-                    if(itr.second == gate+startOfMemGateForget && itr.second < startOfHidden){//for inputs
-                        Vec.array[startOfMemGateForget+gate*ind] += Vec.array[startOfInput+itr.first - startOfInput]*Vec.array[(n++)*ind];
+                for(connectPairMatrix it = connections.array; it!= connections.array + connections.size; ++it){//for memGateOut
+                    if(static_cast<std::pair<const int, const int> >(*it).second == gate+startOfMemGateOut && static_cast<std::pair<const int, const int> >(*it).second < startOfHidden){//for inputs
+                        Vec.array[startOfMemGateOut+gate*ind] += Vec.array[startOfInput+(static_cast<std::pair<const int, const int> >(*it).first-startOfInput)*ind]*Vec.array[(n++)*ind];
                     }
-                    else if(itr.second == gate+startOfMemGateForget && itr.second >startOfHidden && itr.second <startOfMem){//for hidden neurons
-                        Vec.array[startOfMemGateForget+gate*ind] += Vec.array[startOfHidden+(itr.first-startOfHidden)*ind]*Vec.array[(n++)*ind];
+                    else if(static_cast<std::pair<const int, const int> >(*it).second == gate+startOfMemGateOut && static_cast<std::pair<const int, const int> >(*it).second >startOfHidden && static_cast<std::pair<const int, const int> >(*it).second <startOfMem){//for hidden neurons
+                        Vec.array[startOfMemGateOut+gate*ind] += Vec.array[startOfHidden+(static_cast<std::pair<const int, const int> >(*it).first-startOfHidden)*ind]*Vec.array[(n++)*ind];
+                    }
+                }
+                for(connectPairMatrix it = connections.array; it!= connections.array + connections.size; ++it){//for  memGateForget
+                    if(static_cast<std::pair<const int, const int> >(*it).second == gate+startOfMemGateForget && static_cast<std::pair<const int, const int> >(*it).second < startOfHidden){//for inputs
+                        Vec.array[startOfMemGateForget+gate*ind] += Vec.array[startOfInput+static_cast<std::pair<const int, const int> >(*it).first - startOfInput]*Vec.array[(n++)*ind];
+                    }
+                    else if(static_cast<std::pair<const int, const int> >(*it).second == gate+startOfMemGateForget && static_cast<std::pair<const int, const int> >(*it).second >startOfHidden && static_cast<std::pair<const int, const int> >(*it).second <startOfMem){//for hidden neurons
+                        Vec.array[startOfMemGateForget+gate*ind] += Vec.array[startOfHidden+(static_cast<std::pair<const int, const int> >(*it).first-startOfHidden)*ind]*Vec.array[(n++)*ind];
                     }
                 }
                 Vec.array[startOfMemGateIn+gate*ind] = ActFunc(Vec.array[startOfMemGateIn+gate*ind]);
@@ -109,10 +105,9 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, kernel
             //since we calculated the values for memGateIn and memGateOut, and MemGateForget..
             for (int gate = 0; gate<params.array[5]; gate++){ // if memGateIn is greater than 0.3, then let mem = the sum inputs attached to memGateIn
                 if(Vec.array[startOfMemGateIn+gate*ind] > 0.5){ //gate -startOfMemGateIn = [0, num of mem neurons]
-                    for(connectPairMatrix it = connections.array; it!= connections.array+connections.size; ++it){
-                        std::pair<int, int>itr = static_cast<std::pair<int, int> >(*it);
-                        if(itr.second == gate+startOfMemGateIn && itr.first < gate+startOfHidden){//only pass inputs
-                            Vec.array[startOfMem+gate*ind] += Vec.array[startOfInput+(itr.first-startOfInput)*ind]; // no Vec attached, but the old value stored here is not removed.
+                    for(connectPairMatrix it = connections.array; it!= connections.array + connections.size; ++it){
+                        if(static_cast<std::pair<const int, const int> >(*it).second == gate+startOfMemGateIn && static_cast<std::pair<const int, const int> >(*it).first < gate+startOfHidden){//only pass inputs
+                            Vec.array[startOfMem+gate*ind] += Vec.array[startOfInput+(static_cast<std::pair<const int, const int> >(*it).first-startOfInput)*ind]; // no Vec attached, but the old value stored here is not removed.
                         }
                     }
                 }
@@ -121,10 +116,9 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, kernel
                 }
                 //if memGateForget fires, then memGateOut will output nothing.
                 if(Vec.array[startOfMemGateOut+gate*ind] > 0.5){//if memGateOut is greater than 0.3, let the nodes mem is connected to recieve mem
-                    for(connectPairMatrix it = connections.array; it!= connections.array+connections.size; ++it){
-                        std::pair<int, int>itr = static_cast<std::pair<int, int> >(*it);
-                        if(itr.first == gate+startOfMem){// since mem node: memIn node : memOut node = 1:1:1, we can do this.
-                            Vec.array[startOfHidden+itr.second] += Vec.array[startOfMem+gate*ind];
+                    for(connectPairMatrix it = connections.array; it!= connections.array + connections.size; ++it){
+                        if(static_cast<std::pair<const int, const int> >(*it).first == gate+startOfMem){// since mem node: memIn node : memOut node = 1:1:1, we can do this.
+                            Vec.array[startOfHidden+static_cast<std::pair<const int, const int> >(*it).second] += Vec.array[startOfMem+gate*ind];
                         }
                     }
                 }
@@ -132,32 +126,28 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, kernel
 
             // hidden neuron nodes --
             for(int hid=0; hid<params.array[4]; hid++){ // for all hidden neurons at layer 1, lets sum the inputs, the memory values were already added.
-                for(connectPairMatrix it = connections.array; it!= connections.array+connections.size; ++it){ // Add the inputs to the hidden neurons
-                    std::pair<int, int>itr = static_cast<std::pair<int, int> >(*it);
-                    if(itr.second == hid+startOfHidden && itr.first < startOfHidden && itr.first >= startOfInput){ // if an input connects with this hidden neuron
-                        Vec.array[startOfHidden+hid*ind] += Vec.array[startOfInput+itr.first*ind]*Vec.array[(n++)*ind];
+                for(connectPairMatrix it = connections.array; it!= connections.array + connections.size; ++it){ // Add the inputs to the hidden neurons
+                    if(static_cast<std::pair<const int, const int> >(*it).second == hid+startOfHidden && static_cast<std::pair<const int, const int> >(*it).first < startOfHidden && static_cast<std::pair<const int, const int> >(*it).first >= startOfInput){ // if an input connects with this hidden neuron
+                        Vec.array[startOfHidden+hid*ind] += Vec.array[startOfInput+static_cast<std::pair<const int, const int> >(*it).first*ind]*Vec.array[(n++)*ind];
                     }
                 }
-                for(connectPairMatrix it = connections.array; it!= connections.array+connections.size; ++it){//add other hidden neuron inputs to each hidden neuron (if applicable)
-                    std::pair<int, int>itr = static_cast<std::pair<int, int> >(*it);
-                    if(itr.second == hid+startOfHidden && itr.first < startOfMem && itr.first >= startOfHidden){
-                        Vec.array[startOfHidden+hid*ind] += Vec.array[startOfHidden+(itr.first-startOfHidden)*ind]*Vec.array[(n++)*ind];
+                for(connectPairMatrix it = connections.array; it!= connections.array + connections.size; ++it){//add other hidden neuron inputs to each hidden neuron (if applicable)
+                    if(static_cast<std::pair<const int, const int> >(*it).second == hid+startOfHidden && static_cast<std::pair<const int, const int> >(*it).first < startOfMem && static_cast<std::pair<const int, const int> >(*it).first >= startOfHidden){
+                        Vec.array[startOfHidden+hid*ind] += Vec.array[startOfHidden+(static_cast<std::pair<const int, const int> >(*it).first-startOfHidden)*ind]*Vec.array[(n++)*ind];
                     }
                 }
                 Vec.array[startOfHidden+hid*ind] += 1*Vec.array[(n++)*ind]; // add bias
-                Vec.array[startOfHidden+hid*ind] = ActFunc(Vec.array[startOfHidden+hid*ind]); // then squash itr.
+                Vec.array[startOfHidden+hid*ind] = ActFunc(Vec.array[startOfHidden+hid*ind]); // then squash static_cast<std::pair<const int, const int> >(*it).
             }
             //output nodes --
 
             for(int out =0; out<params.array[9]; out++){// add hidden neurons to the output nodes
-                for(connectPairMatrix it = connections.array; it!= connections.array+connections.size; ++it){
-                    std::pair<int, int>itr = static_cast<std::pair<int, int> >(*it);
-                    if(itr.second == out+startOfOutput){
-                        Vec.array[startOfOutput+out*ind] += Vec.array[startOfHidden+(itr.first-startOfHidden)*ind]*Vec.array[(n++)*ind];
+                for(connectPairMatrix it = connections.array; it!= connections.array + connections.size; ++it){                    if(static_cast<std::pair<const int, const int> >(*it).second == out+startOfOutput){
+                        Vec.array[startOfOutput+out*ind] += Vec.array[startOfHidden+(static_cast<std::pair<const int, const int> >(*it).first-startOfHidden)*ind]*Vec.array[(n++)*ind];
                     }
                 }
                 Vec.array[startOfOutput+out*ind] += 1*Vec.array[(n++)*ind]; // add bias
-                Vec.array[startOfOutput+out*ind] = ActFunc(Vec.array[startOfOutput+out*ind]);// then squash itr.
+                Vec.array[startOfOutput+out*ind] = ActFunc(Vec.array[startOfOutput+out*ind]);// then squash static_cast<std::pair<const int, const int> >(*it).
             }
 
             Vec.array[startOfWhen+j*ind] += Vec.array[startOfOutput+0*ind]*((2160-hour)-hour)+2160-hour; // nv = ((ov - omin)*(nmax-nmin) / (omax - omin))+nmin
