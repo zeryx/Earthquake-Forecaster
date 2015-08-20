@@ -1,7 +1,6 @@
 #include <kernelDefs.h>
-__constant__ int trainingsize;
 
-__global__ void interKern(kernelArray<int> in, kernelArray<int> out, int* site_offset, int* channel_offset, int sampleRate, int numOfSites){
+__global__ void interKern(kernelArray<int> in, kernelArray<int> out, int sampleRate, int numOfSites){
     int idx = blockIdx.x * blockDim.x + threadIdx.x;// each thread manages a single second for the 3d flattened input array.
     for(int k=0; k<numOfSites; k++){
         int meanch1 = 0, meanch2 =0, meanch3 = 0;

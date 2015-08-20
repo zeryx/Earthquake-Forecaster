@@ -214,14 +214,12 @@ void NetworkGenetic::reformatTraining(kernelArray<int> old_input){ // increase t
     for(int i=1; i<3; i++){
         chanOffset[i] = trainingSize + chanOffset[i-1];
     }
-    CUDA_SAFE_CALL(cudaMalloc((void**)&_site_offset,_numofSites*sizeof(int)));
-    CUDA_SAFE_CALL(cudaMalloc((void**)&_channel_offset, 3*sizeof(int)));
-    CUDA_SAFE_CALL(cudaMalloc((void**)&tmpInput.array, trainingSize*3*_numOfStreams*sizeof(int)));
-    CUDA_SAFE_CALL(cudaMemcpyToSymbol(site_offset, siteOffset, _numofSites*sizeof(int), cudaMemcpyHostToDevice));
-    CUDA_SAFE_CALL(cudaMemcpyToSymbol(channel_offset, chanOffset, 3*sizeof(int), cudaMemcpyHostToDevice));
-    CUDA_SAFE_CALL(cudaMemcpyToSymbol(trainingsize, &trainingSize, sizeof(int), cudaMemcpyHostToDevice));
 
-    interKern<<<1, trainingSize>>>(old_input, tmpInput ,_site_offset, _channel_offset, _sampleRate, _numofSites);
+    CUDA_SAFE_CALL(cudaMalloc((void**)&tmpInput.array, trainingSize*3*_numOfStreams*sizeof(int)));
+    CUDA_SAFE_CALL(cudaMemcpyToSymbol(site_offset, siteOffset, _numofSites*sizeof(int)));
+    CUDA_SAFE_CALL(cudaMemcpyToSymbol(channel_offset, chanOffset, 3*sizeof(int)));
+    CUDA_SAFE_CALL(cudaMemcpyToSymbol(trainingsize, &trainingSize, sizeof(int)));
+    interKern<<<1, trainingSize>>>(old_input, tmpInput, _sampleRate, _numofSites);
     CUDA_SAFE_CALL(cudaPeekAtLastError());
     CUDA_SAFE_CALL(cudaDeviceSynchronize());
     CUDA_SAFE_CALL(cudaMemcpyToSymbol(input, tmpInput.array, trainingSize*_numofSites*3*sizeof(int),cudaMemcpyDeviceToDevice));
