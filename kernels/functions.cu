@@ -35,8 +35,7 @@ __host__ __device__ float shift(float x, float max, float min){
 }
 
 __host__ __device__ float ActFunc(float x){
-    float ret = 1+1/exp(-x);
-    return ret;
+    return 1/(1+exp(-x));
 }
 
 
