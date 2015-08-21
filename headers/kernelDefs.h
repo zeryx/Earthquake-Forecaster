@@ -5,6 +5,10 @@
 #include <utility>
 #include <thrust/pair.h>
 extern __constant__ int input[];
+extern __constant__ double answers[];
+extern __constant__ double globalQuakes[];
+extern __constant__ double siteData[];
+extern __constant__ double Kp;
 extern __constant__ int site_offset[];
 extern __constant__ int channel_offset[];
 extern __constant__ int trainingsize;
@@ -24,16 +28,15 @@ __host__ __device__ float ActFunc(float x);
 //main kernels
 __global__ void genWeightsKern( kernelArray<double> ref, uint32_t in, kernelArray<int> params, size_t offset);
 
-__global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, kernelArray<double> globalQuakes,
-                        kernelArray<double> siteData, kernelArray<double> answers, kernelArray<std::pair<const int, const int> > connections,
-                        double Kp,int numOfSites,int hour, kernelArray<double> meanCh, kernelArray<double> stdCh,
+__global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kernelArray<std::pair<const int, const int> > connections,
+                        int numOfSites,int hour, kernelArray<double> meanCh, kernelArray<double> stdCh,
                         size_t device_offset);
 
 __global__ void reduceFirstKern(kernelArray<double> weights,
                                 kernelArray<double> per_block_results,
                                 kernelArray<int> params, int device_offset);
 
-__global__ void reduceSecondKern(kernelArray<double> per_block_results, double result);
+__global__ void reduceSecondKern(kernelArray<double> per_block_results, double *result);
 
 __global__ void evoKern(kernelArray<double> weights, kernelArray<int> params, int device_offset);
 

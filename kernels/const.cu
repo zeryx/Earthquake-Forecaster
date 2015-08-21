@@ -1,6 +1,10 @@
 #include <kernelDefs.h>
 
- __constant__ int input[15*3*35]{0};
- __constant__ int site_offset[15]{0};//padding
+ __constant__ int input[15*3*100]{0};
+ __constant__ double answers[7];
+ __constant__ double globalQuakes[5];
+ __constant__ double siteData[15*2]{0};
+ __constant__ double Kp;
+ __constant__ int site_offset[15]{0};
  __constant__ int channel_offset[3];
  __constant__ int trainingsize;

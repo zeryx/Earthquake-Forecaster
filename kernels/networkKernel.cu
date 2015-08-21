@@ -1,7 +1,15 @@
 #include <kernelDefs.h>
-
-__global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, kernelArray<double> globalQuakes,
-                        kernelArray<double> siteData, kernelArray<double> answers, kernelArray<std::pair<const int, const int> > connections, double Kp,int numOfSites,
+//using
+extern __constant__ int input[];
+extern __constant__ double answers[];
+extern __constant__ double globalQuakes[];
+extern __constant__ double siteData[];
+extern __constant__ double Kp;
+extern __constant__ int site_offset[];
+extern __constant__ int channel_offset[];
+extern __constant__ int trainingsize;
+//endof using
+__global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kernelArray<std::pair<const int, const int> > connections, int numOfSites,
                         int hour, kernelArray<double> meanCh, kernelArray<double> stdCh, size_t device_offset){
 
     const int idx = blockIdx.x * blockDim.x + threadIdx.x; // for each thread is one individual
@@ -27,18 +35,18 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, kernel
         float CommunityLat = 0;
         float CommunityLon = 0;
         for(int j=0; j<numOfSites; j++){//sitesWeighted Lat/Lon values are determined based on all previous zsites mag output value.
-            CommunityLat += siteData.array[j*2]*Vec.array[startOfCommunityMag+j*ind];
-            CommunityLon += siteData.array[j*2+1]*Vec.array[startOfCommunityMag+j*ind];
+            CommunityLat += siteData[j*2]*Vec.array[startOfCommunityMag+j*ind];
+            CommunityLon += siteData[j*2+1]*Vec.array[startOfCommunityMag+j*ind];
         }
         CommunityLat = CommunityLat/numOfSites;
         CommunityLon = CommunityLon/numOfSites;
         for(int j=0; j<numOfSites; j++){ //each site is run independently of others, but shares an output from the previous step
 
-            float  latSite = siteData.array[j*2];
-            float lonSite = siteData.array[j*2+1];
-            float avgLatGQuake = globalQuakes.array[0];
-            float avgLonGQuake = globalQuakes.array[1];
-            float GQuakeAvgMag = globalQuakes.array[3];
+            float  latSite = siteData[j*2];
+            float lonSite = siteData[j*2+1];
+            float avgLatGQuake = globalQuakes[0];
+            float avgLonGQuake = globalQuakes[1];
+            float GQuakeAvgMag = globalQuakes[3];
             float GQuakeAvgdist = distCalc(latSite, lonSite, avgLatGQuake, avgLonGQuake);
             float GQuakeAvgBearing = bearingCalc(latSite, lonSite, avgLatGQuake, avgLonGQuake);
             float CommunityDist = distCalc(latSite, lonSite, CommunityLat, CommunityLon);
@@ -165,10 +173,10 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, kernel
     for(int j=0; j<numOfSites; j++){
         if(Vec.array[startOfHowCertain+j*ind] > maxCertainty){
             whenGuess = Vec.array[startOfWhen+j*ind];
-            latSite = siteData.array[j*2];
-            lonSite = siteData.array[j*2+1];
+            latSite = siteData[j*2];
+            lonSite = siteData[j*2+1];
         }
     }
-    float SiteToQuakeDist = distCalc(latSite, lonSite, answers.array[1], answers.array[2]); // [2] is latitude, [3] is longitude.
-    Vec.array[startOfFitness] = 1/(fabs(whenGuess - answers.array[0]-hour)*SiteToQuakeDist);//larger is better, negative numbers are impossible.
+    float SiteToQuakeDist = distCalc(latSite, lonSite, answers[1], answers[2]); // [2] is latitude, [3] is longitude.
+    Vec.array[startOfFitness] = 1/(fabs(whenGuess - answers[0]-hour)*SiteToQuakeDist);//larger is better, negative numbers are impossible.
 }
