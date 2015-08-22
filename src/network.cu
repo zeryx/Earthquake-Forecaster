@@ -295,6 +295,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         std::cerr<<"input data corrected, running main sequence."<<std::endl;
         size_t host_offset = 0;
         size_t device_offset=0;
+        Lock lock;
         for(int n=0; n<_numOfStreams; n++){
             if(n%2==0 && n!=0){
                 device_offset=0;
@@ -316,6 +317,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
 
             evoFirstKern<<<netGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, hfitnessAvg[n], device_offset);
 
+            evoSecondKern<<<netGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, device_offset, lock);
             CUDA_SAFE_CALL(cudaMemcpyAsync(&host_genetics.array[host_offset], &device_genetics.array[device_offset], _streambytes, cudaMemcpyDeviceToHost, _stream[n]));
             host_offset += _streamSize;
             device_offset += _streamSize;

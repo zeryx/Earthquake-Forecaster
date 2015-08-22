@@ -25,6 +25,13 @@ __host__ __device__ float shift(float x, float max, float min);
 __host__ __device__ float ActFunc(float x);
 
 
+//mutations union definition
+union mutations{
+    char c[8];
+    int f[2];
+    double result;
+};
+
 //main kernels
 __global__ void genWeightsKern( kernelArray<double> ref, uint32_t in, kernelArray<int> params, size_t offset);
 
@@ -40,7 +47,7 @@ __global__ void reduceSecondKern(kernelArray<double> per_block_results, double *
 
 __global__ void evoFirstKern(kernelArray<double> weights, kernelArray<int> params, float avgFitness, int device_offset);
 
-__global__ void evoSecondKern(kernelArray<double> weights, kernelArray<int> params, int device_offset);
+__global__ void evoSecondKern(kernelArray<double> weights, kernelArray<int> params, int device_offset, Lock lock);
 
 
 //utility kernels
