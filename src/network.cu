@@ -306,7 +306,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
 
             reduceFirstKern<<<reduceGridSize, regBlockSize, regBlockSize*sizeof(double), _stream[n]>>>(device_genetics, partial_reduce_sums, _deviceParams, device_offset);
 
-            reduceSecondKern<<<1, 1, 0, _stream[n]>>>(partial_reduce_sums, &dfitnessAvg[n]);
+            reduceSecondKern<<<1, 1, 0, _stream[n]>>>(partial_reduce_sums, _deviceParams, &dfitnessAvg[n]);
 
             normalizeKern<<<netGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dfitnessAvg[n], device_offset);
 
@@ -323,18 +323,18 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         //            std::cerr<<"for stream #: "<<j<<std::endl;
         //            std::cerr<<"average fitness is: "<<hfitnessAvg[j]<<std::endl;
         //        }
-//        for(int j=0; j<_numOfStreams; j++){
-
-//            int ctr=0;
-//            for(int i=0; i<_hostParams.array[10]; i++){
-//                if(host_genetics.array[_hostParams.array[19] + i + device_offset] >0)
-//                    ctr++;
-//            }
-//            std::cerr<<"for stream num#: "<<j<<" the number of better than average individuals is: "<<ctr<<std::endl;
-//            std::cerr<<"percentage %: "<<(ctr/_hostParams.array[10])*100<<std::endl;
-//        }
         for(int j=0; j<_numOfStreams; j++){
-            for(int i=0; i<15; i++){
+
+            int ctr=0;
+            for(int i=0; i<_hostParams.array[10]; i++){
+                if(host_genetics.array[_hostParams.array[19] + i + device_offset] >0)
+                    ctr++;
+            }
+            std::cerr<<"for stream num#: "<<j<<" the number of better than average individuals is: "<<ctr<<std::endl;
+            std::cerr<<"percentage %: "<<(ctr/_hostParams.array[10])*100<<std::endl;
+        }
+        for(int j=0; j<_numOfStreams; j++){
+            for(int i=0; i<40; i++){
             std::cerr<<"for stream num#: "<<j<<" "<<host_genetics.array[_hostParams.array[19]+i+j*_streamSize]<<std::endl;
             }
         }
