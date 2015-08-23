@@ -308,7 +308,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
 
             reduceSecondKern<<<1, 1, 0, _stream[n]>>>(partial_reduce_sums, &dfitnessAvg[n]);
 
-            normalizeKern<<<netGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, dfitnessAvg[n], device_offset);
+            normalizeKern<<<netGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dfitnessAvg[n], device_offset);
 
             evolutionKern<<<netGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, device_offset);
 
