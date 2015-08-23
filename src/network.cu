@@ -60,7 +60,6 @@ void NetworkGenetic::generateWeights(){
         if(chk <1){std::cerr<<"couldn't read /dev/urandom"<<std::endl; exit(1);}
         std::fclose(fp);
         std::cerr<<"stream number #"<<n<<std::endl;
-        std::cerr<<"seed is:"<<seed<<std::endl;
         std::cerr<<"global offset: "<<global_offset<<std::endl;
         std::cerr<<"device offset: "<<device_offset<<std::endl<<std::endl;
         genWeightsKern<<< gridSize, blockSize, 0, _stream[n]>>>(device_genetics, seed, _deviceParams, device_offset);
@@ -199,7 +198,7 @@ void NetworkGenetic::storeWeights(std::string filepath){
 }
 
 void NetworkGenetic::reformatTraining(std::vector<int>* old_input, std::vector<double> ans, std::vector<double>* sitedata, std::vector<double>* globalquakes, double kp){ // increase the timestep and reduce resolution, takes too long.
-    int trainingSize = 15;
+    int trainingSize = 10;
     int * new_input = new int[trainingSize*3*_numofSites];
     int *siteOffset = new int[15], *chanOffset = new int[3];
     long long stor[trainingSize*3*_numofSites];
@@ -263,7 +262,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
     }
     //input data from all sites and all channels normalized
     if(_istraining == true){
-        if(hour == 3){
+        if(hour == 50){
             cudaDeviceReset();
             exit(1);
         }
@@ -289,7 +288,15 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         this->reformatTraining(data, _answers, _siteData,  globalQuakes, Kp);
         size_t host_offset = 0;
         size_t device_offset=0;
-
+        u_int32_t *seed = new u_int32_t[_numOfStreams];
+        for(int i=0; i<_numOfStreams; i++){
+            FILE *fp;
+            fp = std::fopen("/dev/urandom", "r");
+            size_t chk;
+            chk =std::fread(&seed[i], 4, 1, fp);
+            if(chk <1){std::cerr<<"couldn't read /dev/urandom"<<std::endl; exit(1);}
+            std::fclose(fp);
+        }
         for(int n=0; n<_numOfStreams; n++){
             if(n%2==0 && n!=0){
                 device_offset=0;
@@ -309,9 +316,9 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
 
             normalizeKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dfitnessAvg[n], device_offset);
 
-            evolutionKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, device_offset);
+            evolutionKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, seed[n], device_offset);
 
-            CUDA_SAFE_CALL(cudaMemcpyAsync(&hfitnessAvg[n], &dfitnessAvg[n], sizeof(float), cudaMemcpyDeviceToHost, _stream[n]));
+            CUDA_SAFE_CALL(cudaMemcpyAsync(&hfitnessAvg[n], &dfitnessAvg[n], sizeof(double), cudaMemcpyDeviceToHost, _stream[n]));
 
             CUDA_SAFE_CALL(cudaMemcpyAsync(&host_genetics.array[host_offset], &device_genetics.array[device_offset], _streambytes, cudaMemcpyDeviceToHost, _stream[n]));
             host_offset += _streamSize;
@@ -323,24 +330,27 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
                     std::cerr<<"average fitness is: "<<hfitnessAvg[j]<<std::endl;
                 }
 //        for(int j=0; j<_numOfStreams; j++){
-//            int ctr=0;
-//            for(int i=0; i<_hostParams.array[10]; i++){
-//                if(host_genetics.array[_hostParams.array[19] + i + j*_streamSize] >1)
-//                    ctr++;
-//            }
-//            std::cerr<<"for stream num#: "<<j<<" the number of better than average individuals is: "<<ctr<<std::endl;
-//            std::cerr<<"percentage %: "<<(ctr/_hostParams.array[10])*100<<std::endl;
-//        }
-        for(int j=0; j<_numOfStreams; j++){
-            for(int i=0; i<40; i++){
-            std::cerr<<"for stream num#: "<<j<<" "<<host_genetics.array[_hostParams.array[19]+i+j*_streamSize]<<std::endl;
+            int ctr=0;
+            for(int i=0; i<_hostParams.array[10]; i++){
+                if(host_genetics.array[_hostParams.array[19] + i] >=1)
+                    ctr++;
             }
-        }
+            std::cerr<<"for stream num#:0 the number of better than average individuals is: "<<ctr<<std::endl;
+            std::cerr<<"percentage %: "<<((double)ctr/(double)_hostParams.array[10])*100<<std::endl;
+
+//        for(int j=0; j<_numOfStreams; j++){
+//            for(int i=0; i<20; i++){
+//            std::cerr<<"for stream num#: "<<j<<" "<<host_genetics.array[_hostParams.array[19]+i+j*_streamSize]<<std::endl;
+//            }
+//        }
         CUDA_SAFE_CALL(cudaFree(dConnect.array));
         CUDA_SAFE_CALL(cudaFree(retVec.array));
         CUDA_SAFE_CALL(cudaFree(partial_reduce_sums.array));
         CUDA_SAFE_CALL(cudaFreeHost(hfitnessAvg));
         CUDA_SAFE_CALL(cudaFree(dfitnessAvg));
+        CUDA_SAFE_CALL(cudaFree(dmeanCh.array));
+        CUDA_SAFE_CALL(cudaFree(dstdCh.array));
+
     }
     else{
         std::cerr<<"entered not training version.."<<std::endl;

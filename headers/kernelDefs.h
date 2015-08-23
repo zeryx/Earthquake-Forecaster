@@ -55,7 +55,7 @@ __global__ void reduceSecondKern(kernelArray<double> per_block_results, kernelAr
 
 __global__ void normalizeKern(kernelArray<double> weights, kernelArray<int> params, double *avgFitness, int device_offset);
 
-__global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params, int device_offset);
+__global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params, uint32_t in, int device_offset);
 
 
 //utility kernels

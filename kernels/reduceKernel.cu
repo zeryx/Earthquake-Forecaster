@@ -44,6 +44,6 @@ __global__ void reduceSecondKern(kernelArray<double> per_block_results, kernelAr
             *result += per_block_results.array[i];
 
         }
-        *result = *result;
+        *result = *result/params.array[10];
     }
 }
