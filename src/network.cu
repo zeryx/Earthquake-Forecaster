@@ -249,7 +249,6 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
     //were going to normalize the inputs using v` = v-mean/stdev, so we need mean and stdev for each channel.
     double meanCh[3]{0}, stdCh[3]{0};
     int num=0;
-    std::cerr<<"right before mean & std calc"<<std::endl;
     for(int i=0; i<3600*_sampleRate; i++){
         for(int j=0; j < _numofSites; j++){
             for(int k=0; k<3; k++){
@@ -262,24 +261,23 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         meanCh[k] = meanCh[k]/num;
         stdCh[k] = sqrt(meanCh[k]);
     }
-    std::cerr<<"channels std and mean calculated"<<std::endl;
     //input data from all sites and all channels normalized
     if(_istraining == true){
-        std::cerr<<"beginning of training"<<std::endl;
-        kernelArray<double>retVec, gQuakeAvg, answers, siteData, partial_reduce_sums, dmeanCh, dstdCh;
+        if(hour == 3){
+            cudaDeviceReset();
+            exit(1);
+        }
+        kernelArray<double>retVec, partial_reduce_sums, dmeanCh, dstdCh;
         kernelArray<std::pair<const int, const int> > dConnect;
         int regBlockSize = 512;
         int reduceGridSize = (_hostParams.array[10])/regBlockSize + (((_hostParams.array[10])%regBlockSize) ? 1 : 0);
         int netGridSize = (_hostParams.array[10])/regBlockSize;
         retVec.size = 2160*_numofSites;
-        gQuakeAvg.size = globalQuakes->size();
-        answers.size = _answers.size();
         dConnect.size = _connect->size();
-        siteData.size = _siteData->size();
         partial_reduce_sums.size = _numOfStreams*(reduceGridSize);
-        double *hfitnessAvg, *dfitnessAvg;
-        CUDA_SAFE_CALL(cudaHostAlloc((void**)&hfitnessAvg, _numOfStreams*sizeof(double), cudaHostAllocWriteCombined));
-        CUDA_SAFE_CALL(cudaMalloc((void**)&dfitnessAvg, _numOfStreams*sizeof(double)));
+        float *hfitnessAvg, *dfitnessAvg;
+        CUDA_SAFE_CALL(cudaHostAlloc((void**)&hfitnessAvg, _numOfStreams*sizeof(float), cudaHostAllocWriteCombined));
+        CUDA_SAFE_CALL(cudaMalloc((void**)&dfitnessAvg, _numOfStreams*sizeof(float)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&retVec.array, ret->size()*sizeof(double)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&dConnect.array, _connect->size()*sizeof(std::pair<int, int>)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&partial_reduce_sums.array, partial_reduce_sums.size*sizeof(double)));
@@ -289,13 +287,10 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         CUDA_SAFE_CALL(cudaMemcpy(dmeanCh.array, meanCh, 3*sizeof(double), cudaMemcpyHostToDevice));
         CUDA_SAFE_CALL(cudaMemcpy(dstdCh.array, stdCh, 3*sizeof(double), cudaMemcpyHostToDevice));
         CUDA_SAFE_CALL(cudaMemset(retVec.array, 0, retVec.size*sizeof(double)));
-        std::cerr<<"synchronizing device before correcting input data.."<<std::endl;
-        std::cerr<<"device synchronized, correcting input data."<<std::endl;
         this->reformatTraining(data, _answers, _siteData,  globalQuakes, Kp);
-        std::cerr<<"input data corrected, running main sequence."<<std::endl;
         size_t host_offset = 0;
         size_t device_offset=0;
-        Lock lock;
+
         for(int n=0; n<_numOfStreams; n++){
             if(n%2==0 && n!=0){
                 device_offset=0;
@@ -313,33 +308,36 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
 
             reduceSecondKern<<<1, 1, 0, _stream[n]>>>(partial_reduce_sums, &dfitnessAvg[n]);
 
-            CUDA_SAFE_CALL(cudaMemcpyAsync(&hfitnessAvg[n], &dfitnessAvg[n], sizeof(double), cudaMemcpyDeviceToHost, _stream[n]));
+            normalizeKern<<<netGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dfitnessAvg[n], device_offset);
 
-            evoFirstKern<<<netGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, hfitnessAvg[n], device_offset);
+            evolutionKern<<<netGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, device_offset);
 
-            evoSecondKern<<<netGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, device_offset, lock);
+            CUDA_SAFE_CALL(cudaMemcpyAsync(&hfitnessAvg[n], &dfitnessAvg[n], sizeof(float), cudaMemcpyDeviceToHost, _stream[n]));
+
             CUDA_SAFE_CALL(cudaMemcpyAsync(&host_genetics.array[host_offset], &device_genetics.array[device_offset], _streambytes, cudaMemcpyDeviceToHost, _stream[n]));
             host_offset += _streamSize;
             device_offset += _streamSize;
         }
         CUDA_SAFE_CALL(cudaDeviceSynchronize());
+        //        for(int j=0; j<_numOfStreams; j++){
+        //            std::cerr<<"for stream #: "<<j<<std::endl;
+        //            std::cerr<<"average fitness is: "<<hfitnessAvg[j]<<std::endl;
+        //        }
         for(int j=0; j<_numOfStreams; j++){
-            std::cerr<<"for stream #: "<<j<<std::endl;
-            for(int i=0; i<15; i++){
-                std::cerr<<"fitness value for individual #: "<<i<<std::endl;
-                std::cerr<<host_genetics.array[_hostParams.array[19]+i+_streamSize*j]<<std::endl;
+
+            int ctr=0;
+            for(int i=0; i<_hostParams.array[10]; i++){
+                if(host_genetics.array[_hostParams.array[19] + i + device_offset] >=1)
+                    ctr++;
             }
+            std::cerr<<"for stream num#: "<<j<<" the number of better than average individuals is: "<<ctr<<std::endl;
+            std::cerr<<"percentage %: "<<(ctr/_hostParams.array[10])*100<<std::endl;
         }
-        cudaDeviceReset();
-        exit(1);
         CUDA_SAFE_CALL(cudaFree(dConnect.array));
-        CUDA_SAFE_CALL(cudaFree(gQuakeAvg.array));
         CUDA_SAFE_CALL(cudaFree(retVec.array));
-        CUDA_SAFE_CALL(cudaFree(answers.array));
-        CUDA_SAFE_CALL(cudaFree(siteData.array));
-        CUDA_SAFE_CALL(cudaFree(dfitnessAvg));
         CUDA_SAFE_CALL(cudaFree(partial_reduce_sums.array));
         CUDA_SAFE_CALL(cudaFreeHost(hfitnessAvg));
+        CUDA_SAFE_CALL(cudaFree(dfitnessAvg));
     }
     else{
         std::cerr<<"entered not training version.."<<std::endl;

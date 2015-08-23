@@ -11,30 +11,6 @@ struct kernelArray{
     int size;
 };
 
-struct Lock {
-    int *mutex;
-    Lock( void ) {
-        CUDA_SAFE_CALL( cudaMalloc( (void**)&mutex, sizeof(int) ) );
-        CUDA_SAFE_CALL( cudaMemset( mutex, 0, sizeof(int) ) );
-    }
-
-    ~Lock( void ) {
-        cudaFree( mutex );
-    }
-
-    __device__ void lock( void ) {
-    #if __CUDA_ARCH__ >= 200
-        while( atomicCAS( mutex, 0, 1 ) != 0 );
-    #endif
-    }
-
-    __device__ void unlock( void ) {
-    #if __CUDA_ARCH__ >= 200
-        atomicExch( mutex, 0 );
-    #endif
-    }
-};
-
 
 
 #endif

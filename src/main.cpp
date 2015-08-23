@@ -102,7 +102,6 @@ int main(int argc, char** arg){
             ConstructedNetwork.allocateHostAndGPUObjects(0.75, GetDeviceRamInBytes(), GetHostRamInBytes());
             ConstructedNetwork.generateWeights();
         }
-        std::cerr<<"weights generation completed, setting training"<<std::endl;
         ConstructedNetwork.doingTraining(gtf_site, gtf_hour, gtf_lat, gtf_long, gtf_mag, gtf_dist);
     }
     while(1)
@@ -113,7 +112,7 @@ int main(int argc, char** arg){
         std::vector<int> *data = new std::vector<int>;
         std::vector<double> *globalQuakes = new std::vector<double>(5);
         std::cin>>hour;
-        if(hour== -1 || hour ==20)
+        if(hour== -1)
             exit(1);
         std::cin>>DLEN;
         for(int i=0; i<DLEN; i++){
@@ -123,7 +122,6 @@ int main(int argc, char** arg){
                 data->at(i) = data->at(i-1);
             }
         }
-        std::cerr<<"recieved all input data"<<std::endl;
         std::cin>>Kp;
         std::cin>>QLEN;
 
@@ -132,7 +130,6 @@ int main(int argc, char** arg){
             tmpQuakes->push_back(0.0);
             std::cin>>tmpQuakes->at(i);
         }
-        std::cerr<<"recieved all global quakes data"<<std::endl;
         int accVal=0;
         for (int i=0; i<QLEN/5; i++){
             for(int k=0; k<4; k++){//don't start at 0 because 0 is time.
@@ -146,14 +143,11 @@ int main(int argc, char** arg){
         }
         delete tmpQuakes;
         std::vector<double> *retM = new std::vector<double>(2160*numberOfSites, 0);
-        std::cerr<<"about to call forecast.."<<std::endl;
         ConstructedNetwork.forecast(retM, hour, data, Kp, globalQuakes);
-        std::cerr<<"forecast returned."<<std::endl;
         std::cout<<retM->size()<<std::endl;
         for(unsigned int i=0; i<retM->size(); i++){
             std::cout<<retM->at(i)<<std::endl;
         }
-        std::cerr<<"ret is returned to stream."<<std::endl;
         std::cout.flush();
         delete data;
         delete globalQuakes;

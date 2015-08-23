@@ -38,5 +38,15 @@ __host__ __device__ float ActFunc(float x){
     return 1/(1+exp(-x));
 }
 
+__device__ volatile int sem = 0;
+
+__device__ void acquire_semaphore(volatile int *lock){
+    while (atomicCAS((int *)lock, 0, 1) != 0);
+}
+
+__device__ void release_semaphore(volatile int *lock){
+    *lock = 0;
+    __threadfence();
+}
 
 

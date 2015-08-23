@@ -35,6 +35,8 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kerne
     const int communityMagOffset = params.array[20] +idx +device_offset;
     const int whenOffset = params.array[21] + idx + device_offset;
     const int howCertainOffset = params.array[22] + idx + device_offset;
+
+    //for connections --imagined offsets if we strided instead of interleaved
     const int connInputOffset = 0;
     const int connHiddenOffset = params.array[3] + connInputOffset;
     const int connMemOffset = params.array[4] + connHiddenOffset;
@@ -42,9 +44,14 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kerne
     const int connMemOutOffset = params.array[6] + connMemInOffset;
     const int connMemForgetOffset = params.array[7] + connMemOutOffset;
     const int connOutputOffset = params.array[8] + connMemForgetOffset;
+    //reset values from previous individual.
+    Vec.array[fitnessOffset] =0;
     for(int i=0; i<numOfSites; i++){
         Vec.array[communityMagOffset+i*ind]=1;
+        Vec.array[whenOffset +i*ind] = 0;
+        Vec.array[howCertainOffset +i*ind] =0;
     }
+
     for(int i=0; i<trainingsize; i++){
         float CommunityLat = 0;
         float CommunityLon = 0;
@@ -178,7 +185,6 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kerne
     for(int j=0; j<numOfSites; j++){ // now lets get the average when and howcertain values.
         Vec.array[whenOffset+j*ind] = Vec.array[whenOffset+j*ind]/trainingsize;
         Vec.array[howCertainOffset+j*ind] = Vec.array[howCertainOffset+j*ind]/trainingsize;
-        Vec.array[communityMagOffset+j*ind] = Vec.array[communityMagOffset+j*ind]/trainingsize;
     }
     /*calculate performance for this individual - score = 1/(abs(whenGuess-whenReal)*distToQuake), for whenGuess = Vec.array[whenOffset+j] where HowCertain is max for set.
     distToQuake is from the current sites parameters, it emphasizes higher scores for the closest site, a smaller distance is a higher score. */
