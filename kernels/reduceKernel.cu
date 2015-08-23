@@ -32,12 +32,11 @@ __global__ void reduceFirstKern(kernelArray<double> weights,kernelArray<double> 
     // thread 0 writes the final result
     if(threadIdx.x == 0)
     {
-        sdata[0] = sdata[0] / blockDim.x;
         per_block_results.array[blockIdx.x] = sdata[0];
     }
 }
 
-__global__ void reduceSecondKern(kernelArray<double> per_block_results, double *result){
+__global__ void reduceSecondKern(kernelArray<double> per_block_results, kernelArray<int> params, double *result){
     unsigned int idx = threadIdx.x+ blockIdx.x*blockDim.x;
     if(idx ==0){
         *result =0;
@@ -45,6 +44,6 @@ __global__ void reduceSecondKern(kernelArray<double> per_block_results, double *
             *result += per_block_results.array[i];
 
         }
-        *result = *result/per_block_results.size;
+        *result = *result;
     }
 }

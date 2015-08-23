@@ -51,7 +51,7 @@ __global__ void reduceFirstKern(kernelArray<double> weights,
                                 kernelArray<double> per_block_results,
                                 kernelArray<int> params, int device_offset);
 
-__global__ void reduceSecondKern(kernelArray<double> per_block_results, double *result);
+__global__ void reduceSecondKern(kernelArray<double> per_block_results, kernelArray<int> params, double *result);
 
 __global__ void normalizeKern(kernelArray<double> weights, kernelArray<int> params, double *avgFitness, int device_offset);
 
