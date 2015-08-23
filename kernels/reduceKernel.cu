@@ -7,9 +7,9 @@ __global__ void reduceFirstKern(kernelArray<double> weights,kernelArray<double> 
     int ind = params.array[19] + idx + device_offset;
 
     // load input into __shared__ memory
-    float x = 0;
+    double x = 0;
 
-        x = weights.array[ind];
+    x = weights.array[ind];
 
     sdata[threadIdx.x] = x;
     __syncthreads();
@@ -32,11 +32,12 @@ __global__ void reduceFirstKern(kernelArray<double> weights,kernelArray<double> 
     // thread 0 writes the final result
     if(threadIdx.x == 0)
     {
+        sdata[0] = sdata[0] / blockDim.x;
         per_block_results.array[blockIdx.x] = sdata[0];
     }
 }
 
-__global__ void reduceSecondKern(kernelArray<double> per_block_results, kernelArray<int> params, float *result){
+__global__ void reduceSecondKern(kernelArray<double> per_block_results, kernelArray<int> params, double *result){
     unsigned int idx = threadIdx.x+ blockIdx.x*blockDim.x;
     if(idx ==0){
         *result =0;
@@ -44,6 +45,6 @@ __global__ void reduceSecondKern(kernelArray<double> per_block_results, kernelAr
             *result += per_block_results.array[i];
 
         }
-        *result = *result/params.array[10];
+        *result = *result/per_block_results.size;
     }
 }

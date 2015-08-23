@@ -274,10 +274,10 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         int netGridSize = (_hostParams.array[10])/regBlockSize;
         retVec.size = 2160*_numofSites;
         dConnect.size = _connect->size();
-        partial_reduce_sums.size = _numOfStreams*(reduceGridSize);
-        float *hfitnessAvg, *dfitnessAvg;
-        CUDA_SAFE_CALL(cudaHostAlloc((void**)&hfitnessAvg, _numOfStreams*sizeof(float), cudaHostAllocWriteCombined));
-        CUDA_SAFE_CALL(cudaMalloc((void**)&dfitnessAvg, _numOfStreams*sizeof(float)));
+        partial_reduce_sums.size = (reduceGridSize);
+        double *hfitnessAvg, *dfitnessAvg;
+        CUDA_SAFE_CALL(cudaHostAlloc((void**)&hfitnessAvg, _numOfStreams*sizeof(double), cudaHostAllocWriteCombined));
+        CUDA_SAFE_CALL(cudaMalloc((void**)&dfitnessAvg, _numOfStreams*sizeof(double)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&retVec.array, ret->size()*sizeof(double)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&dConnect.array, _connect->size()*sizeof(std::pair<int, int>)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&partial_reduce_sums.array, partial_reduce_sums.size*sizeof(double)));
@@ -324,10 +324,9 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         //            std::cerr<<"average fitness is: "<<hfitnessAvg[j]<<std::endl;
         //        }
         for(int j=0; j<_numOfStreams; j++){
-
             int ctr=0;
             for(int i=0; i<_hostParams.array[10]; i++){
-                if(host_genetics.array[_hostParams.array[19] + i + device_offset] >0)
+                if(host_genetics.array[_hostParams.array[19] + i + j*_streamSize] >1)
                     ctr++;
             }
             std::cerr<<"for stream num#: "<<j<<" the number of better than average individuals is: "<<ctr<<std::endl;
