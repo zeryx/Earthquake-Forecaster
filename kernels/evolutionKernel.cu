@@ -9,8 +9,8 @@ __global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params,
     thrust::minstd_rand0 randEng;
     thrust::uniform_int_distribution<size_t> select(0,params.array[10]);
     while(1){//select primary
-        randEng.discard((vect.array[idx+in]));
-        if(vect.array[params.array[19] + select(randEng) + device_offset] > 1){
+        randEng.discard(idx+in);
+        if(vect.array[params.array[19] + select(randEng) + device_offset] >0){//everyone below 1.15 was already deleted
             you = select(randEng);
             break;
         }
@@ -18,8 +18,8 @@ __global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params,
     const int your_wt = params.array[11] + you + device_offset;
 
     while(1){//select secondary
-        randEng.discard(vect.array[idx]);
-        if(vect.array[params.array[19] + select(randEng) + device_offset] > 1){
+        randEng.discard(idx+in);
+        if(vect.array[params.array[19] + select(randEng) + device_offset] > 0){ //dido as before, the eligible parent value is set in normalize
             partner = select(randEng);
             break;
         }
@@ -27,7 +27,7 @@ __global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params,
     const int partner_wt = params.array[11] + partner + device_offset; // set the weights location for the partner
 
     while(1){//select child.
-        randEng.discard(vect.array[in+idx] + idx);
+        randEng.discard(in + idx);
         if(vect.array[params.array[19] + select(randEng) + device_offset] == 0){
             vect.array[params.array[19] + select(randEng) + device_offset] = -1;
             child = select(randEng);
@@ -43,7 +43,7 @@ __global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params,
         partner_mt.result = vect.array[partner_wt+i*ind];
 
         thrust::uniform_real_distribution<float> weightSpin(0, 10);
-        randEng.discard(vect.array[in] + idx);
+        randEng.discard(in + idx);
         double result;
         float rng = weightSpin(randEng);
 

@@ -270,6 +270,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         kernelArray<std::pair<const int, const int> > dConnect;
         int regBlockSize = 512;
         int regGridSize = (_hostParams.array[10])/regBlockSize;
+        int evoGridSize = (_hostParams.array[10]/2)/regBlockSize;
         retVec.size = 2160*_numofSites;
         dConnect.size = _connect->size();
         partial_reduce_sums.size = (regGridSize);
@@ -289,7 +290,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         size_t host_offset = 0;
         size_t device_offset=0;
         u_int32_t *seed = new u_int32_t[_numOfStreams];
-        for(int i=0; i<_numOfStreams; i++){
+        for(int i=0; i<_numOfStreams; i++){//set random numbers for evolution seed
             FILE *fp;
             fp = std::fopen("/dev/urandom", "r");
             size_t chk;
@@ -316,7 +317,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
 
             normalizeKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dfitnessAvg[n], device_offset);
 
-            evolutionKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, seed[n], device_offset);
+            evolutionKern<<<evoGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, seed[n], device_offset);
 
             CUDA_SAFE_CALL(cudaMemcpyAsync(&hfitnessAvg[n], &dfitnessAvg[n], sizeof(double), cudaMemcpyDeviceToHost, _stream[n]));
 
@@ -332,7 +333,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
 //        for(int j=0; j<_numOfStreams; j++){
             int ctr=0;
             for(int i=0; i<_hostParams.array[10]; i++){
-                if(host_genetics.array[_hostParams.array[19] + i] >=1)
+                if(host_genetics.array[_hostParams.array[19] + i] >0)
                     ctr++;
             }
             std::cerr<<"for stream num#:0 the number of better than average individuals is: "<<ctr<<std::endl;
@@ -350,6 +351,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         CUDA_SAFE_CALL(cudaFree(dfitnessAvg));
         CUDA_SAFE_CALL(cudaFree(dmeanCh.array));
         CUDA_SAFE_CALL(cudaFree(dstdCh.array));
+        delete[] seed;
 
     }
     else{
