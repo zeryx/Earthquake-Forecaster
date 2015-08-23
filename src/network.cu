@@ -199,7 +199,7 @@ void NetworkGenetic::storeWeights(std::string filepath){
 }
 
 void NetworkGenetic::reformatTraining(std::vector<int>* old_input, std::vector<double> ans, std::vector<double>* sitedata, std::vector<double>* globalquakes, double kp){ // increase the timestep and reduce resolution, takes too long.
-    int trainingSize = 40;
+    int trainingSize = 25;
     int * new_input = new int[trainingSize*3*_numofSites];
     int *siteOffset = new int[15], *chanOffset = new int[3];
     long long stor[trainingSize*3*_numofSites];
@@ -308,7 +308,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
 
             reduceSecondKern<<<1, 1, 0, _stream[n]>>>(partial_reduce_sums, &dfitnessAvg[n]);
 
-            normalizeKern<<<netGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dfitnessAvg[n], device_offset);
+            normalizeKern<<<netGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, dfitnessAvg[n], device_offset);
 
             evolutionKern<<<netGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, device_offset);
 
@@ -323,15 +323,20 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         //            std::cerr<<"for stream #: "<<j<<std::endl;
         //            std::cerr<<"average fitness is: "<<hfitnessAvg[j]<<std::endl;
         //        }
-        for(int j=0; j<_numOfStreams; j++){
+//        for(int j=0; j<_numOfStreams; j++){
 
-            int ctr=0;
-            for(int i=0; i<_hostParams.array[10]; i++){
-                if(host_genetics.array[_hostParams.array[19] + i + device_offset] >=1)
-                    ctr++;
+//            int ctr=0;
+//            for(int i=0; i<_hostParams.array[10]; i++){
+//                if(host_genetics.array[_hostParams.array[19] + i + device_offset] >0)
+//                    ctr++;
+//            }
+//            std::cerr<<"for stream num#: "<<j<<" the number of better than average individuals is: "<<ctr<<std::endl;
+//            std::cerr<<"percentage %: "<<(ctr/_hostParams.array[10])*100<<std::endl;
+//        }
+        for(int j=0; j<_numOfStreams; j++){
+            for(int i=0; i<15; i++){
+            std::cerr<<"for stream num#: "<<j<<" "<<host_genetics.array[_hostParams.array[19]+i+j*_streamSize]<<std::endl;
             }
-            std::cerr<<"for stream num#: "<<j<<" the number of better than average individuals is: "<<ctr<<std::endl;
-            std::cerr<<"percentage %: "<<(ctr/_hostParams.array[10])*100<<std::endl;
         }
         CUDA_SAFE_CALL(cudaFree(dConnect.array));
         CUDA_SAFE_CALL(cudaFree(retVec.array));
