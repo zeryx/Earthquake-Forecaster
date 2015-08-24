@@ -5,34 +5,19 @@
 __global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params, uint32_t in, size_t device_offset){
     const int idx = blockIdx.x * blockDim.x + threadIdx.x;
     const int ind = params.array[10];
+    const int parentsIndex = params.array[23]-1;
     int you, partner, child;
     thrust::minstd_rand0 randEng;
-    thrust::uniform_int_distribution<size_t> select(0,params.array[10]);
-    while(1){//select primary
-        randEng.discard(idx+in);
-        if(vect.array[params.array[19] + select(randEng) + device_offset] >0){//everyone below 1.15 was already deleted
-            you = select(randEng);
-            break;
-        }
-    }
+    randEng.seed(in);
+    thrust::uniform_int_distribution<size_t> selectParent(0,parentsIndex);
+    randEng.discard(idx);
+    you = selectParent(randEng);
     const int your_wt = params.array[11] + you + device_offset;
-    while(1){//select secondary
-        randEng.discard(idx+in);
-        if(vect.array[params.array[19] + select(randEng) + device_offset] > 0){ //dido as before, the eligible parent value is set in normalize
-            partner = select(randEng);
-            break;
-        }
-    }
+    randEng.discard(idx);
+    partner = selectParent(randEng);
     const int partner_wt = params.array[11] + partner + device_offset; // set the weights location for the partner
 
-    while(1){//select child.
-        randEng.discard(in + idx);
-        if(vect.array[params.array[19] + select(randEng) + device_offset] == 0){
-            vect.array[params.array[19] + select(randEng) + device_offset] = -1;
-            child = select(randEng);
-            break;
-        }
-    }
+    child = parentsIndex + idx; // num threads = num eligible children
     const int child_wt = params.array[11] + child + device_offset; // set the weights location for the child
     const int child_mem = params.array[14] + child + device_offset;
 
@@ -42,7 +27,7 @@ __global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params,
         partner_mt.result = vect.array[partner_wt+i*ind];
 
         thrust::uniform_real_distribution<float> weightSpin(0, 10);
-        randEng.discard(in + idx);
+        randEng.discard(idx);
         double result;
         float rng = weightSpin(randEng);
 

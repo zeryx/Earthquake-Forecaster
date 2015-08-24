@@ -57,5 +57,5 @@ __global__ void evolutionKern(kernelArray<double> Vec, kernelArray<int> params, 
 
 __global__ void sortKern(kernelArray<double> Vec, kernelArray<int> params, int j, int k, size_t device_offset);
 
-
+__global__ void findChildrenKern(kernelArray<double>vect, kernelArray<int> params, size_t *childOffset, size_t device_offset);
 #endif

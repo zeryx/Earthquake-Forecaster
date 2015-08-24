@@ -38,6 +38,7 @@ NetworkGenetic::NetworkGenetic(const int &numInputNodes, const int &numHiddenNeu
     //    _hostParams.array[20] = community magnitude offset
     //    _hostParams.array[21] = when offset
     //    _hostParams.array[22] = howCertain offset
+    //    _deviceParams.array[23] = start of children offset
     _hostParams.array[25] = 1 ;// population ratio next_pop_size/current_pop_size, ie 1 = constant
 
     _connect = &connections;
@@ -52,7 +53,7 @@ void NetworkGenetic::generateWeights(){
     for(int n=0; n<_numOfStreams; n++){//fill the host first.
         if(n%2==0 && n !=0)
             device_offset =0;
-        uint32_t seed;
+        size_t seed;
         FILE *fp;
         fp = std::fopen("/dev/urandom", "r");
         size_t chk;
@@ -270,12 +271,14 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         kernelArray<std::pair<const int, const int> > dConnect;
         int regBlockSize = 512;
         int regGridSize = (_hostParams.array[10])/regBlockSize;
-        int evoGridSize = (_hostParams.array[10]/10)/regBlockSize;
         retVec.size = 2160*_numofSites;
         dConnect.size = _connect->size();
         partial_reduce_sums.size = (regGridSize);
         double *hfitnessAvg, *dfitnessAvg;
+        size_t *hchildOffset, *dchildOffset;
+        CUDA_SAFE_CALL(cudaHostAlloc((void**)&hchildOffset, _numOfStreams*sizeof(size_t), cudaHostAllocWriteCombined));
         CUDA_SAFE_CALL(cudaHostAlloc((void**)&hfitnessAvg, _numOfStreams*sizeof(double), cudaHostAllocWriteCombined));
+        CUDA_SAFE_CALL(cudaMalloc((void**)&dchildOffset, _numOfStreams*sizeof(size_t)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&dfitnessAvg, _numOfStreams*sizeof(double)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&retVec.array, ret->size()*sizeof(double)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&dConnect.array, _connect->size()*sizeof(std::pair<int, int>)));
@@ -289,7 +292,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         this->reformatTraining(data, _answers, _siteData,  globalQuakes, Kp);
         size_t host_offset = 0;
         size_t device_offset=0;
-        u_int32_t *seed = new u_int32_t[_numOfStreams];
+        size_t *seed = new size_t[_numOfStreams];
         for(int i=0; i<_numOfStreams; i++){//set random numbers for evolution seed
             FILE *fp;
             fp = std::fopen("/dev/urandom", "r");
@@ -316,13 +319,20 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
 
             reduceSecondKern<<<1, 1, 0, _stream[n]>>>(partial_reduce_sums, _deviceParams, &dfitnessAvg[n]);
 
-            normalizeKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dfitnessAvg[n], device_offset);
-
             for(int k=2; k<= _hostParams.array[10]; k<<= 1){
                 for(int j =k>>1; j>0; j=j>>1){
                     sortKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, j, k, device_offset);
                 }
             }
+
+            normalizeKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dfitnessAvg[n], device_offset);
+
+            findChildrenKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dchildOffset[n], device_offset);
+
+            CUDA_SAFE_CALL(cudaMemcpyAsync(&hchildOffset[n], &dchildOffset[n], sizeof(size_t), cudaMemcpyDeviceToHost, _stream[n]));
+
+            int evoGridSize = (_hostParams.array[10]-hchildOffset[n])/regBlockSize;
+
 
             evolutionKern<<<evoGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, seed[n], device_offset);
 
@@ -346,11 +356,10 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
 //            std::cerr<<"for stream num#:0 the number of better than average individuals is: "<<ctr<<std::endl;
 //            std::cerr<<"percentage %: "<<((double)ctr/(double)_hostParams.array[10])*100<<std::endl;
 
-        for(int j=0; j<_numOfStreams; j++){
-            for(int i=0; i<20; i++){
-            std::cerr<<"for stream num#: "<<j<<" "<<host_genetics.array[_hostParams.array[19]+i]<<std::endl;
+                std::cerr.precision(15);
+            for(int i=0; i<100; i++){
+            std::cerr<<host_genetics.array[_hostParams.array[19]+i]<<std::endl;
             }
-        }
         CUDA_SAFE_CALL(cudaFree(dConnect.array));
         CUDA_SAFE_CALL(cudaFree(retVec.array));
         CUDA_SAFE_CALL(cudaFree(partial_reduce_sums.array));

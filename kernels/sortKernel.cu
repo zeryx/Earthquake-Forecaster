@@ -10,8 +10,8 @@ __global__ void sortKern(kernelArray<double> vec, kernelArray<int> params, int j
     /* The threads with the lowest ids sort the array. */
     if ((second)>first){
         if ((first&k)==0) {
-            /* Sort ascending */
-            if (vec.array[first+fitnessOffset]>vec.array[second+fitnessOffset]) {
+            /* Sort Decending */
+            if (vec.array[first+fitnessOffset]<vec.array[second+fitnessOffset]) {
                 /* exchange(first,second); */
                 double temp = vec.array[first+fitnessOffset];
                 vec.array[first+fitnessOffset] = vec.array[second+fitnessOffset];
@@ -24,8 +24,8 @@ __global__ void sortKern(kernelArray<double> vec, kernelArray<int> params, int j
             }
         }
         if ((first&k)!=0) {
-            /* Sort descending */
-            if (vec.array[first+fitnessOffset]<vec.array[second+fitnessOffset]) {
+            /* Sort Ascending */
+            if (vec.array[first+fitnessOffset]>vec.array[second+fitnessOffset]) {
                 /* exchange(first,second); */
                 double temp = vec.array[first+fitnessOffset];
                 vec.array[first+fitnessOffset] = vec.array[second+fitnessOffset];
