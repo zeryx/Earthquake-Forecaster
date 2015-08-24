@@ -1,34 +1,41 @@
 #include <kernelDefs.h>
 
-__global__ void sortKern(kernelArray<std::pair<int, double> > vec, int j, int k, int ind_offset){
-    unsigned int i, ixj; /* Sorting partners: i and ixj */
-    i = threadIdx.x + blockDim.x * blockIdx.x;
-    ixj = i^j;
-
+__global__ void sortKern(kernelArray<double> vec, kernelArray<int> params, int j, int k, size_t device_offset){
+    const int idx = threadIdx.x + blockDim.x * blockIdx.x;
+    const int first=idx;
+    const int second = first^j;
+    const int fitnessOffset = params.array[19] + device_offset;
+    const int wtOffset = params.array[11] + device_offset;
+    const int ind = params.array[10];
     /* The threads with the lowest ids sort the array. */
-    if ((ixj)>i) {
-        if ((i&k)==0) {
+    if ((second)>first){
+        if ((first&k)==0) {
             /* Sort ascending */
-            if (vec.array[i+ind_offset].second>vec.array[ixj+ind_offset].second) {
-                /* exchange(i,ixj); */
-                std::pair<int, double> temp = vec.array[i+ind_offset];
-                vec.array[i+ind_offset].first = vec.array[ixj+ind_offset].first;
-                vec.array[i+ind_offset].second = vec.array[ixj+ind_offset].second;
-                vec.array[ixj+ind_offset].first = temp.first;
-                vec.array[ixj+ind_offset].second = temp.second;
+            if (vec.array[first+fitnessOffset]>vec.array[second+fitnessOffset]) {
+                /* exchange(first,second); */
+                double temp = vec.array[first+fitnessOffset];
+                vec.array[first+fitnessOffset] = vec.array[second+fitnessOffset];
+                vec.array[second+fitnessOffset] = temp;
+                for(int n=0; n<params.array[1]; n++){
+                    double temp_wt = vec.array[wtOffset + first + n*ind];
+                    vec.array[wtOffset+first+n*ind] = vec.array[wtOffset+second+n*ind];
+                    vec.array[wtOffset+second+n*ind] = temp_wt;
+                }
             }
         }
-        if ((i&k)!=0) {
+        if ((first&k)!=0) {
             /* Sort descending */
-            if (vec.array[i+ind_offset].second<vec.array[ixj+ind_offset].second) {
-                /* exchange(i,ixj); */
-                std::pair<int, double> temp = vec.array[i+ind_offset];
-                vec.array[i+ind_offset].first = vec.array[ixj+ind_offset].first;
-                vec.array[i+ind_offset].second = vec.array[ixj+ind_offset].second;
-                vec.array[ixj+ind_offset].first = temp.first;
-                vec.array[ixj+ind_offset].second = temp.second;
+            if (vec.array[first+fitnessOffset]<vec.array[second+fitnessOffset]) {
+                /* exchange(first,second); */
+                double temp = vec.array[first+fitnessOffset];
+                vec.array[first+fitnessOffset] = vec.array[second+fitnessOffset];
+                vec.array[second+fitnessOffset] = temp;
+                for(int n=0; n<params.array[1]; n++){
+                    double temp_wt = vec.array[wtOffset + first + n*ind];
+                    vec.array[wtOffset+first+n*ind] = vec.array[wtOffset+second+n*ind];
+                    vec.array[wtOffset+second+n*ind] = temp_wt;
+                }
             }
         }
     }
-
 }
