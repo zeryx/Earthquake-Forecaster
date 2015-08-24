@@ -16,7 +16,6 @@ __global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params,
         }
     }
     const int your_wt = params.array[11] + you + device_offset;
-
     while(1){//select secondary
         randEng.discard(idx+in);
         if(vect.array[params.array[19] + select(randEng) + device_offset] > 0){ //dido as before, the eligible parent value is set in normalize

@@ -200,5 +200,5 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kerne
         }
     }
     float SiteToQuakeDist = distCalc(ansLat, ansLong, answers[1], answers[2]); // [2] is latitude, [3] is longitude.
-    Vec.array[fitnessOffset] = exp(-(fabs(whenGuess - answers[0]-hour)*SiteToQuakeDist));//1 is perfect, never negative
+    Vec.array[fitnessOffset] = 1/(fabs(whenGuess - answers[0]-hour)*SiteToQuakeDist);//larger is better, negative numbers are impossible.
 }

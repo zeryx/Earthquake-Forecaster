@@ -80,13 +80,13 @@ int main(int argc, char** arg){
     NetworkGenetic ConstructedNetwork(inputs, hidden, memory, outputs, numWeights, connections);
     int sampleRate, numberOfSites, SLEN;
     std::cin>>sampleRate>>numberOfSites>>SLEN;
-    std::vector<double> *sitesData = new std::vector<double>;
+    std::vector<double> sitesData;
 
     for (int i=0; i < SLEN; i++){
-        sitesData->push_back(0);
-        std::cin>>sitesData->at(i);
+        sitesData.push_back(0);
+        std::cin>>sitesData.at(i);
     }
-    int initRet= ConstructedNetwork.init(sampleRate, numberOfSites, sitesData);
+    int initRet= ConstructedNetwork.init(sampleRate, numberOfSites, &sitesData);
     std::cout<<initRet<<std::endl;
     int doTraining;
     std::cin>>doTraining;
@@ -109,52 +109,49 @@ int main(int argc, char** arg){
         int DLEN, QLEN;
         int hour;
         double Kp;
-        std::vector<int> *data = new std::vector<int>;
-        std::vector<double> *globalQuakes = new std::vector<double>(5);
+        std::vector<int> data ;
+        std::vector<double> globalQuakes(5, 0);
+        std::vector<double> tmpQuakes;
+        std::vector<double> retM(2160*numberOfSites, 0);
+
+
         std::cin>>hour;
         if(hour== -1)
             exit(1);
         std::cin>>DLEN;
         for(int i=0; i<DLEN; i++){
-            data->push_back(0);
-            std::cin>>data->at(i);
-            if(data->at(i) == -1){
-                data->at(i) = data->at(i-1);
+            data.push_back(0);
+            std::cin>>data.at(i);
+            if(data.at(i) == -1){
+                data.at(i) = data.at(i-1);
             }
         }
         std::cin>>Kp;
         std::cin>>QLEN;
 
-        std::vector<double>* tmpQuakes = new std::vector<double>;
         for(int i=0; i<QLEN; i++){
-            tmpQuakes->push_back(0.0);
-            std::cin>>tmpQuakes->at(i);
+            tmpQuakes.push_back(0.0);
+            std::cin>>tmpQuakes.at(i);
         }
         int accVal=0;
         for (int i=0; i<QLEN/5; i++){
             for(int k=0; k<4; k++){//don't start at 0 because 0 is time.
-                globalQuakes->at(k) += tmpQuakes->at(i*5+k);
+                globalQuakes.at(k) += tmpQuakes.at(i*5+k);
                 accVal++;
             }
         }
         for(int k=0; k<4; k++){
-            if(globalQuakes->at(k) !=0)
-                globalQuakes->at(k) = globalQuakes->at(k)/accVal; // push the hourly average into _DGQuakes for all parameters.
+            if(globalQuakes.at(k) !=0)
+                globalQuakes.at(k) = globalQuakes.at(k)/accVal; // push the hourly average into _DGQuakes for all parameters.
         }
-        delete tmpQuakes;
-        std::vector<double> *retM = new std::vector<double>(2160*numberOfSites, 0);
-        ConstructedNetwork.forecast(retM, hour, data, Kp, globalQuakes);
-        std::cout<<retM->size()<<std::endl;
-        for(unsigned int i=0; i<retM->size(); i++){
-            std::cout<<retM->at(i)<<std::endl;
+        ConstructedNetwork.forecast(&retM, hour, &data, Kp, &globalQuakes);
+        std::cout<<retM.size()<<std::endl;
+        for(unsigned int i=0; i<retM.size(); i++){
+            std::cout<<retM.at(i)<<std::endl;
         }
         std::cout.flush();
-        delete data;
-        delete globalQuakes;
-        delete retM;
     }
     if(doTraining == 1)
         ConstructedNetwork.storeWeights("/weights.bin");
-    delete sitesData;
     return 0;
 }

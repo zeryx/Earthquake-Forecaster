@@ -37,7 +37,6 @@ union mutations{
     int f[2];
     double result;
 };
-//lock
 
 
 //main kernels
@@ -56,9 +55,8 @@ __global__ void normalizeKern(kernelArray<double> Vec, kernelArray<int> params, 
 
 __global__ void evolutionKern(kernelArray<double> Vec, kernelArray<int> params, uint32_t in, size_t device_offset);
 
+__global__ void getFitKern(kernelArray<double> in, kernelArray<int> params, kernelArray<std::pair<int, double> > out, size_t device_offset, int ind_offset);
 
-//utility kernels
-__global__ void sortFirstKern(kernelArray<double> Vec, kernelArray<int> params, size_t device_offset);
-
+__global__ void sortKern(kernelArray<std::pair<int, double> > vec, int j, int k, int ind_offset);
 
 #endif
