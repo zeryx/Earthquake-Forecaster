@@ -23,7 +23,7 @@ __global__ void sortKern(kernelArray<double> vec, kernelArray<int> params, int j
                 }
             }
         }
-        if ((first&k)!=0) {
+        else if ((first&k)!=0) {
             /* Sort Ascending */
             if (vec.array[first+fitnessOffset]>vec.array[second+fitnessOffset]) {
                 /* exchange(first,second); */

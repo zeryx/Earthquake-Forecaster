@@ -53,9 +53,9 @@ __global__ void reduceSecondKern(kernelArray<double> per_block_results, kernelAr
 
 __global__ void normalizeKern(kernelArray<double> Vec, kernelArray<int> params, double *avgFitness, size_t device_offset);
 
-__global__ void evolutionKern(kernelArray<double> Vec, kernelArray<int> params, uint32_t in, size_t device_offset);
+__global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params, int *childOffset, uint32_t in, size_t device_offset);
 
 __global__ void sortKern(kernelArray<double> Vec, kernelArray<int> params, int j, int k, size_t device_offset);
 
-__global__ void findChildrenKern(kernelArray<double>vect, kernelArray<int> params, size_t *childOffset, size_t device_offset);
+__global__ void findChildrenKern(kernelArray<double>vect, kernelArray<int> params, int *childOffset, double *avgFitness, size_t device_offset);
 #endif

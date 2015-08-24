@@ -2,10 +2,10 @@
 #include <thrust/random.h>
 
 
-__global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params, uint32_t in, size_t device_offset){
+__global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params, int *childOffset, uint32_t in, size_t device_offset){
     const int idx = blockIdx.x * blockDim.x + threadIdx.x;
     const int ind = params.array[10];
-    const int parentsIndex = params.array[23]-1;
+    const int parentsIndex = *childOffset-1;
     int you, partner, child;
     thrust::minstd_rand0 randEng;
     randEng.seed(in);
@@ -13,10 +13,12 @@ __global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params,
     randEng.discard(idx);
     you = selectParent(randEng);
     const int your_wt = params.array[11] + you + device_offset;
-    randEng.discard(idx);
+    const float yourFitness = vect.array[params.array[19] + you + device_offset];
+
+    randEng.discard(yourFitness/idx);
     partner = selectParent(randEng);
     const int partner_wt = params.array[11] + partner + device_offset; // set the weights location for the partner
-
+    const float partnerFitness = vect.array[params.array[19] + partner + device_offset];
     child = parentsIndex + idx; // num threads = num eligible children
     const int child_wt = params.array[11] + child + device_offset; // set the weights location for the child
     const int child_mem = params.array[14] + child + device_offset;
@@ -27,7 +29,7 @@ __global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params,
         partner_mt.result = vect.array[partner_wt+i*ind];
 
         thrust::uniform_real_distribution<float> weightSpin(0, 10);
-        randEng.discard(idx);
+        randEng.discard((partnerFitness+yourFitness)/idx);
         double result;
         float rng = weightSpin(randEng);
 
