@@ -44,22 +44,21 @@ union mutations{
 __global__ void genWeightsKern( kernelArray<double> ref, uint32_t in, kernelArray<int> params, size_t offset);
 
 __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kernelArray<std::pair<const int, const int> > connections,
-                        int numOfSites,int hour, kernelArray<double> meanCh, kernelArray<double> stdCh,
-                        size_t device_offset);
+                        int numOfSites,int hour, kernelArray<double> meanCh, kernelArray<double> stdCh, size_t device_offset);
 
-__global__ void reduceFirstKern(kernelArray<double> weights,
+__global__ void reduceFirstKern(kernelArray<double> Vec,
                                 kernelArray<double> per_block_results,
-                                kernelArray<int> params, int device_offset);
+                                kernelArray<int> params, size_t device_offset);
 
 __global__ void reduceSecondKern(kernelArray<double> per_block_results, kernelArray<int> params, double *result);
 
-__global__ void normalizeKern(kernelArray<double> weights, kernelArray<int> params, double *avgFitness, int device_offset);
+__global__ void normalizeKern(kernelArray<double> Vec, kernelArray<int> params, double *avgFitness, size_t device_offset);
 
-__global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params, uint32_t in, int device_offset);
+__global__ void evolutionKern(kernelArray<double> Vec, kernelArray<int> params, uint32_t in, size_t device_offset);
 
 
 //utility kernels
-
+__global__ void sortFirstKern(kernelArray<double> Vec, kernelArray<int> params, size_t device_offset);
 
 
 #endif

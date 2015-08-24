@@ -270,7 +270,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         kernelArray<std::pair<const int, const int> > dConnect;
         int regBlockSize = 512;
         int regGridSize = (_hostParams.array[10])/regBlockSize;
-        int evoGridSize = (_hostParams.array[10]/2)/regBlockSize;
+        int evoGridSize = (_hostParams.array[10]/5)/regBlockSize;
         retVec.size = 2160*_numofSites;
         dConnect.size = _connect->size();
         partial_reduce_sums.size = (regGridSize);

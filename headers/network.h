@@ -25,6 +25,7 @@ public:
     void reformatTraining(std::vector<int>* old_input, std::vector<double> ans, std::vector<double>* sitedata, std::vector<double>* globalquakes, double kp);
     void storeWeights(std::string filepath);
     bool checkForWeights(std::string filepath);
+    void sort();
 private:
     kernelArray<double> device_genetics;
     kernelArray<double> host_genetics;

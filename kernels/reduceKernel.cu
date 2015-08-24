@@ -1,6 +1,6 @@
 #include <kernelDefs.h>
 
-__global__ void reduceFirstKern(kernelArray<double> weights,kernelArray<double> per_block_results, kernelArray<int> params,  int device_offset){
+__global__ void reduceFirstKern(kernelArray<double> weights,kernelArray<double> per_block_results, kernelArray<int> params,  size_t device_offset){
     extern __shared__ float sdata[];
 
     unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
