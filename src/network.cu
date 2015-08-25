@@ -1,6 +1,5 @@
 ﻿#include <network.h>
 #include <kernelDefs.h>
-#include <thrust/sort.h>
 #include <getsys.h>
 #include <fstream>
 #include <sstream>
@@ -263,36 +262,29 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
     }
     //input data from all sites and all channels normalized
     if(_istraining == true){
-        if(hour == 5){
+        if(hour == 20){
             cudaDeviceReset();
             exit(1);
         }
         kernelArray<double>retVec, partial_reduce_sums, dmeanCh, dstdCh;
         kernelArray<std::pair<const int, const int> > dConnect;
-        kernelArray<double> fitForSort;
-        kernelArray<int> posForSort;
         int regBlockSize = 512;
         int regGridSize = (_hostParams.array[10])/regBlockSize;
-        int evoGridSize[_numOfStreams];
+        int evoGridsize[_numOfStreams];
         retVec.size = 2160*_numofSites;
         dConnect.size = _connect->size();
         partial_reduce_sums.size = (regGridSize);
-        fitForSort.size = _hostParams.array[10]*_numOfStreams;
-        posForSort.size = _hostParams.array[10]*_numOfStreams;
         double *hfitnessAvg, *dfitnessAvg;
-        int *hChildOffset, *dChildOffset;
+        int *hchildOffset, *dchildOffset;
+        CUDA_SAFE_CALL(cudaHostAlloc((void**)&hchildOffset, _numOfStreams*sizeof(int), cudaHostAllocWriteCombined));
         CUDA_SAFE_CALL(cudaHostAlloc((void**)&hfitnessAvg, _numOfStreams*sizeof(double), cudaHostAllocWriteCombined));
-        CUDA_SAFE_CALL(cudaHostAlloc((void**)&hChildOffset, _numOfStreams*sizeof(int), cudaHostAllocWriteCombined));
+        CUDA_SAFE_CALL(cudaMalloc((void**)&dchildOffset, _numOfStreams*sizeof(int)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&dfitnessAvg, _numOfStreams*sizeof(double)));
-        CUDA_SAFE_CALL(cudaMalloc((void**)&dChildOffset, _numOfStreams*sizeof(int)));
-
         CUDA_SAFE_CALL(cudaMalloc((void**)&retVec.array, ret->size()*sizeof(double)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&dConnect.array, _connect->size()*sizeof(std::pair<int, int>)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&partial_reduce_sums.array, partial_reduce_sums.size*sizeof(double)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&dmeanCh.array, 3*sizeof(double)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&dstdCh.array, 3*sizeof(double)));
-        CUDA_SAFE_CALL(cudaMalloc((void**)&fitForSort.array, _numOfStreams*_hostParams.array[10]*sizeof(double)));
-        CUDA_SAFE_CALL(cudaMalloc((void**)&posForSort.array, _numOfStreams*_hostParams.array[10]*sizeof(int)));
         CUDA_SAFE_CALL(cudaMemcpy(dConnect.array, _connect->data(), _connect->size()*sizeof(std::pair<int, int>), cudaMemcpyHostToDevice));
         CUDA_SAFE_CALL(cudaMemcpy(dmeanCh.array, meanCh, 3*sizeof(double), cudaMemcpyHostToDevice));
         CUDA_SAFE_CALL(cudaMemcpy(dstdCh.array, stdCh, 3*sizeof(double), cudaMemcpyHostToDevice));
@@ -322,25 +314,29 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
 
             NetKern<<<regGridSize, regBlockSize, _connect->size()*sizeof(std::pair<const int, const int>), _stream[n]>>>(device_genetics,_deviceParams,  dConnect, _numofSites, hour, dmeanCh, dstdCh, device_offset);
 
-            getFitKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, fitForSort, posForSort, device_offset, device_offset/_hostParams.array[2]);
-
-            thrust::sort_by_key(fitForSort.array, fitForSort.array+fitForSort.size, posForSort.array, thrust::greater<double>());
-
-            transferKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, posForSort, _deviceParams, device_offset/_hostParams.array[2], device_offset);
 
             reduceFirstKern<<<regGridSize, regBlockSize, regBlockSize*sizeof(double), _stream[n]>>>(device_genetics, partial_reduce_sums, _deviceParams, device_offset);
 
             reduceSecondKern<<<1, 1, 0, _stream[n]>>>(partial_reduce_sums, _deviceParams, &dfitnessAvg[n]);
 
-            normalizeKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dfitnessAvg[n], device_offset);
+            for(int k=2; k<= _hostParams.array[10]; k<<= 1){
+                for(int j =k>>1; j>0; j=j>>1){
+                    bitonicBuildKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, j, k, device_offset);
+                }
+            }
+            for(int k=_hostParams.array[10]/2;  k<= 1; k=k>>1){
+                bitonicSortKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, k, device_offset);
+            }
 
-            findChildrenKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dChildOffset[n], &dfitnessAvg[n], device_offset);
+//            normalizeKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dfitnessAvg[n], device_offset);
 
-           CUDA_SAFE_CALL(cudaMemcpyAsync(&hChildOffset[n], &dChildOffset[n], sizeof(int), cudaMemcpyDeviceToHost, _stream[n]));
+            findChildrenKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams,  &dchildOffset[n], &dfitnessAvg[n], device_offset);
 
-            evoGridSize[n] = (_hostParams.array[10] - hChildOffset[n])/regBlockSize;
+            CUDA_SAFE_CALL(cudaMemcpyAsync(&hchildOffset[n], &dchildOffset[n], sizeof(int), cudaMemcpyDeviceToHost, _stream[n]));
 
-            evolutionKern<<<evoGridSize[n], regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dChildOffset[n], seed[n], device_offset);
+//            evoGridsize[n] = (_hostParams.array[10]-hchildOffset[n])/regBlockSize;
+
+//            evolutionKern<<<evoGridsize[n], regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dchildOffset[n], seed[n], device_offset);
 
             CUDA_SAFE_CALL(cudaMemcpyAsync(&hfitnessAvg[n], &dfitnessAvg[n], sizeof(double), cudaMemcpyDeviceToHost, _stream[n]));
 
@@ -349,29 +345,32 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
             device_offset += _streamSize;
         }
         CUDA_SAFE_CALL(cudaDeviceSynchronize());
-                for(int j=0; j<_numOfStreams; j++){
-                    std::cerr<<"for stream #: "<<j<<std::endl;
-                    std::cerr<<"average fitness is: "<<hfitnessAvg[j]<<std::endl;
-                }
 //        for(int j=0; j<_numOfStreams; j++){
-//            int ctr=0;
-//            for(int i=0; i<_hostParams.array[10]; i++){
-//                if(host_genetics.array[_hostParams.array[19] + i] >0)
-//                    ctr++;
-//            }
-//            std::cerr<<"for stream num#:0 the number of better than average individuals is: "<<ctr<<std::endl;
-//            std::cerr<<"percentage %: "<<((double)ctr/(double)_hostParams.array[10])*100<<std::endl;
+//            std::cerr<<"for stream #: "<<j<<std::endl;
+//            std::cerr<<"average fitness is: "<<hfitnessAvg[j]<<std::endl;
+//        }
+//        int ctr=0;
+//        for(int i=0; i<_hostParams.array[10]; i++){
+//            if(host_genetics.array[_hostParams.array[19] + i] >0)
+//                ctr++;
+//        }
+//        std::cerr<<"for stream num#:0 the number of better than average individuals is: "<<ctr<<std::endl;
+//        std::cerr<<"percentage %: "<<((double)ctr/(double)_hostParams.array[10])*100<<std::endl;
 
+        std::cerr.precision(15);
+        for(int i=0; i<_hostParams.array[10]; i++){
+            std::cerr<<host_genetics.array[_hostParams.array[19]+i]<<std::endl;
+        }
         CUDA_SAFE_CALL(cudaFree(dConnect.array));
         CUDA_SAFE_CALL(cudaFree(retVec.array));
         CUDA_SAFE_CALL(cudaFree(partial_reduce_sums.array));
         CUDA_SAFE_CALL(cudaFreeHost(hfitnessAvg));
+        CUDA_SAFE_CALL(cudaFreeHost(hchildOffset));
         CUDA_SAFE_CALL(cudaFree(dfitnessAvg));
+        CUDA_SAFE_CALL(cudaFree(dchildOffset));
         CUDA_SAFE_CALL(cudaFree(dmeanCh.array));
         CUDA_SAFE_CALL(cudaFree(dstdCh.array));
-        CUDA_SAFE_CALL(cudaFree(fitForSort.array));
         delete[] seed;
-
     }
     else{
         std::cerr<<"entered not training version.."<<std::endl;

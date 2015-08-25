@@ -45,10 +45,6 @@ __global__ void genWeightsKern( kernelArray<double> ref, uint32_t in, kernelArra
 __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kernelArray<std::pair<const int, const int> > connections,
                         int numOfSites,int hour, kernelArray<double> meanCh, kernelArray<double> stdCh, size_t device_offset);
 
-__global__ void getFitKern(kernelArray<double> in, kernelArray<int> params, kernelArray<double> fit, kernelArray<int> pos, int ind_offset, size_t device_offset);
-
-__global__ void transferKern(kernelArray<double> vect, kernelArray<int> pos, kernelArray<int> params, int ind_offset, size_t device_offset);
-
 __global__ void reduceFirstKern(kernelArray<double> Vec,
                                 kernelArray<double> per_block_results,
                                 kernelArray<int> params, size_t device_offset);
@@ -58,6 +54,10 @@ __global__ void reduceSecondKern(kernelArray<double> per_block_results, kernelAr
 __global__ void normalizeKern(kernelArray<double> Vec, kernelArray<int> params, double *avgFitness, size_t device_offset);
 
 __global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params, int *childOffset, uint32_t in, size_t device_offset);
+
+__global__ void bitonicBuildKern(kernelArray<double> Vec, kernelArray<int> params, int j, int k, size_t device_offset);
+
+__global__ void bitonicSortKern(kernelArray<double> Vec, kernelArray<int> params, int k, size_t device_offset);
 
 __global__ void findChildrenKern(kernelArray<double>vect, kernelArray<int> params, int *childOffset, double *avgFitness, size_t device_offset);
 #endif
