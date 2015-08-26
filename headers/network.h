@@ -34,6 +34,7 @@ private:
     std::vector<double> _answers;
     std::vector<double> _best;
     kernelArray<int>_hostParams;
+    kernelArray<int>_deviceParams;
     bool _istraining;
     int _numOfStreams;
     size_t _streambytes;

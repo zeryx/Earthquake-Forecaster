@@ -8,10 +8,9 @@ extern __constant__ double Kp;
 extern __constant__ int site_offset[];
 extern __constant__ int channel_offset[];
 extern __constant__ int trainingsize;
-extern __constant__ int params[];
 //endof using
 
-__global__ void NetKern(kernelArray<double> Vec,  kernelArray<std::pair<const int, const int> > connections,
+__global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kernelArray<std::pair<const int, const int> > connections,
                         int hour, kernelArray<double> meanCh, kernelArray<double> stdCh, size_t device_offset){
     extern __shared__ std::pair<int, int> shdConnect[];
     if(threadIdx.x ==0){
@@ -23,32 +22,32 @@ __global__ void NetKern(kernelArray<double> Vec,  kernelArray<std::pair<const in
     __syncthreads();
     const int idx = blockIdx.x * blockDim.x + threadIdx.x; // for each thread is one individual
     typedef std::pair<const int, const int>*  connectPairMatrix;
-    const int ind = params[10]; // number of individuals on device
-    const int weightsOffset = params[11] + idx + device_offset;
-    const int inputOffset = params[12] + idx + device_offset; // 6 is the offset to the start of the input neurons
-    const int hiddenOffset = params[13] + idx + device_offset;
-    const int memOffset = params[14] + idx + device_offset;
-    const int memGateInOffset = params[15] + idx + device_offset;
-    const int memGateOutOffset = params[16] + idx + device_offset;
-    const int memGateForgetOffset = params[17] + idx + device_offset;
-    const int outputOffset = params[18] + idx + device_offset;
-    const int fitnessOffset = params[19] + idx + device_offset;
-    const int communityMagOffset = params[20] +idx +device_offset;
-    const int whenOffset = params[21] + idx + device_offset;
-    const int howCertainOffset = params[22] + idx + device_offset;
+    const int ind = params.array[10]; // number of individuals on device
+    const int weightsOffset = params.array[11] + idx + device_offset;
+    const int inputOffset = params.array[12] + idx + device_offset; // 6 is the offset to the start of the input neurons
+    const int hiddenOffset = params.array[13] + idx + device_offset;
+    const int memOffset = params.array[14] + idx + device_offset;
+    const int memGateInOffset = params.array[15] + idx + device_offset;
+    const int memGateOutOffset = params.array[16] + idx + device_offset;
+    const int memGateForgetOffset = params.array[17] + idx + device_offset;
+    const int outputOffset = params.array[18] + idx + device_offset;
+    const int fitnessOffset = params.array[19] + idx + device_offset;
+    const int communityMagOffset = params.array[20] +idx +device_offset;
+    const int whenOffset = params.array[21] + idx + device_offset;
+    const int howCertainOffset = params.array[22] + idx + device_offset;
 
     //for connections --imagined offsets if we strided instead of interleaved
     const int connInputOffset = 0;
-    const int connHiddenOffset = params[3] + connInputOffset;
-    const int connMemOffset = params[4] + connHiddenOffset;
-    const int connMemInOffset = params[5] + connMemOffset;
-    const int connMemOutOffset = params[6] + connMemInOffset;
-    const int connMemForgetOffset = params[7] + connMemOutOffset;
-    const int connOutputOffset = params[8] + connMemForgetOffset;
+    const int connHiddenOffset = params.array[3] + connInputOffset;
+    const int connMemOffset = params.array[4] + connHiddenOffset;
+    const int connMemInOffset = params.array[5] + connMemOffset;
+    const int connMemOutOffset = params.array[6] + connMemInOffset;
+    const int connMemForgetOffset = params.array[7] + connMemOutOffset;
+    const int connOutputOffset = params.array[8] + connMemForgetOffset;
     //reset values from previous individual.
     Vec.array[fitnessOffset] =0;
     //community magnitude is not set, as this needs to be continued.
-    for(int i=0; i<params[23]; i++){
+    for(int i=0; i<params.array[23]; i++){
         Vec.array[whenOffset +i*ind] = 0;
         Vec.array[howCertainOffset +i*ind] =0;
     }
@@ -56,13 +55,13 @@ __global__ void NetKern(kernelArray<double> Vec,  kernelArray<std::pair<const in
     for(int i=0; i<trainingsize; i++){
         float CommunityLat = 0;
         float CommunityLon = 0;
-        for(int j=0; j<params[23]; j++){//sitesWeighted Lat/Lon values are determined based on all previous zsites mag output value.
+        for(int j=0; j<params.array[23]; j++){//sitesWeighted Lat/Lon values are determined based on all previous zsites mag output value.
             CommunityLat += siteData[j*2]*Vec.array[communityMagOffset+j*ind];
             CommunityLon += siteData[j*2+1]*Vec.array[communityMagOffset+j*ind];
         }
-        CommunityLat = CommunityLat/params[23];
-        CommunityLon = CommunityLon/params[23];
-        for(int j=0; j<params[23]; j++){ //each site is run independently of others, but shares an output from the previous step
+        CommunityLat = CommunityLat/params.array[23];
+        CommunityLon = CommunityLon/params.array[23];
+        for(int j=0; j<params.array[23]; j++){ //each site is run independently of others, but shares an output from the previous step
 
             float latSite = siteData[j*2];
             float lonSite = siteData[j*2+1];
@@ -86,21 +85,21 @@ __global__ void NetKern(kernelArray<double> Vec,  kernelArray<std::pair<const in
             Vec.array[inputOffset+7*ind] = shift(CommunityDist,40075.1, 0);
             Vec.array[inputOffset+8*ind] = shift(CommunityBearing, 360, 0);
             //lets reset all neuron values for this new timestep (except memory neurons)
-            for(int gate=0; gate<params[5]; gate++){
+            for(int gate=0; gate<params.array[5]; gate++){
                 Vec.array[memGateInOffset+gate*ind] = 0;
                 Vec.array[memGateOutOffset+gate*ind] = 0;
                 Vec.array[memGateForgetOffset+gate*ind] = 0;
             }
-            for(int hid=0; hid<params[4]; hid++){
+            for(int hid=0; hid<params.array[4]; hid++){
                 Vec.array[hiddenOffset+hid*ind] = 0;
             }
-            for(int out=0; out<params[9]; out++){
+            for(int out=0; out<params.array[9]; out++){
                 Vec.array[outputOffset+out*ind] = 0;
             }
 
             //now that everything that should be zeroed is zeroed, lets start the network.
             //mem gates & LSTM nodes --
-            for(int gate = 0; gate<params[5]; gate++){//calculate memory gate node values, you can connect inputs & hidden neurons to them.
+            for(int gate = 0; gate<params.array[5]; gate++){//calculate memory gate node values, you can connect inputs & hidden neurons to them.
                 for(int pair=0; pair<connections.size; pair++){//for memGateIn
                     if(shdConnect[pair].second == gate+connMemInOffset && shdConnect[pair].first < connHiddenOffset){ //for inputs
                         Vec.array[memGateInOffset+gate*ind] += Vec.array[inputOffset+shdConnect[pair].first*ind]*Vec.array[weightsOffset + (n++)*ind]; // memGateIn vect starts at 0
@@ -130,7 +129,7 @@ __global__ void NetKern(kernelArray<double> Vec,  kernelArray<std::pair<const in
                 Vec.array[memGateForgetOffset+gate*ind] = ActFunc(Vec.array[memGateForgetOffset+gate*ind]);
             }
             //since we calculated the values for memGateIn and memGateOut, and MemGateForget..
-            for (int gate = 0; gate<params[5]; gate++){ // if memGateIn is greater than 0.3, then let mem = the sum inputs attached to memGateIn
+            for (int gate = 0; gate<params.array[5]; gate++){ // if memGateIn is greater than 0.3, then let mem = the sum inputs attached to memGateIn
                 if(Vec.array[memGateInOffset+gate*ind] > 0.5){ //gate -memGateInOffset = [0, num of mem neurons]
                     for(int pair=0; pair<connections.size; pair++){
                         if(shdConnect[pair].second == gate+connMemInOffset && shdConnect[pair].first < gate+connHiddenOffset){//only pass inputs
@@ -152,7 +151,7 @@ __global__ void NetKern(kernelArray<double> Vec,  kernelArray<std::pair<const in
             }
 
             // hidden neuron nodes --
-            for(int hid=0; hid<params[4]; hid++){ // for all hidden neurons at layer 1, lets sum the inputs, the memory values were already added.
+            for(int hid=0; hid<params.array[4]; hid++){ // for all hidden neurons at layer 1, lets sum the inputs, the memory values were already added.
                 for(int pair=0; pair<connections.size; pair++){ // Add the inputs to the hidden neurons
                     if(shdConnect[pair].second == hid+connHiddenOffset && shdConnect[pair].first < connHiddenOffset && shdConnect[pair].first >= connInputOffset){ // if an input connects with this hidden neuron
                         Vec.array[hiddenOffset+hid*ind] += Vec.array[inputOffset+shdConnect[pair].first*ind]*Vec.array[weightsOffset + (n++)*ind];
@@ -168,7 +167,7 @@ __global__ void NetKern(kernelArray<double> Vec,  kernelArray<std::pair<const in
             }
             //output nodes --
 
-            for(int out =0; out<params[9]; out++){// add hidden neurons to the output nodes
+            for(int out =0; out<params.array[9]; out++){// add hidden neurons to the output nodes
                 for(int pair=0; pair<connections.size; pair++){
                     if(shdConnect[pair].second == out+connOutputOffset){
                         Vec.array[outputOffset+out*ind] += Vec.array[hiddenOffset+(shdConnect[pair].first-hiddenOffset)*ind]*Vec.array[weightsOffset + (n++)*ind];
@@ -183,17 +182,17 @@ __global__ void NetKern(kernelArray<double> Vec,  kernelArray<std::pair<const in
             Vec.array[communityMagOffset+j*ind] =  Vec.array[outputOffset+2*ind]; // set the next sets communityMag = output #3.
         }
     }
-    for(int j=0; j<params[23]; j++){ // now lets get the average when and howcertain values.
+    for(int j=0; j<params.array[23]; j++){ // now lets get the average when and howcertain values.
         Vec.array[whenOffset+j*ind] = Vec.array[whenOffset+j*ind]/trainingsize;
         Vec.array[howCertainOffset+j*ind] = Vec.array[howCertainOffset+j*ind]/trainingsize;
     }
     /*calculate performance for this individual - score = 1/(abs(whenGuess-whenReal)*distToQuake), for whenGuess = Vec.array[whenOffset+j] where HowCertain is max for set.
     distToQuake is from the current sites parameters, it emphasizes higher scores for the closest site, a smaller distance is a higher score. */
     float maxCertainty=0;
-    float whenGuess=0;
+    double whenGuess=0;
     float guessLat=0;
     float guessLon=0;
-    for(int j=0; j<params[23]; j++){
+    for(int j=0; j<params.array[23]; j++){
         if(Vec.array[howCertainOffset+j*ind] > maxCertainty){
             whenGuess = Vec.array[whenOffset+j*ind];
             guessLat = siteData[j*2];
@@ -202,6 +201,6 @@ __global__ void NetKern(kernelArray<double> Vec,  kernelArray<std::pair<const in
     }
     float ansLat = siteData[(int)answers[2]*2];
     float ansLon = siteData[(int)answers[2]*2+1];
-    float whenAns = answers[1];
+    double whenAns = answers[1];
     Vec.array[fitnessOffset] = scoreFunc(whenGuess, whenAns, hour, guessLat, guessLon, ansLat, ansLon);//larger is better, negative numbers are impossible.
 }

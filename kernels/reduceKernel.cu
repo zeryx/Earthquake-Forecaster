@@ -1,18 +1,15 @@
 #include <kernelDefs.h>
-//using
-extern __constant__ int params[];
-//endofusing
 
-__global__ void reduceFirstKern(kernelArray<double> Vec,kernelArray<double> per_block_sum,  size_t device_offset){
+__global__ void reduceFirstKern(kernelArray<double> weights,kernelArray<double> per_block_sum, kernelArray<int> params,  size_t device_offset){
     extern __shared__ float sumData[];
 
     unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    int ind = params[19] + idx + device_offset;
+    int ind = params.array[19] + idx + device_offset;
 
     // load input into __shared__ memory
     double x = 0;
 
-    x = Vec.array[ind];
+    x = weights.array[ind];
 
     sumData[threadIdx.x] = x;
     __syncthreads();
@@ -39,7 +36,7 @@ __global__ void reduceFirstKern(kernelArray<double> Vec,kernelArray<double> per_
     }
 }
 
-__global__ void reduceSecondKern(kernelArray<double> per_block_results, double *result){
+__global__ void reduceSecondKern(kernelArray<double> per_block_results, kernelArray<int> params, double *result){
     unsigned int idx = threadIdx.x+ blockIdx.x*blockDim.x;
     if(idx ==0){
         *result =0;
@@ -47,6 +44,6 @@ __global__ void reduceSecondKern(kernelArray<double> per_block_results, double *
             *result += per_block_results.array[i];
 
         }
-        *result = *result/params[10];
+        *result = *result/params.array[10];
     }
 }

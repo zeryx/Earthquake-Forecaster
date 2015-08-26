@@ -6,6 +6,5 @@
  __constant__ double siteData[15*2]{0};
  __constant__ double Kp;
  __constant__ int site_offset[15]{0};
- __constant__ int params[26];
  __constant__ int channel_offset[3];
  __constant__ int trainingsize;
