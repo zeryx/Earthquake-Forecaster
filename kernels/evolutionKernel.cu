@@ -2,7 +2,7 @@
 #include <thrust/random.h>
 
 
-__global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params, int *childOffset, uint32_t in, size_t device_offset){
+__global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params, int *childOffset, size_t in, size_t device_offset){
     const int idx = blockIdx.x * blockDim.x + threadIdx.x;
     const int ind = params.array[10];
     const int parentsIndex = *childOffset-1;

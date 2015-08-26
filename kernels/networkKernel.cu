@@ -45,7 +45,6 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kerne
     const int connMemForgetOffset = params.array[7] + connMemOutOffset;
     const int connOutputOffset = params.array[8] + connMemForgetOffset;
     //reset values from previous individual.
-    Vec.array[fitnessOffset] =0;
     //community magnitude is not set, as this needs to be continued.
     for(int i=0; i<params.array[23]; i++){
         Vec.array[whenOffset +i*ind] = 0;
@@ -102,26 +101,26 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kerne
             for(int gate = 0; gate<params.array[5]; gate++){//calculate memory gate node values, you can connect inputs & hidden neurons to them.
                 for(int pair=0; pair<connections.size; pair++){//for memGateIn
                     if(shdConnect[pair].second == gate+connMemInOffset && shdConnect[pair].first < connHiddenOffset){ //for inputs
-                        Vec.array[memGateInOffset+gate*ind] += Vec.array[inputOffset+shdConnect[pair].first*ind]*Vec.array[weightsOffset + (n++)*ind]; // memGateIn vect starts at 0
+                        Vec.array[memGateInOffset+gate*ind] += Vec.array[inputOffset+(shdConnect[pair].first)*ind]*Vec.array[weightsOffset + (n++)*ind]; // memGateIn vect starts at 0
                     }
                     else if(shdConnect[pair].second == gate+connMemInOffset && shdConnect[pair].first > connHiddenOffset && shdConnect[pair].first <connMemOffset){//for hidden neurons
-                        Vec.array[memGateInOffset+gate*ind] += Vec.array[hiddenOffset+shdConnect[pair].first*ind]*Vec.array[weightsOffset + (n++)*ind];
+                        Vec.array[memGateInOffset+gate*ind] += Vec.array[hiddenOffset+(shdConnect[pair].first)*ind]*Vec.array[weightsOffset + (n++)*ind];
                     }
                 }
                 for(int pair=0; pair<connections.size; pair++){//for memGateOut
                     if(shdConnect[pair].second == gate+connMemOutOffset && shdConnect[pair].first < connHiddenOffset){//for inputs
-                        Vec.array[memGateOutOffset+gate*ind] += Vec.array[inputOffset+shdConnect[pair].first*ind]*Vec.array[weightsOffset + (n++)*ind];
+                        Vec.array[memGateOutOffset+gate*ind] += Vec.array[inputOffset+(shdConnect[pair].first)*ind]*Vec.array[weightsOffset + (n++)*ind];
                     }
                     else if(shdConnect[pair].second == gate+connMemOutOffset && shdConnect[pair].first > connHiddenOffset && shdConnect[pair].first < connMemOffset){//for hidden neurons
-                        Vec.array[memGateOutOffset+gate*ind] += Vec.array[hiddenOffset+shdConnect[pair].first*ind]*Vec.array[weightsOffset + (n++)*ind];
+                        Vec.array[memGateOutOffset+gate*ind] += Vec.array[hiddenOffset+(shdConnect[pair].first)*ind]*Vec.array[weightsOffset + (n++)*ind];
                     }
                 }
                 for(int pair=0; pair<connections.size; pair++){//for  memGateForget
                     if(shdConnect[pair].second == gate+connMemForgetOffset && shdConnect[pair].first < connHiddenOffset){//for inputs
-                        Vec.array[memGateForgetOffset+gate*ind] += Vec.array[inputOffset+shdConnect[pair].first*ind]*Vec.array[weightsOffset + (n++)*ind];
+                        Vec.array[memGateForgetOffset+gate*ind] += Vec.array[inputOffset+(shdConnect[pair].first-inputOffset)*ind]*Vec.array[weightsOffset + (n++)*ind];
                     }
                     else if(shdConnect[pair].second == gate+connMemForgetOffset && shdConnect[pair].first >connHiddenOffset && shdConnect[pair].first <connMemOffset){//for hidden neurons
-                        Vec.array[memGateForgetOffset+gate*ind] += Vec.array[hiddenOffset+shdConnect[pair].first*ind]*Vec.array[weightsOffset + (n++)*ind];
+                        Vec.array[memGateForgetOffset+gate*ind] += Vec.array[hiddenOffset+(shdConnect[pair].first)*ind]*Vec.array[weightsOffset + (n++)*ind];
                     }
                 }
                 Vec.array[memGateInOffset+gate*ind] = ActFunc(Vec.array[memGateInOffset+gate*ind]);
@@ -133,7 +132,7 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kerne
                 if(Vec.array[memGateInOffset+gate*ind] > 0.5){ //gate -memGateInOffset = [0, num of mem neurons]
                     for(int pair=0; pair<connections.size; pair++){
                         if(shdConnect[pair].second == gate+connMemInOffset && shdConnect[pair].first < gate+connHiddenOffset){//only pass inputs
-                            Vec.array[memOffset+gate*ind] += Vec.array[inputOffset+shdConnect[pair].first*ind]; // no Vec attached, but the old value stored here is not removed.
+                            Vec.array[memOffset+gate*ind] += Vec.array[inputOffset+(shdConnect[pair].first)*ind]; // no Vec attached, but the old value stored here is not removed.
                         }
                     }
                 }
@@ -144,7 +143,7 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kerne
                 if(Vec.array[memGateOutOffset+gate*ind] > 0.5){//if memGateOut is greater than 0.3, let the nodes mem is connected to recieve mem
                     for(int pair=0; pair<connections.size; pair++){
                         if(shdConnect[pair].first == gate+connMemOffset){// since mem node: memIn node : memOut node = 1:1:1, we can do this.
-                            Vec.array[hiddenOffset+shdConnect[pair].second] += Vec.array[memOffset+gate*ind];
+                            Vec.array[hiddenOffset+(shdConnect[pair].second)*ind] += Vec.array[memOffset+gate*ind];
                         }
                     }
                 }
@@ -154,12 +153,12 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kerne
             for(int hid=0; hid<params.array[4]; hid++){ // for all hidden neurons at layer 1, lets sum the inputs, the memory values were already added.
                 for(int pair=0; pair<connections.size; pair++){ // Add the inputs to the hidden neurons
                     if(shdConnect[pair].second == hid+connHiddenOffset && shdConnect[pair].first < connHiddenOffset && shdConnect[pair].first >= connInputOffset){ // if an input connects with this hidden neuron
-                        Vec.array[hiddenOffset+hid*ind] += Vec.array[inputOffset+shdConnect[pair].first*ind]*Vec.array[weightsOffset + (n++)*ind];
+                        Vec.array[hiddenOffset+hid*ind] += Vec.array[inputOffset+(shdConnect[pair].first)*ind]*Vec.array[weightsOffset + (n++)*ind];
                     }
                 }
                 for(int pair=0; pair<connections.size; pair++){//add other hidden neuron inputs to each hidden neuron (if applicable)
                     if(shdConnect[pair].second == hid+connHiddenOffset && shdConnect[pair].first < connMemOffset && shdConnect[pair].first >= connHiddenOffset){
-                        Vec.array[hiddenOffset+hid*ind] += Vec.array[hiddenOffset+(shdConnect[pair].first-hiddenOffset)*ind]*Vec.array[weightsOffset + (n++)*ind];
+                        Vec.array[hiddenOffset+hid*ind] += Vec.array[hiddenOffset+(shdConnect[pair].first)*ind]*Vec.array[weightsOffset + (n++)*ind];
                     }
                 }
                 Vec.array[hiddenOffset+hid*ind] += 1*Vec.array[weightsOffset + (n++)*ind]; // add bias
@@ -170,7 +169,7 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kerne
             for(int out =0; out<params.array[9]; out++){// add hidden neurons to the output nodes
                 for(int pair=0; pair<connections.size; pair++){
                     if(shdConnect[pair].second == out+connOutputOffset){
-                        Vec.array[outputOffset+out*ind] += Vec.array[hiddenOffset+(shdConnect[pair].first-hiddenOffset)*ind]*Vec.array[weightsOffset + (n++)*ind];
+                        Vec.array[outputOffset+out*ind] += Vec.array[hiddenOffset+(shdConnect[pair].first)*ind]*Vec.array[weightsOffset + (n++)*ind];
                     }
                 }
                 Vec.array[outputOffset+out*ind] += 1*Vec.array[weightsOffset + (n++)*ind]; // add bias
@@ -189,18 +188,19 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kerne
     /*calculate performance for this individual - score = 1/(abs(whenGuess-whenReal)*distToQuake), for whenGuess = Vec.array[whenOffset+j] where HowCertain is max for set.
     distToQuake is from the current sites parameters, it emphasizes higher scores for the closest site, a smaller distance is a higher score. */
     float maxCertainty=0;
-    double whenGuess=0;
+    float whenGuess=0;
     float guessLat=0;
     float guessLon=0;
     for(int j=0; j<params.array[23]; j++){
         if(Vec.array[howCertainOffset+j*ind] > maxCertainty){
+            maxCertainty = Vec.array[howCertainOffset+j*ind];
             whenGuess = Vec.array[whenOffset+j*ind];
             guessLat = siteData[j*2];
             guessLon = siteData[j*2+1];
         }
     }
-    float ansLat = siteData[(int)answers[2]*2];
-    float ansLon = siteData[(int)answers[2]*2+1];
-    double whenAns = answers[1];
+    float ansLat = siteData[(int)answers[0]*2];
+    float ansLon = siteData[(int)answers[0]*2+1];
+    float whenAns = answers[1];
     Vec.array[fitnessOffset] = scoreFunc(whenGuess, whenAns, hour, guessLat, guessLon, ansLat, ansLon);//larger is better, negative numbers are impossible.
 }

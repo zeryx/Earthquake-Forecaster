@@ -24,7 +24,7 @@ __host__ __device__ float shift(float x, float max, float min);
 
 __host__ __device__ float ActFunc(float x);
 
-__host__ __device__ double scoreFunc(double whenGuess, double whenAns, int hour, float latGuess, float lonGuess, float latAns, float lonAns);
+__host__ __device__ float scoreFunc(float whenGuess, float whenAns, int hour, float latGuess, float lonGuess, float latAns, float lonAns);
 
 
 
@@ -32,7 +32,7 @@ __host__ __device__ double scoreFunc(double whenGuess, double whenAns, int hour,
 
 
 //main kernels
-__global__ void genWeightsKern( kernelArray<double> ref, uint32_t in, kernelArray<int> params, size_t offset);
+__global__ void genWeightsKern( kernelArray<double> ref, size_t in, kernelArray<int> params, size_t offset);
 
 __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kernelArray<std::pair<const int, const int> > connections,
                         int hour, kernelArray<double> meanCh, kernelArray<double> stdCh, size_t device_offset);
@@ -45,11 +45,9 @@ __global__ void reduceSecondKern(kernelArray<double> per_block_results, kernelAr
 
 __global__ void normalizeKern(kernelArray<double> Vec, kernelArray<int> params, double *avgFitness, size_t device_offset);
 
-__global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params, int *childOffset, uint32_t in, size_t device_offset);
+__global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params, int *childOffset, size_t in, size_t device_offset);
 
-__global__ void bitonicBuildKern(kernelArray<double> Vec, kernelArray<int> params, int j, int k, size_t device_offset);
+__global__ void bitonicSortKern(kernelArray<double> Vec, kernelArray<int> params, int j, int k, size_t device_offset);
 
-__global__ void bitonicSortKern(kernelArray<double> Vec, kernelArray<int> params, int k, size_t device_offset);
-
-__global__ void findChildrenKern(kernelArray<double>vect, kernelArray<int> params, int *childOffset, double *avgFitness, size_t device_offset);
+__global__ void cutoffKern(kernelArray<double>vect, kernelArray<int> params, int *childOffset, double *avgFitness, size_t device_offset);
 #endif

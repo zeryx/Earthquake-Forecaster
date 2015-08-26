@@ -1,6 +1,6 @@
 #include <kernelDefs.h>
 
-__global__ void bitonicBuildKern(kernelArray<double> vec, kernelArray<int> params, int j, int k, size_t device_offset){
+__global__ void bitonicSortKern(kernelArray<double> vec, kernelArray<int> params, int j, int k, size_t device_offset){
     const int idx = threadIdx.x + blockDim.x * blockIdx.x;
     const int first=idx;
     const int second = first^j;
@@ -40,22 +40,3 @@ __global__ void bitonicBuildKern(kernelArray<double> vec, kernelArray<int> param
     }
 }
 
-
-__global__ void bitonicSortKern(kernelArray<double> vec, kernelArray<int> params, int k, size_t device_offset){
-    const int idx = threadIdx.x + blockDim.x * blockIdx.x;
-    const int first=idx;
-    const int second = first^k;
-    const int fitnessOffset = params.array[19] + device_offset;
-    const int wtOffset = params.array[11] + device_offset;
-    const int ind = params.array[10];
-    if(second>first){
-        double temp = vec.array[first+fitnessOffset];
-        vec.array[first+fitnessOffset] = vec.array[second+fitnessOffset];
-        vec.array[second+fitnessOffset] = temp;
-        for(int n=0; n<params.array[1]; n++){
-            double temp_wt = vec.array[wtOffset + first + n*ind];
-            vec.array[wtOffset+first+n*ind] = vec.array[wtOffset+second+n*ind];
-            vec.array[wtOffset+second+n*ind] = temp_wt;
-        }
-    }
-}

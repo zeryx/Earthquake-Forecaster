@@ -1,6 +1,7 @@
 ﻿#include <network.h>
 #include <kernelDefs.h>
 #include <getsys.h>
+#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <ostream>
@@ -14,7 +15,7 @@ NetworkGenetic::NetworkGenetic(const int &numInputNodes, const int &numHiddenNeu
                                const int &numOutNeurons, const int &numWeights, std::vector< std::pair<int, int> >&connections){
 
     _hostParams.array = new int[26];
-    _hostParams.size=23;
+    _hostParams.size=26;
     _hostParams.array[0] = numInputNodes + numHiddenNeurons + numMemoryNeurons*4 + numOutNeurons;
     _hostParams.array[1] = numWeights;
     //    _hostParams.array[2] = _hostParams.array[0] + _hostParams.array[1] + 1 + 3*_hostParams.array[23]; //1*numOfSites for community mag, 1*numOfSites for When, 1*numOfSites for HowCertain,  1 for fitness
@@ -40,7 +41,6 @@ NetworkGenetic::NetworkGenetic(const int &numInputNodes, const int &numHiddenNeu
     //    _hostParams.array[22] = howCertain offset
     //    _hostParams.array[23] = number of sites
     //    _hostParams.array[24] = sample rate
-    _hostParams.array[25] = 1.1 ;// normalized cutoff value, ie 1 = 50% percentile
 
     _connect = &connections;
 }
@@ -70,6 +70,7 @@ void NetworkGenetic::generateWeights(){
         global_offset += _streamSize;
         device_offset += _streamSize;
     }
+
 }
 
 
@@ -273,7 +274,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         kernelArray<std::pair<const int, const int> > dConnect;
         int regBlockSize = 512;
         int regGridSize = (_hostParams.array[10])/regBlockSize;
-        int evoGridsize[_numOfStreams];
+        volatile int evoGridsize[_numOfStreams];
         retVec.size = 2160*_hostParams.array[23];
         dConnect.size = _connect->size();
         partial_reduce_sums.size = (regGridSize);
@@ -317,25 +318,24 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
 
             NetKern<<<regGridSize, regBlockSize, _connect->size()*sizeof(std::pair<const int, const int>), _stream[n]>>>(device_genetics,_deviceParams,  dConnect, hour, dmeanCh, dstdCh, device_offset);
 
-
             reduceFirstKern<<<regGridSize, regBlockSize, regBlockSize*sizeof(double), _stream[n]>>>(device_genetics, partial_reduce_sums, _deviceParams, device_offset);
 
             reduceSecondKern<<<1, 1, 0, _stream[n]>>>(partial_reduce_sums, _deviceParams, &dfitnessAvg[n]);
 
             for(int k=2; k<= _hostParams.array[10]; k<<= 1){
                 for(int j =k>>1; j>0; j=j>>1){
-                    bitonicBuildKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, j, k, device_offset);
+                    bitonicSortKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, j, k, device_offset);
                 }
-            }
-            for(int k=_hostParams.array[10]/2;  k<= 1; k=k>>1){
-                bitonicSortKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, k, device_offset);
             }
 
             normalizeKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dfitnessAvg[n], device_offset);
 
-            findChildrenKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams,  &dchildOffset[n], &dfitnessAvg[n], device_offset);
+
+            cutoffKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams,  &dchildOffset[n], &dfitnessAvg[n], device_offset);
+
 
             CUDA_SAFE_CALL(cudaMemcpyAsync(&hchildOffset[n], &dchildOffset[n], sizeof(int), cudaMemcpyDeviceToHost, _stream[n]));
+
 
             evoGridsize[n] = (_hostParams.array[10]-hchildOffset[n])/regBlockSize;
 
@@ -348,6 +348,11 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
             device_offset += _streamSize;
         }
         CUDA_SAFE_CALL(cudaDeviceSynchronize());
+
+        std::cerr.precision(25);
+        for(int i=0; i<hchildOffset[0]-1; i++){
+            std::cerr<<host_genetics.array[_hostParams.array[19]+i]<<std::endl;
+        }
         for(int j=0; j<_numOfStreams; j++){
             std::cerr<<"for stream #: "<<j<<std::endl;
             std::cerr<<"average fitness is: "<<hfitnessAvg[j]<<std::endl;
@@ -358,11 +363,6 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
                 ctr++;
         }
         std::cerr<<"percentage %: "<<((double)ctr/(double)_hostParams.array[10])*100<<std::endl;
-
-        std::cerr.precision(25);
-        for(int i=0; i<20; i++){
-            std::cerr<<host_genetics.array[_hostParams.array[19]+i]<<std::endl;
-        }
         CUDA_SAFE_CALL(cudaFree(dConnect.array));
         CUDA_SAFE_CALL(cudaFree(retVec.array));
         CUDA_SAFE_CALL(cudaFree(partial_reduce_sums.array));

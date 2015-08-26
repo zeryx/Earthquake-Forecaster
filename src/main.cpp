@@ -1,8 +1,10 @@
 #include <network.h>
 #include <getsys.h>
+#include <connections.h>
 #include <iostream>
 #include <vector>
-#include <thrust/pair.h>
+#include <connections.h>
+#include <map>
 
 using std::make_pair;
 int main(int argc, char** arg){
@@ -14,6 +16,13 @@ int main(int argc, char** arg){
     int MemGateForget = 3;
     int outputs = 3;
     int numWeights;
+    std::multimap<connection, connection> test;
+    connection testing(make_pair("input", 0));
+    connection outputtesting(make_pair("output", 0));
+    test.insert(make_pair(testing, outputtesting));
+    std::cerr<<"first: ";
+    std::cerr<<test.find((make_pair("input", 0)))->second.second<<std::endl;
+
     std::vector< std::pair<int, int> >connections; //each vector starts at 0, and then is < than the num of each val
     connections.push_back(make_pair(0, inputs+0));
     connections.push_back(make_pair(0, inputs+hidden+memory+0)); // connect input 1 to memorygateIn 1
