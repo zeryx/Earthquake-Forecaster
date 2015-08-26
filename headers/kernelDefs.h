@@ -2,9 +2,10 @@
 #define KERNELDEFS_H
 #include <cuda_runtime.h>
 #include "dataarray.h"
+#include <connections.h>
 #include <utility>
 #include <thrust/pair.h>
-extern __constant__ int input[];
+extern __constant__ int inputData[];
 extern __constant__ double answers[];
 extern __constant__ double globalQuakes[];
 extern __constant__ double siteData[];
@@ -34,7 +35,7 @@ __host__ __device__ float scoreFunc(float whenGuess, float whenAns, int hour, fl
 //main kernels
 __global__ void genWeightsKern( kernelArray<double> ref, size_t in, kernelArray<int> params, size_t offset);
 
-__global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kernelArray<std::pair<const int, const int> > connections,
+__global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kernelArray<std::pair<con, con> > connections,
                         int hour, kernelArray<double> meanCh, kernelArray<double> stdCh, size_t device_offset);
 
 __global__ void reduceFirstKern(kernelArray<double> Vec,

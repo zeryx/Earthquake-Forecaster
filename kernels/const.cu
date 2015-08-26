@@ -1,6 +1,6 @@
 #include <kernelDefs.h>
 
- __constant__ int input[15*3*100]{0};
+ __constant__ int inputData[15*3*100]{0};
  __constant__ double answers[7];
  __constant__ double globalQuakes[5];
  __constant__ double siteData[15*2]{0};

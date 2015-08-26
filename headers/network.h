@@ -1,6 +1,7 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 #include <dataarray.h>
+#include <connections.h>
 #include <vector>
 #include <string>
 #include <map>
@@ -12,8 +13,8 @@
 
 class  NetworkGenetic{
 public:
-    NetworkGenetic(const int &numInNeurons, const int &numHiddenNeurons, const int &numMemoryNeurons,
-                   const int &numOutNeurons, const int &numWeights,  std::vector< std::pair<int, int> >&connections);
+    NetworkGenetic(const int &numInNeurons, const int &numHiddenNeurons, const int &numMemoryNeurons, const int &numMemoryIn, const int &numMemoryOut, const int &numMemoryForget,
+                   const int &numOutNeurons, const int &numWeights,  std::vector< std::pair<con, con> >&connections);
     void errorFunc();
     void generateWeights(); //initializes _data array and fills with random numbers
         void setParams();
@@ -29,7 +30,7 @@ public:
 private:
     kernelArray<double> device_genetics;
     kernelArray<double> host_genetics;
-    std::vector<std::pair<int, int> > *_connect;
+    std::vector<std::pair<con, con> > *_connect;
     std::vector<double> *_siteData;
     std::vector<double> _answers;
     std::vector<double> _best;

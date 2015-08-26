@@ -11,20 +11,21 @@
 #include <assert.h>
 
 
-NetworkGenetic::NetworkGenetic(const int &numInputNodes, const int &numHiddenNeurons, const int &numMemoryNeurons,
-                               const int &numOutNeurons, const int &numWeights, std::vector< std::pair<int, int> >&connections){
+NetworkGenetic::NetworkGenetic(const int &numInNeurons, const int &numHiddenNeurons, const int &numMemoryNeurons, const int &numMemoryIn,
+                               const int &numMemoryOut, const int &numMemoryForget,
+                               const int &numOutNeurons, const int &numWeights,  std::vector< std::pair<con, con> >&connections){
 
     _hostParams.array = new int[26];
     _hostParams.size=26;
-    _hostParams.array[0] = numInputNodes + numHiddenNeurons + numMemoryNeurons*4 + numOutNeurons;
+    _hostParams.array[0] = numInNeurons + numHiddenNeurons + numMemoryNeurons + numMemoryIn + numMemoryOut + numMemoryForget + numOutNeurons;
     _hostParams.array[1] = numWeights;
     //    _hostParams.array[2] = _hostParams.array[0] + _hostParams.array[1] + 1 + 3*_hostParams.array[23]; //1*numOfSites for community mag, 1*numOfSites for When, 1*numOfSites for HowCertain,  1 for fitness
-    _hostParams.array[3] = numInputNodes;
+    _hostParams.array[3] = numInNeurons;
     _hostParams.array[4] = numHiddenNeurons;
     _hostParams.array[5] =numMemoryNeurons;            //memory neurons per individual
-    _hostParams.array[6] =numMemoryNeurons;            //memoryIn neurons per individual
-    _hostParams.array[7] =numMemoryNeurons;            //memoryOut neurons per individual
-    _hostParams.array[8] = numMemoryNeurons;       //memoryForget neurons per individual
+    _hostParams.array[6] =numMemoryIn;            //memoryIn neurons per individual
+    _hostParams.array[7] =numMemoryOut;            //memoryOut neurons per individual
+    _hostParams.array[8] = numMemoryForget;       //memoryForget neurons per individual
     _hostParams.array[9] =numOutNeurons;           //output neurons per individual
     //    _hostParams.array[10] = number of individuals in stream
     //    _hostParams.array[11] = weights offset
@@ -238,7 +239,7 @@ void NetworkGenetic::reformatTraining(std::vector<int>* old_input, std::vector<d
     CUDA_SAFE_CALL(cudaMemcpyToSymbol(siteData, sitedata->data(), sitedata->size()*sizeof(double), 0, cudaMemcpyHostToDevice));
     CUDA_SAFE_CALL(cudaMemcpyToSymbol(globalQuakes,globalquakes->data(), globalquakes->size()*sizeof(double), 0, cudaMemcpyHostToDevice));
     CUDA_SAFE_CALL(cudaMemcpyToSymbol(Kp, &kp, sizeof(double), 0, cudaMemcpyHostToDevice));
-    CUDA_SAFE_CALL(cudaMemcpyToSymbol(input, new_input, trainingSize*_hostParams.array[23]*3*sizeof(int), 0,  cudaMemcpyHostToDevice));
+    CUDA_SAFE_CALL(cudaMemcpyToSymbol(inputData, new_input, trainingSize*_hostParams.array[23]*3*sizeof(int), 0,  cudaMemcpyHostToDevice));
     CUDA_SAFE_CALL(cudaMemcpyToSymbol(trainingsize, &trainingSize, sizeof(int), 0, cudaMemcpyHostToDevice));
     CUDA_SAFE_CALL(cudaMemcpyToSymbol(site_offset, siteOffset, _hostParams.array[23]*sizeof(int), 0, cudaMemcpyHostToDevice));
     CUDA_SAFE_CALL(cudaMemcpyToSymbol(channel_offset, chanOffset, 3*sizeof(int), 0, cudaMemcpyHostToDevice));
@@ -271,7 +272,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
             exit(1);
         }
         kernelArray<double>retVec, partial_reduce_sums, dmeanCh, dstdCh;
-        kernelArray<std::pair<const int, const int> > dConnect;
+        kernelArray<std::pair<con, con> > dConnect;
         int regBlockSize = 512;
         int regGridSize = (_hostParams.array[10])/regBlockSize;
         volatile int evoGridsize[_numOfStreams];
@@ -285,11 +286,11 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         CUDA_SAFE_CALL(cudaMalloc((void**)&dchildOffset, _numOfStreams*sizeof(int)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&dfitnessAvg, _numOfStreams*sizeof(double)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&retVec.array, ret->size()*sizeof(double)));
-        CUDA_SAFE_CALL(cudaMalloc((void**)&dConnect.array, _connect->size()*sizeof(std::pair<int, int>)));
+        CUDA_SAFE_CALL(cudaMalloc((void**)&dConnect.array, _connect->size()*sizeof(std::pair<con, con>)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&partial_reduce_sums.array, partial_reduce_sums.size*sizeof(double)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&dmeanCh.array, 3*sizeof(double)));
         CUDA_SAFE_CALL(cudaMalloc((void**)&dstdCh.array, 3*sizeof(double)));
-        CUDA_SAFE_CALL(cudaMemcpy(dConnect.array, _connect->data(), _connect->size()*sizeof(std::pair<int, int>), cudaMemcpyHostToDevice));
+        CUDA_SAFE_CALL(cudaMemcpy(dConnect.array, _connect->data(), _connect->size()*sizeof(std::pair<con, con>), cudaMemcpyHostToDevice));
         CUDA_SAFE_CALL(cudaMemcpy(dmeanCh.array, meanCh, 3*sizeof(double), cudaMemcpyHostToDevice));
         CUDA_SAFE_CALL(cudaMemcpy(dstdCh.array, stdCh, 3*sizeof(double), cudaMemcpyHostToDevice));
         CUDA_SAFE_CALL(cudaMemset(retVec.array, 0, retVec.size*sizeof(double)));
@@ -316,7 +317,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
             std::cerr<<"stream number: "<<n<<std::endl;
             CUDA_SAFE_CALL(cudaMemcpyAsync(&device_genetics.array[device_offset], &host_genetics.array[host_offset], _streambytes, cudaMemcpyHostToDevice, _stream[n]));
 
-            NetKern<<<regGridSize, regBlockSize, _connect->size()*sizeof(std::pair<const int, const int>), _stream[n]>>>(device_genetics,_deviceParams,  dConnect, hour, dmeanCh, dstdCh, device_offset);
+            NetKern<<<regGridSize, regBlockSize, _connect->size()*sizeof(std::pair<con, con>), _stream[n]>>>(device_genetics,_deviceParams,  dConnect, hour, dmeanCh, dstdCh, device_offset);
 
             reduceFirstKern<<<regGridSize, regBlockSize, regBlockSize*sizeof(double), _stream[n]>>>(device_genetics, partial_reduce_sums, _deviceParams, device_offset);
 
@@ -376,13 +377,13 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
     }
     else{
         std::cerr<<"entered not training version.."<<std::endl;
-        typedef std::vector<std::pair<int, int> > connectPairMatrix;
+        typedef std::vector<std::pair<con, con> > connectPairMatrix;
         //replace this later
-        _best.resize(_hostParams.array[1]);
-        for(std::vector<double>::iterator it = _best.begin(); it != _best.end(); ++it){
-            std::srand(std::time(NULL)+*it);
-            *it = (double)(std::rand())/(RAND_MAX);
-        }
+        //        _best.resize(_hostParams.array[1]);
+        //        for(std::vector<double>::iterator it = _best.begin(); it != _best.end(); ++it){
+        //            std::srand(std::time(NULL)+*it);
+        //            *it = (double)(std::rand())/(RAND_MAX);
+        //        }
         std::cerr<<"example best vector has been set."<<std::endl;
         double CommunityLat = 0;
         double CommunityLon = 0;
@@ -420,13 +421,6 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
                 outputs.resize(_hostParams.array[12], 0); /* 3 outputs, 1 with an hour in the future when the earthquake will hit,
                     1 with the porbability of that earthquake happening (between [0,1]) and 1 with the sites magnitude (for community feedback) */
                 int n =0;
-                int startOfInput = 0;
-                int startOfHidden = startOfInput +_hostParams.array[2];
-                int startOfMem = startOfHidden + _hostParams.array[10];
-                int startOfMemGateIn = startOfMem + _hostParams.array[11];
-                int startOfMemGateOut = startOfMemGateIn + _hostParams.array[11];
-                int startOfMemGateForget = startOfMemGateOut + _hostParams.array[11];
-                int startOfOutput = startOfMemGateForget + _hostParams.array[11];
                 for(int k=0; k<3; k++){
                     input[k] = normalize((double)(data->at(3600*_hostParams.array[24]*j*3 + k*(3600*_hostParams.array[24])+step)), meanCh[k], stdCh[k]);
 
@@ -451,68 +445,76 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
                 }
                 //now that everything that should be zeroed is zeroed, lets start the network.
                 //mem gates & LSTM nodes --
-                for(int gate = 0; gate<_hostParams.array[11]; gate++){//calculate memory gate node values, you can connect inputs & hidden neurons to them.
-                    for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){//for memGateIn
-                        if(it->second == gate+startOfMemGateIn && it->first < startOfHidden){ //for inputs
-                            memGateIn.at(gate) += input[it->first-startOfInput]*_best[n++]; // memGateIn vect starts at 0
+                for(int gate = 0; gate<_hostParams.array[15]; gate++){//calculate memory gate node values, you can connect inputs & hidden neurons to them.
+                    for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){//for memgates
+                        //memGateIn
+                        if(it->second.first == typeMemGateIn &&it->second.second == gate && it->first.first == typeInput){ //for inputs
+                            memGateIn.at(gate) += input[it->first.second]*_best[n++]; // memGateIn vect starts at 0
                         }
-                        else if(it->second == gate+startOfMemGateIn && it->first >startOfHidden && it->first < startOfMem){//for hidden neurons
-                            memGateIn.at(gate) += hidden[it->first-startOfHidden]*_best[n++];
+                        else if(it->second.first == typeMemGateIn && it->second.second == gate && it->first.first == typeHidden){//for hidden neurons
+                            memGateIn.at(gate) += hidden[it->first.second]*_best[n++];
                         }
-                    }
-                    for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){//for memGateOut
-                        if(it->second == gate+startOfMemGateOut && it->first < startOfHidden){//for inputs
-                            memGateOut.at(gate) += input[it->first-startOfInput]*_best[n++];
+                        //memGateOut
+                        else if(it->second.first == typeMemGateOut && it->second.second == gate && it->first.first == typeInput){//for inputs
+                            memGateOut.at(gate) += input[it->first.second]*_best[n++];
                         }
-                        else if(it->second == gate+startOfMemGateOut && it->first >startOfHidden && it->first <startOfMem){//for hidden neurons
-                            memGateOut.at(gate) += hidden[it->first-startOfHidden]*_best[n++];
+                        else if(it->second.first == typeMemGateOut && it->second.second == gate && it->first.first == typeHidden){//for hidden neurons
+                            memGateOut.at(gate) += hidden[it->first.second]*_best[n++];
                         }
-                    }
-                    for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){//for  memGateForget
-                        if(it->second == gate+startOfMemGateForget && it->first < startOfHidden){//for inputs
-                            memGateForget.at(gate) += input[it->first - startOfInput]*_best[n++];
+                        //memGateForget
+                        if(it->second.first == typeMemGateForget && it->second.second == gate && it->first.first == typeInput){//for inputs
+                            memGateForget.at(gate) += input[it->first.second]*_best[n++];
                         }
-                        else if(it->second == gate+startOfMemGateForget && it->first >startOfHidden && it->first <startOfMem){//for hidden neurons
-                            memGateForget.at(gate) += hidden[it->first-startOfHidden]*_best[n++];
+                        else if(it->second.first == typeMemGateForget && it->second.second == gate && it->first.first == typeHidden){//for hidden neurons
+                            memGateForget.at(gate) += hidden[it->first.second]*_best[n++];
                         }
                     }
                     memGateIn.at(gate) = ActFunc(memGateIn.at(gate));
                     memGateOut.at(gate) = ActFunc(memGateOut.at(gate));
                     memGateForget.at(gate) = ActFunc(memGateForget.at(gate));
-
                 }
                 //since we calculated the values for memGateIn and memGateOut, and MemGateForget..
-                for (int gate = 0; gate<_hostParams.array[11]; gate++){ // if memGateIn is greater than 0.3, then let mem = the sum inputs attached to memGateIn
-                    if(memGateIn.at(gate) > 0.5){ //gate -startOfMemGateIn = [0, num of mem neurons]
+                for (int gate = 0; gate<_hostParams.array[15]; gate++){ // if memGateIn is greater than 0.3, then let mem = the sum inputs attached to memGateIn
+                    if(memGateIn[gate] > 0.5){ //gate -startOfMemGateIn = [0, num of mem neurons]
                         for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){
-                            if(it->second == gate+startOfMemGateIn && it->first < gate+startOfHidden){//only pass inputs
-                                mem.at(gate) += input[it->first-startOfInput]; // no weights attached, but the old value stored here is not removed.
+                            if(it->second.first == typeMemGateIn && it->second.second == gate && it->first.first == typeInput){//only pass inputs
+                                mem[gate] += input[it->first.second]; // no weights attached, but the old value stored here is not removed.
                             }
                         }
                     }
-                    if(memGateForget.at(gate) > 0.5){// if memGateForget is greater than 0.5, then tell mem to forget
-                        mem.at(gate) = 0;
+                }
+                for (int gate = 0; gate<_hostParams.array[16]; gate++){
+                    if(memGateForget[gate] > 0.5){// if memGateForget is greater than 0.5, then tell mem to forget
+                        for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){
+                            if(it->first.first == typeMemGateForget && it->first.second == gate && it->second.first == typeMemory){//any memory neuron that this memGateForget neuron connects to, is erased.
+                                mem[it->second.second] = 0;
+                            }
+                        }
                     }
-                    //if memGateForget fires, then memGateOut will output nothing.
+                }
+                for (int gate = 0; gate<_hostParams.array[17]; gate++){
                     if(memGateOut.at(gate) > 0.5){//if memGateOut is greater than 0.3, let the nodes mem is connected to recieve mem
                         for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){
-                            if(it->first == gate+startOfMem){// since mem node: memIn node : memOut node = 1:1:1, we can do this.
-                                hidden[it->second-startOfHidden] += mem.at(gate);
+                            if(it->first.first == typeMemory && it->first.second == gate && it->second.first == typeHidden){ //for hidden
+                                hidden[it->second.second] += mem[gate];
+                            }
+                            else if(it->first.first == typeMemory && it->first.second == gate && it->second.first == typeOutput){//for outputs
+                                outputs[it->second.second] += mem[gate];
                             }
                         }
                     }
                 }
 
                 // hidden neuron nodes --
-                for(int hid=0; hid<_hostParams.array[10]; hid++){ // for all hidden neurons at layer 1, lets sum the inputs, the memory values were already added.
+                for(int hid=0; hid<_hostParams.array[13]; hid++){ // for all hidden neurons at layer 1, lets sum the inputs, the memory values were already added.
                     for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){ // Add the inputs to the hidden neurons
-                        if(it->second == hid+startOfHidden && it->first < startOfHidden){ // if an input connects with this hidden neuron
-                            hidden[hid] += input[it->first]*_best[n++];
+                        if(it->second.first == typeHidden && it->second.second == hid && it->first.first == typeInput){ // if an input connects with this hidden neuron
+                            hidden[hid] += input[it->first.second]*_best[n++];
                         }
                     }
                     for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){//add other hidden neuron inputs to each hidden neuron (if applicable)
-                        if(it->second == hid+startOfHidden && it->first < startOfMem && it->first > startOfHidden){
-                            hidden[hid] += hidden[it->first-startOfHidden]*_best[n++];
+                        if(it->second.first == typeHidden && it->second.second == hid && it->first.first == typeHidden){
+                            hidden[hid] += hidden[it->first.second]*_best[n++];
                         }
                     }
                     hidden[hid] += 1*_best[n++]; // add bias
@@ -520,10 +522,10 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
                 }
                 //output nodes --
 
-                for(int out =0; out<_hostParams.array[12]; out++){// add hidden neurons to the output nodes
+                for(int out =0; out<_hostParams.array[14]; out++){// add hidden neurons to the output nodes
                     for(connectPairMatrix::iterator it = _connect->begin(); it!= _connect->end(); ++it){
-                        if(it->second == out+startOfOutput){
-                            outputs[out] += hidden[it->first-startOfHidden]*_best[n++];
+                        if(it->second.first == typeOutput && it->second.second == out && it->first.first == typeHidden){
+                            outputs[out] += hidden[it->first.second]*_best[n++];
                         }
                     }
                     outputs[out] += 1*_best[n++]; // add bias
@@ -536,18 +538,21 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
                 CommunityMag[j] =  outputs[2]; // set the next sets communityMag = output #3.
             }
         }
-        for(int j=0; j<_hostParams.array[23]; j++){ // each site has its own when and howcertain vector
-            When[j] = When[j]/3600*_hostParams.array[24];
-            HowCertain[j] = HowCertain[j]/3600*_hostParams.array[24];
-            std::cerr<<"When for site:"<<j<<" is: "<<When[j]<<std::endl;
-        }
-        //all done, lets output the return matrix.
-        //since right now were using a point value for when & how certain (only one output per site),
-        //we're going to approximate using a normal distribution around when with a sigma of howCertain, over the whole array from T=currentHour [T, 2160]
-        for(int h=hour; h<2160; h++){
-            for(int j=0; j<_hostParams.array[23]; j++){
-                ret->at(h*_hostParams.array[23]+j)= 1/(1/HowCertain[j]*sqrt(2*M_PI))*exp(-pow(h-When[j], 2)/(2*pow(1/HowCertain[j], 2))); // normal distribution with a mu of When and a sigma of 1/HowCertain
+        float maxCertainty=0;
+        float whenGuess=0;
+        float guessLat=0;
+        float guessLon=0;
+        for(int j=0; j<_hostParams.array[23]; j++){
+            if(HowCertain[j] > maxCertainty){
+                maxCertainty = HowCertain[j];
+                whenGuess = When[j];
+                guessLat = _siteData->at(j*2);
+                guessLon = _siteData->at(j*2+1);
             }
         }
+        float ansLat = _siteData->at((int)_answers[0]*2);
+        float ansLon = _siteData->at((int)_answers[0]*2+1);
+        float whenAns = _answers[1];
+        ret->at(0) = scoreFunc(whenGuess, whenAns, hour, guessLat, guessLon, ansLat, ansLon);//larger is better, negative numbers are impossible.
     }
 }

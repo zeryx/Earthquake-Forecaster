@@ -8,85 +8,92 @@
 
 using std::make_pair;
 int main(int argc, char** arg){
-    int inputs = 9;
-    int hidden = 3;
-    int memory = 3; //LSTM neurons
-    int memGateIn = 3;
-    int MemGateOut = 3;
-    int MemGateForget = 3;
-    int outputs = 3;
+    int numinput = 9;
+    int numHidden = 3;
+    int numMemory = 3; //LSTM neurons
+    int numMemGateIn = 3;
+    int numMemGateOut = 3;
+    int numMemGateForget = 3;
+    int numOutputs = 3;
     int numWeights;
-    std::multimap<connection, connection> test;
-    connection testing(make_pair("input", 0));
-    connection outputtesting(make_pair("output", 0));
-    test.insert(make_pair(testing, outputtesting));
-    std::cerr<<"first: ";
-    std::cerr<<test.find((make_pair("input", 0)))->second.second<<std::endl;
+    std::vector<std::pair<con, con> >connections;
+    //beginning of 3 channel data inputs
+    connections.push_back(make_pair(make_pair(typeInput, 0), make_pair(typeHidden, 0)));
+    connections.push_back(make_pair(make_pair(typeInput, 0), make_pair(typeMemGateIn, 0))); // connect input 0 to memorygateIn 0
+    connections.push_back(make_pair(make_pair(typeInput, 0), make_pair(typeMemGateOut, 0))); // connect input 10 to memory gateoutput 0
+    connections.push_back(make_pair(make_pair(typeInput, 0), make_pair(typeMemGateForget, 0)));
 
-    std::vector< std::pair<int, int> >connections; //each vector starts at 0, and then is < than the num of each val
-    connections.push_back(make_pair(0, inputs+0));
-    connections.push_back(make_pair(0, inputs+hidden+memory+0)); // connect input 1 to memorygateIn 1
-    connections.push_back(make_pair(0, inputs+hidden+memory+memGateIn+0)); // connect input 1 to memory gateoutput 1
-    connections.push_back(make_pair(0, inputs+hidden+memory+memGateIn+MemGateOut+0));
-    connections.push_back(make_pair(1, inputs+0));
-    connections.push_back(make_pair(1, inputs+hidden+memory+0));
-    connections.push_back(make_pair(1, inputs+hidden+memory+memGateIn+0)); //connect input 2 to memory gate out 1 (all 3 data channels share a memory
-    connections.push_back(make_pair(1, inputs+hidden+memory+memGateIn+MemGateOut+0));
-    connections.push_back(make_pair(2, inputs+0));
-    connections.push_back(make_pair(2, inputs+hidden+memory+0));
-    connections.push_back(make_pair(2, inputs+hidden+memory+memGateIn+0));
-    connections.push_back(make_pair(2, inputs+hidden+memory+memGateIn+MemGateOut+0));
-    connections.push_back(make_pair(3, inputs+1));
-    connections.push_back(make_pair(3, inputs+hidden+memory+1));
-    connections.push_back(make_pair(3, inputs+hidden+memory+memGateIn+1));
-    connections.push_back(make_pair(3, inputs+hidden+memory+memGateIn+MemGateOut+1));
-    connections.push_back(make_pair(4, inputs+1));
-    connections.push_back(make_pair(4, inputs+hidden+memory+1));
-    connections.push_back(make_pair(4, inputs+hidden+memory+memGateIn+1));
-    connections.push_back(make_pair(4, inputs+hidden+memory+memGateIn+MemGateOut+1));
-    connections.push_back(make_pair(5, inputs+1));
-    connections.push_back(make_pair(5, inputs+hidden+memory+1));
-    connections.push_back(make_pair(5, inputs+hidden+memory+memGateIn+1));
-    connections.push_back(make_pair(5, inputs+hidden+memory+memGateIn+MemGateOut+1));
-    connections.push_back(make_pair(6, inputs+2));
-    connections.push_back(make_pair(6, inputs+hidden+memory+2));
-    connections.push_back(make_pair(6, inputs+hidden+memory+memGateIn+2));
-    connections.push_back(make_pair(6, inputs+hidden+memory+memGateIn+MemGateOut+2));
-    connections.push_back(make_pair(7, inputs+2));
-    connections.push_back(make_pair(7, inputs+hidden+memory+2));
-    connections.push_back(make_pair(7, inputs+hidden+memory+memGateIn+2));
-    connections.push_back(make_pair(7, inputs+hidden+memory+memGateIn+MemGateOut+2));
-    connections.push_back(make_pair(8, inputs+2));
-    connections.push_back(make_pair(8, inputs+hidden+memory+2));
-    connections.push_back(make_pair(8, inputs+hidden+memory+memGateIn+2));
-    connections.push_back(make_pair(8, inputs+hidden+memory+memGateIn+MemGateOut+2));
+    connections.push_back(make_pair(make_pair(typeInput, 1), make_pair(typeHidden, 0)));
+    connections.push_back(make_pair(make_pair(typeInput, 1), make_pair(typeMemGateIn, 0))); // connect input 1 to memorygateIn 0
+    connections.push_back(make_pair(make_pair(typeInput, 1), make_pair(typeMemGateOut, 0)));  //connect input 1 to memory gate out 1 (all 3 data channels share a memory
+    connections.push_back(make_pair(make_pair(typeInput, 1), make_pair(typeMemGateForget, 0)));
+
+    connections.push_back(make_pair(make_pair(typeInput, 2), make_pair(typeHidden, 0)));
+    connections.push_back(make_pair(make_pair(typeInput, 2), make_pair(typeMemGateIn, 0)));
+    connections.push_back(make_pair(make_pair(typeInput, 2), make_pair(typeMemGateOut, 0)));
+
+    connections.push_back(make_pair(make_pair(typeInput, 2), make_pair(typeMemGateForget, 0)));
+    connections.push_back(make_pair(make_pair(typeInput, 3), make_pair(typeHidden, 0)));
+    connections.push_back(make_pair(make_pair(typeInput, 3), make_pair(typeMemGateIn, 0)));
+    connections.push_back(make_pair(make_pair(typeInput, 3), make_pair(typeMemGateOut, 0)));
+    connections.push_back(make_pair(make_pair(typeInput, 3), make_pair(typeMemGateForget, 0)));
+    //end of 3 channel data inputs
+    connections.push_back(make_pair(make_pair(typeInput, 4), make_pair(typeHidden, 1)));
+    connections.push_back(make_pair(make_pair(typeInput, 4), make_pair(typeMemGateIn, 1)));
+    connections.push_back(make_pair(make_pair(typeInput, 4), make_pair(typeMemGateOut, 1)));
+    connections.push_back(make_pair(make_pair(typeInput, 4), make_pair(typeMemGateForget, 1)));
+
+    connections.push_back(make_pair(make_pair(typeInput, 5), make_pair(typeHidden, 1)));
+    connections.push_back(make_pair(make_pair(typeInput, 5), make_pair(typeMemGateIn, 1)));
+    connections.push_back(make_pair(make_pair(typeInput, 5), make_pair(typeMemGateOut, 1)));
+    connections.push_back(make_pair(make_pair(typeInput, 5), make_pair(typeMemGateForget, 1)));
+
+    connections.push_back(make_pair(make_pair(typeInput, 6), make_pair(typeHidden, 1)));
+    connections.push_back(make_pair(make_pair(typeInput, 6), make_pair(typeMemGateIn, 1)));
+    connections.push_back(make_pair(make_pair(typeInput, 6), make_pair(typeMemGateOut, 1)));
+    connections.push_back(make_pair(make_pair(typeInput, 6), make_pair(typeMemGateForget, 1)));
+
+    connections.push_back(make_pair(make_pair(typeInput, 7), make_pair(typeHidden, 2)));
+    connections.push_back(make_pair(make_pair(typeInput, 7), make_pair(typeMemGateIn, 2)));
+    connections.push_back(make_pair(make_pair(typeInput, 7), make_pair(typeMemGateOut, 2)));
+    connections.push_back(make_pair(make_pair(typeInput, 7), make_pair(typeMemGateForget, 2)));
+
+    connections.push_back(make_pair(make_pair(typeInput, 8), make_pair(typeHidden, 2)));
+    connections.push_back(make_pair(make_pair(typeInput, 8), make_pair(typeMemGateIn, 2)));
+    connections.push_back(make_pair(make_pair(typeInput, 8), make_pair(typeMemGateOut, 2)));
+    connections.push_back(make_pair(make_pair(typeInput, 8), make_pair(typeMemGateForget, 2)));
+
     //connect memory gate in/outs/forgets to the memory node.
-    connections.push_back(make_pair(inputs+hidden+memory+0, inputs+hidden+0));
-    connections.push_back(make_pair(inputs+hidden+memory+memGateIn+0, inputs+hidden+0));
-    connections.push_back(make_pair(inputs+hidden+memory+memGateIn+MemGateOut+0, inputs+hidden+0));
-    connections.push_back(make_pair(inputs+hidden+memory+1, inputs+hidden+1));
-    connections.push_back(make_pair(inputs+hidden+memory+memGateIn+1, inputs+hidden+1));
-    connections.push_back(make_pair(inputs+hidden+memory+memGateIn+MemGateOut+1, inputs+hidden+1));
-    connections.push_back(make_pair(inputs+hidden+memory+2, inputs+hidden+2));
-    connections.push_back(make_pair(inputs+hidden+memory+memGateIn+2, inputs+hidden+2));
-    connections.push_back(make_pair(inputs+hidden+memory+memGateIn+MemGateOut+2, inputs+hidden+2));
+    connections.push_back(make_pair(make_pair(typeMemGateIn, 0), make_pair(typeMemory, 0)));
+    connections.push_back(make_pair(make_pair(typeMemGateOut, 0), make_pair(typeMemory, 0)));
+    connections.push_back(make_pair(make_pair(typeMemGateForget, 0), make_pair(typeMemory, 0)));
+
+    connections.push_back(make_pair(make_pair(typeMemGateIn, 1), make_pair(typeMemory, 1)));
+    connections.push_back(make_pair(make_pair(typeMemGateOut, 1), make_pair(typeMemory, 1)));
+    connections.push_back(make_pair(make_pair(typeMemGateForget, 1), make_pair(typeMemory, 1)));
+
+    connections.push_back(make_pair(make_pair(typeMemGateIn, 2), make_pair(typeMemory, 2)));
+    connections.push_back(make_pair(make_pair(typeMemGateOut, 2), make_pair(typeMemory, 2)));
+    connections.push_back(make_pair(make_pair(typeMemGateForget, 2), make_pair(typeMemory, 2)));
     //connect memory neurons to hidden neurons, they don't have weights
-    connections.push_back(make_pair(inputs+hidden+0, inputs+0));
-    connections.push_back(make_pair(inputs+hidden+1, inputs+1));
-    connections.push_back(make_pair( inputs+hidden+2, inputs+2));
+    connections.push_back(make_pair(make_pair(typeMemory, 0), make_pair(typeHidden, 0)));
+    connections.push_back(make_pair(make_pair(typeMemory, 1), make_pair(typeHidden, 1)));
+    connections.push_back(make_pair(make_pair(typeMemory, 2), make_pair(typeHidden, 2)));
     //connect hidden neurons to output neurons.
-    connections.push_back(make_pair(inputs+0, inputs+hidden+memGateIn+MemGateOut+MemGateForget+0));
-    connections.push_back(make_pair(inputs+0, inputs+hidden+memGateIn+MemGateOut+MemGateForget+1));
-    connections.push_back(make_pair(inputs+0, inputs+hidden+memGateIn+MemGateOut+MemGateForget+2));
-    connections.push_back(make_pair(inputs+1, inputs+hidden+memGateIn+MemGateOut+MemGateForget+0));
-    connections.push_back(make_pair(inputs+1, inputs+hidden+memGateIn+MemGateOut+MemGateForget+1));
-    connections.push_back(make_pair(inputs+1, inputs+hidden+memGateIn+MemGateOut+MemGateForget+2));
-    connections.push_back(make_pair(inputs+2, inputs+hidden+memGateIn+MemGateOut+MemGateForget+0));
-    connections.push_back(make_pair(inputs+2, inputs+hidden+memGateIn+MemGateOut+MemGateForget+1));
-    connections.push_back(make_pair(inputs+2, inputs+hidden+memGateIn+MemGateOut+MemGateForget+2));
-    numWeights = connections.size()-memory; //minus 3 because the memory neurons connect without weights.
+    connections.push_back(make_pair(make_pair(typeHidden, 0), make_pair(typeOutput, 0)));
+    connections.push_back(make_pair(make_pair(typeHidden, 0), make_pair(typeOutput, 1)));
+    connections.push_back(make_pair(make_pair(typeHidden, 0), make_pair(typeOutput, 2)));
+
+    connections.push_back(make_pair(make_pair(typeHidden, 1), make_pair(typeOutput, 0)));
+    connections.push_back(make_pair(make_pair(typeHidden, 1), make_pair(typeOutput, 1)));
+    connections.push_back(make_pair(make_pair(typeHidden, 1), make_pair(typeOutput, 2)));
+
+    connections.push_back(make_pair(make_pair(typeHidden, 2), make_pair(typeOutput, 0)));
+    connections.push_back(make_pair(make_pair(typeHidden, 2), make_pair(typeOutput, 1)));
+    connections.push_back(make_pair(make_pair(typeHidden, 2), make_pair(typeOutput, 2)));
+    numWeights = connections.size()-numMemory; //minus 3 because the memory neurons connect without weights.
     std::cerr<<"num of weights is: "<<numWeights<<std::endl;
-    NetworkGenetic ConstructedNetwork(inputs, hidden, memory, outputs, numWeights, connections);
+    NetworkGenetic ConstructedNetwork(numinput, numHidden, numMemory, numMemGateIn, numMemGateOut, numMemGateForget, numOutputs, numWeights, connections);
     int sampleRate, numberOfSites, SLEN;
     std::cin>>sampleRate>>numberOfSites>>SLEN;
     std::vector<double> sitesData;
