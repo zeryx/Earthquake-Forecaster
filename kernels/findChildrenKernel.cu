@@ -1,8 +1,11 @@
 #include <kernelDefs.h>
+//using
+extern __constant__ int params[];
+//endofusing
 
-__global__ void findChildrenKern(kernelArray<double>vect, kernelArray<int> params, int *childOffset, double* avgFitness, size_t device_offset){
+__global__ void findChildrenKern(kernelArray<double>Vec, int *childOffset, double* avgFitness, size_t device_offset){
     const int idx = blockIdx.x * blockDim.x +threadIdx.x;
-    const int fitnessval = params.array[19] + idx + device_offset;
-    if(vect.array[fitnessval] < *avgFitness && vect.array[fitnessval-1] > *avgFitness)
+    const int fitnessval = params[19] + idx + device_offset;
+    if(Vec.array[fitnessval] < *avgFitness && Vec.array[fitnessval-1] > *avgFitness)
         *childOffset = idx;
 }
