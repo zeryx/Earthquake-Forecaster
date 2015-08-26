@@ -6,68 +6,85 @@ __global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params,
     const int idx = blockIdx.x * blockDim.x + threadIdx.x;
     const int ind = params.array[10];
     const int parentsIndex = *childOffset-1;
+    const int fitnessval = params.array[19] + device_offset;
     int you, partner, child;
     thrust::minstd_rand0 randEng;
-    randEng.seed(in);
+    randEng.seed(idx*in+in);
     thrust::uniform_int_distribution<size_t> selectParent(0,parentsIndex);
-    randEng.discard(idx);
+    randEng.discard(idx+1);
     you = selectParent(randEng);
     const int your_wt = params.array[11] + you + device_offset;
-    const float yourFitness = vect.array[params.array[19] + you + device_offset];
-
-    randEng.discard(yourFitness/idx);
+    randEng.discard(idx+1);
     partner = selectParent(randEng);
+    while(fabs(vect.array[fitnessval + partner]-vect.array[fitnessval + you]) < 0.0025){ // not allowed to share the same fitness.
+        randEng.discard(idx+1);
+        partner = selectParent(randEng);
+    }
+
     const int partner_wt = params.array[11] + partner + device_offset; // set the weights location for the partner
-    const float partnerFitness = vect.array[params.array[19] + partner + device_offset];
     child = parentsIndex + idx; // num threads = num eligible children
+    vect.array[params.array[19] + child + device_offset] = -1;
     const int child_wt = params.array[11] + child + device_offset; // set the weights location for the child
     const int child_mem = params.array[14] + child + device_offset;
-
+    float mut = 0.037;
     for(int i=0; i<params.array[1]; i++){//for each weight, lets determine how the weights of the child are altered.
-        mutations your_mt, partner_mt, child_mt;
-        your_mt.result = vect.array[your_wt+i*ind];
-        partner_mt.result = vect.array[partner_wt+i*ind];
-
         thrust::uniform_real_distribution<float> weightSpin(0, 10);
-        randEng.discard((partnerFitness+yourFitness)/idx);
-        double result;
+        randEng.discard(idx+1);
+        double result = 0;
         float rng = weightSpin(randEng);
-
-        if(rng >=0 && rng < 5){ //50%
+        int first =0, second = 4.8;
+        if(rng >=first && rng < second){
             result = vect.array[your_wt + i*ind]; // give the child your weight val
         }
-        else if(rng >=5 && rng <9){ //40%
-            result = vect.array[partner_wt+i*ind]; // the the child your partners val
+         first = second + 4.8;
+        if(rng >= second && rng < first){
+            result = vect.array[partner_wt+i*ind];
         }
-        else if(rng >=9 && rng <9.9){ //less of a chance, 9.9%
-            result = vect.array[child_wt+i*ind]; // the child keeps the dead individuals weight
+
+         second = first + mut;
+        if(rng >=first && rng <second){
+            result = vect.array[partner_wt+i*ind]*2;
         }
-        else if(rng >=9.9 && rng <9.95){ //0.05% chance of this mutation
-            child_mt.f[0] = your_mt.f[1];
-            child_mt.f[1] = partner_mt.f[1];
-            result = child_mt.result;
+         first = second + mut;
+        if(rng >=second && rng <first){
+            result = vect.array[your_wt+i*ind]*2;
         }
-        else if(rng >=9.95 && rng <= 10){ //0.05% chance of this mutation
-            child_mt.f[1] = your_mt.f[1];
-            child_mt.f[0] = partner_mt.f[1];
-            result = child_mt.result;
+          second = first + mut;
+        if(rng >=first && rng <second){
+            result = vect.array[your_wt+i*ind]/2;
         }
-        //            else if(rng >= 9.75 && rng < 9.90){ //this takes the last 4 bits rather than the first 4.
-        //                child_mt.f[1] = your_mt.f[0];
-        //                child_mt.f[0] = partner_mt.f[0];
-        //                result = child_mt.result;
-        //            }
-        //            else if(rng >=9.9 && rng <= 10){//similar as the last two but more bytes being shuffled around
-        //                child_mt.c[0] = your_mt.c[0];
-        //                child_mt.c[1] = partner_mt.c[0];
-        //                child_mt.c[2] = your_mt.c[1];
-        //                child_mt.c[3] = partner_mt.c[1];
-        //                child_mt.c[4] = your_mt.c[2];
-        //                child_mt.c[5] = partner_mt.c[2];
-        //                child_mt.c[6] = your_mt.c[3];
-        //                child_mt.c[7] = partner_mt.c[3];
-        //                result = child_mt.result;
-        //            }
+          first = second + mut;
+        if(rng >=second && rng <first){
+            result = vect.array[partner_wt+i*ind]/2;
+        }
+          second = first + mut;
+        if(rng >=first && rng <second){
+            result = vect.array[your_wt+i*ind]/2;
+        }
+          first = second + mut;
+        if(rng >=second && rng <first){
+            result = -vect.array[your_wt+i*ind];
+        }
+          second = first + mut;
+        if(rng >=first && rng <second){
+            result = -vect.array[partner_wt+i*ind];
+        }
+          first = second + mut;
+        if(rng >=second && rng <first){
+            result = vect.array[your_wt+i*ind]-vect.array[partner_wt+i*ind];
+        }
+          second = first + mut;
+        if(rng >=first && rng <second){
+            result = vect.array[partner_wt+i*ind]-vect.array[your_wt+i*ind];
+        }
+          first = second + mut;
+        if(rng >=second && rng <first){
+            result = vect.array[partner_wt+i*ind]+vect.array[your_wt+i*ind];
+        }
+          second = first + mut;
+        if(rng >=first && rng <=second){
+            result = vect.array[your_wt+i*ind]+vect.array[partner_wt+i*ind];
+        }
         vect.array[child_wt +i*ind] = result;
     }
     for(int i=0; i<params.array[5]; i++){
