@@ -76,26 +76,27 @@ void NetworkGenetic::allocateHostAndGPUObjects( float pMax, size_t deviceRam, si
     CUDA_SAFE_CALL(cudaFuncSetCacheConfig(NetKern, cudaFuncCachePreferL1));
     CUDA_SAFE_CALL(cudaDeviceSetSharedMemConfig(cudaSharedMemBankSizeFourByte));
     size_t totalHost = hostRam*pMax;
-    size_t totalDevice = deviceRam*pMax;
+    size_t totalDevice = deviceRam;
     std::cerr<<"total free device ram : "<<deviceRam<<std::endl;
     std::cerr<<"total free host ram : "<<hostRam<<std::endl;
     //each memory block is divisible by the size of an individual, the size of double, and the blocksize
-    while(totalHost%_hostParams.array[2] || totalHost%sizeof(double) || totalHost%(sizeof(double)*2) || totalHost%512) // get the largest number divisible by the individual size, the threads in a block, and the size of a double
-        totalHost= totalHost -1;
-    while(totalDevice%_hostParams.array[2] || totalDevice%sizeof(double) || totalDevice%(sizeof(double)*2) || totalDevice%512)
-        totalDevice = totalDevice -1;
-
     _streamSize = totalDevice/(sizeof(double)*2);
-    _streambytes = _streamSize*sizeof(double);
 
-    assert(_streambytes == _streamSize*sizeof(double));
-    _numOfStreams = ceil((totalHost/sizeof(double))/_streamSize); // number of streams = totalHost/streamBytes, device does not store extra weights for simplicity.
-    assert(_streambytes * _numOfStreams <= totalDevice+totalHost);
+    while(_streamSize%_hostParams.array[2] || (_streamSize/_hostParams.array[2])&(_streamSize/_hostParams.array[2]-1)) // get the largest number divisible by the individual size, the threads in a block, and the size of a double
+        _streamSize= _streamSize -1;
+
+    _streambytes = _streamSize*sizeof(double);
+    totalDevice = _streambytes*2;
+    assert(totalDevice == _streambytes*2);
+    _numOfStreams = totalHost/_streambytes; // number of streams = totalHost/streamBytes, device does not store extra weights for simplicity.
+    totalHost = _streambytes*_numOfStreams;
+    assert(_streambytes * _numOfStreams == totalHost);
     std::cerr<<"number of streams: "<<_numOfStreams<<std::endl;
     device_genetics.size = (totalDevice)/sizeof(double);
     host_genetics.size = totalHost/sizeof(double);
     std::cerr<<"device ram to allocate: "<<totalDevice<<std::endl;
     std::cerr<<"host ram to allocate: "<<totalHost<<std::endl;
+    std::cerr<<"stream size: "<<_streamSize<<std::endl;
     CUDA_SAFE_CALL(cudaHostAlloc((void**)&host_genetics.array, totalHost, cudaHostAllocWriteCombined));
     CUDA_SAFE_CALL(cudaMalloc((void**) &device_genetics.array, totalDevice));
     std::fill(host_genetics.array, host_genetics.array+host_genetics.size, 0);
@@ -328,7 +329,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
                 bitonicSortKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, k, device_offset);
             }
 
-//            normalizeKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dfitnessAvg[n], device_offset);
+            normalizeKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dfitnessAvg[n], device_offset);
 
             findChildrenKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams,  &dchildOffset[n], &dfitnessAvg[n], device_offset);
 
