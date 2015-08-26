@@ -10,7 +10,7 @@ extern __constant__ int channel_offset[];
 extern __constant__ int trainingsize;
 //endof using
 
-__global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kernelArray<std::pair<const int, const int> > connections, int numOfSites,
+__global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kernelArray<std::pair<const int, const int> > connections,
                         int hour, kernelArray<double> meanCh, kernelArray<double> stdCh, size_t device_offset){
     extern __shared__ std::pair<int, int> shdConnect[];
     if(threadIdx.x ==0){
@@ -46,8 +46,8 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kerne
     const int connOutputOffset = params.array[8] + connMemForgetOffset;
     //reset values from previous individual.
     Vec.array[fitnessOffset] =0;
-    for(int i=0; i<numOfSites; i++){
-        Vec.array[communityMagOffset+i*ind]=1;
+    //community magnitude is not set, as this needs to be continued.
+    for(int i=0; i<params.array[23]; i++){
         Vec.array[whenOffset +i*ind] = 0;
         Vec.array[howCertainOffset +i*ind] =0;
     }
@@ -55,13 +55,13 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kerne
     for(int i=0; i<trainingsize; i++){
         float CommunityLat = 0;
         float CommunityLon = 0;
-        for(int j=0; j<numOfSites; j++){//sitesWeighted Lat/Lon values are determined based on all previous zsites mag output value.
+        for(int j=0; j<params.array[23]; j++){//sitesWeighted Lat/Lon values are determined based on all previous zsites mag output value.
             CommunityLat += siteData[j*2]*Vec.array[communityMagOffset+j*ind];
             CommunityLon += siteData[j*2+1]*Vec.array[communityMagOffset+j*ind];
         }
-        CommunityLat = CommunityLat/numOfSites;
-        CommunityLon = CommunityLon/numOfSites;
-        for(int j=0; j<numOfSites; j++){ //each site is run independently of others, but shares an output from the previous step
+        CommunityLat = CommunityLat/params.array[23];
+        CommunityLon = CommunityLon/params.array[23];
+        for(int j=0; j<params.array[23]; j++){ //each site is run independently of others, but shares an output from the previous step
 
             float latSite = siteData[j*2];
             float lonSite = siteData[j*2+1];
@@ -182,23 +182,25 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kerne
             Vec.array[communityMagOffset+j*ind] =  Vec.array[outputOffset+2*ind]; // set the next sets communityMag = output #3.
         }
     }
-    for(int j=0; j<numOfSites; j++){ // now lets get the average when and howcertain values.
+    for(int j=0; j<params.array[23]; j++){ // now lets get the average when and howcertain values.
         Vec.array[whenOffset+j*ind] = Vec.array[whenOffset+j*ind]/trainingsize;
         Vec.array[howCertainOffset+j*ind] = Vec.array[howCertainOffset+j*ind]/trainingsize;
     }
     /*calculate performance for this individual - score = 1/(abs(whenGuess-whenReal)*distToQuake), for whenGuess = Vec.array[whenOffset+j] where HowCertain is max for set.
     distToQuake is from the current sites parameters, it emphasizes higher scores for the closest site, a smaller distance is a higher score. */
     float maxCertainty=0;
-    float whenGuess=0;
-    float ansLat=0;
-    float ansLong=0;
-    for(int j=0; j<numOfSites; j++){
+    double whenGuess=0;
+    float guessLat=0;
+    float guessLon=0;
+    for(int j=0; j<params.array[23]; j++){
         if(Vec.array[howCertainOffset+j*ind] > maxCertainty){
             whenGuess = Vec.array[whenOffset+j*ind];
-            ansLat = siteData[j*2];
-            ansLong = siteData[j*2+1];
+            guessLat = siteData[j*2];
+            guessLon = siteData[j*2+1];
         }
     }
-    float SiteToQuakeDist = distCalc(ansLat, ansLong, answers[1], answers[2]); // [2] is latitude, [3] is longitude.
-    Vec.array[fitnessOffset] = 1/(fabs(whenGuess - answers[0]-hour)*SiteToQuakeDist);//larger is better, negative numbers are impossible.
+    float ansLat = siteData[(int)answers[2]*2];
+    float ansLon = siteData[(int)answers[2]*2+1];
+    double whenAns = answers[1];
+    Vec.array[fitnessOffset] = scoreFunc(whenGuess, whenAns, hour, guessLat, guessLon, ansLat, ansLon);//larger is better, negative numbers are impossible.
 }

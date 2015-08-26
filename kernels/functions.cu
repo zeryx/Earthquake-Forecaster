@@ -35,18 +35,10 @@ __host__ __device__ float shift(float x, float max, float min){
 }
 
 __host__ __device__ float ActFunc(float x){
-    return 1/(1+exp(-x));
+    return tanh(x);
 }
 
-__device__ volatile int sem = 0;
-
-__device__ void acquire_semaphore(volatile int *lock){
-    while (atomicCAS((int *)lock, 0, 1) != 0);
+__host__ __device__ double scoreFunc(double whenGuess, double whenAns, int hour, float latGuess, float lonGuess, float latAns, float lonAns){
+    return 1/(fabs(whenGuess-whenAns-hour)*distCalc(latGuess, lonGuess, latAns, lonAns));
 }
-
-__device__ void release_semaphore(volatile int *lock){
-    *lock = 0;
-    __threadfence();
-}
-
 

@@ -90,4 +90,7 @@ __global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params,
     for(int i=0; i<params.array[5]; i++){
         vect.array[child_mem + i*ind] =0;
     }
+    for(int i=0; i<params.array[23]; i++){
+        vect.array[params.array[20] + i*ind] = 0;
+    }
 }

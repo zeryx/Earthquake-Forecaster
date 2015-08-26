@@ -36,8 +36,6 @@ private:
     kernelArray<int>_hostParams;
     kernelArray<int>_deviceParams;
     bool _istraining;
-    int _sampleRate;
-    int _numofSites;
     int _numOfStreams;
     size_t _streambytes;
     int _streamSize;

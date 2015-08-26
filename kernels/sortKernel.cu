@@ -9,7 +9,7 @@ __global__ void bitonicBuildKern(kernelArray<double> vec, kernelArray<int> param
     const int ind = params.array[10];
     /* The threads with the lowest ids sort the array. */
     if ((second)>first){
-        if ((first&k)==0) {
+        if ((first&k)!=0) {
             /* Sort Decending */
             if (vec.array[first+fitnessOffset]>vec.array[second+fitnessOffset]) {
                 /* exchange(first,second); */
@@ -23,7 +23,7 @@ __global__ void bitonicBuildKern(kernelArray<double> vec, kernelArray<int> param
                 }
             }
         }
-        if ((first&k)!=0) {
+        if ((first&k)==0) {
             /* Sort Ascending */
             if (vec.array[first+fitnessOffset]<vec.array[second+fitnessOffset]) {
                 /* exchange(first,second); */

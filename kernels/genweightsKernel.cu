@@ -6,7 +6,7 @@ __global__ void genWeightsKern( kernelArray<double> ref, uint32_t in, kernelArra
     size_t ind = params.array[11] + idx + device_offset; // offset to start of weights, stride of num weights (stride of numWeights)
     thrust::minstd_rand0 randEng;
     randEng.seed(in);
-    thrust::uniform_real_distribution<double> uniDist(0,1);
+    thrust::uniform_real_distribution<double> uniDist(-1,1);
     randEng.discard(idx);
     ref.array[ind] = uniDist(randEng);
 }

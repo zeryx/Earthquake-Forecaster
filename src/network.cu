@@ -17,7 +17,7 @@ NetworkGenetic::NetworkGenetic(const int &numInputNodes, const int &numHiddenNeu
     _hostParams.size=23;
     _hostParams.array[0] = numInputNodes + numHiddenNeurons + numMemoryNeurons*4 + numOutNeurons;
     _hostParams.array[1] = numWeights;
-    //    _hostParams.array[2] = _hostParams.array[0] + _hostParams.array[1] + 1 + 3*_numofSites; //1*numOfSites for community mag, 1*numOfSites for When, 1*numOfSites for HowCertain,  1 for fitness
+    //    _hostParams.array[2] = _hostParams.array[0] + _hostParams.array[1] + 1 + 3*_hostParams.array[23]; //1*numOfSites for community mag, 1*numOfSites for When, 1*numOfSites for HowCertain,  1 for fitness
     _hostParams.array[3] = numInputNodes;
     _hostParams.array[4] = numHiddenNeurons;
     _hostParams.array[5] =numMemoryNeurons;            //memory neurons per individual
@@ -38,7 +38,9 @@ NetworkGenetic::NetworkGenetic(const int &numInputNodes, const int &numHiddenNeu
     //    _hostParams.array[20] = community magnitude offset
     //    _hostParams.array[21] = when offset
     //    _hostParams.array[22] = howCertain offset
-    _hostParams.array[25] = 1 ;// population ratio next_pop_size/current_pop_size, ie 1 = constant
+    //    _hostParams.array[23] = number of sites
+    //    _hostParams.array[24] = sample rate
+    _hostParams.array[25] = 1.1 ;// normalized cutoff value, ie 1 = 50% percentile
 
     _connect = &connections;
 }
@@ -110,11 +112,11 @@ void NetworkGenetic::allocateHostAndGPUObjects( float pMax, size_t deviceRam, si
     this->setParams();
 }
 bool NetworkGenetic::init(int sampleRate, int SiteNum, std::vector<double> *siteData){
-    _sampleRate = sampleRate;
-    _numofSites = SiteNum;
+    _hostParams.array[24] = sampleRate;
+    _hostParams.array[23] = SiteNum;
     _siteData = siteData;
     _istraining = false;
-    _hostParams.array[2] = _hostParams.array[0] + _hostParams.array[1] + 1 + 3*_numofSites; //1*numOfSites for community mag, 1 for fitness
+    _hostParams.array[2] = _hostParams.array[0] + _hostParams.array[1] + 1 + 3*_hostParams.array[23]; //1*numOfSites for community mag, 1 for fitness
     return true;
 }
 
@@ -130,8 +132,8 @@ void NetworkGenetic::setParams(){
     _hostParams.array[18] = _hostParams.array[17] + _hostParams.array[10] *_hostParams.array[8]; // output neurons offset. (memOut_offset + numMemOut*numIndividuals)
     _hostParams.array[19] = _hostParams.array[18] + _hostParams.array[10] *_hostParams.array[9]; // fitness offset.
     _hostParams.array[20] = _hostParams.array[19] + _hostParams.array[10] *1; //community Magnitude offset
-    _hostParams.array[21] = _hostParams.array[20] + _hostParams.array[10] *_numofSites; // when offset.
-    _hostParams.array[22] = _hostParams.array[21] + _hostParams.array[10] *_numofSites; // howCertain offset.
+    _hostParams.array[21] = _hostParams.array[20] + _hostParams.array[10] *_hostParams.array[23]; // when offset.
+    _hostParams.array[22] = _hostParams.array[21] + _hostParams.array[10] *_hostParams.array[23]; // howCertain offset.
     std::cerr<<"allocating params memory"<<std::endl;
     CUDA_SAFE_CALL(cudaMalloc((void**)&_deviceParams.array, _hostParams.size*sizeof(int)));
     std::cerr<<"setting params memory"<<std::endl;
@@ -200,12 +202,12 @@ void NetworkGenetic::storeWeights(std::string filepath){
 
 void NetworkGenetic::reformatTraining(std::vector<int>* old_input, std::vector<double> ans, std::vector<double>* sitedata, std::vector<double>* globalquakes, double kp){ // increase the timestep and reduce resolution, takes too long.
     int trainingSize = 10;
-    int * new_input = new int[trainingSize*3*_numofSites];
+    int * new_input = new int[trainingSize*3*_hostParams.array[23]];
     int *siteOffset = new int[15], *chanOffset = new int[3];
-    long long stor[trainingSize*3*_numofSites];
-    memset(stor, 0, trainingSize*3*_numofSites*sizeof(long long));
+    long long stor[trainingSize*3*_hostParams.array[23]];
+    memset(stor, 0, trainingSize*3*_hostParams.array[23]*sizeof(long long));
     siteOffset[0] = 0;
-    for(int i=1; i<_numofSites; i++){
+    for(int i=1; i<_hostParams.array[23]; i++){
         siteOffset[i] = trainingSize*3 + siteOffset[i-1];
     }
     chanOffset[0] = 0;
@@ -214,18 +216,18 @@ void NetworkGenetic::reformatTraining(std::vector<int>* old_input, std::vector<d
     }
 
     for(int step=0; step<trainingSize; step++){
-        for(int i=0; i<_sampleRate*3600/trainingSize; i++){
-            for(int k=0; k<_numofSites; k++){
+        for(int i=0; i<_hostParams.array[24]*3600/trainingSize; i++){
+            for(int k=0; k<_hostParams.array[23]; k++){
                 for(int j=0; j<3; j++){
-                    stor[siteOffset[k]+chanOffset[j]+step] += old_input->at(k*_sampleRate*3600*3 + j*_sampleRate*3600 + step*_sampleRate*3600/trainingSize+i);
+                    stor[siteOffset[k]+chanOffset[j]+step] += old_input->at(k*_hostParams.array[24]*3600*3 + j*_hostParams.array[24]*3600 + step*_hostParams.array[24]*3600/trainingSize+i);
                 }
             }
         }
     }
     for(int step=0; step<trainingSize; step++){
-        for(int k=0; k<_numofSites; k++){
+        for(int k=0; k<_hostParams.array[23]; k++){
             for(int j=0; j<3; j++){
-                stor[siteOffset[k]+chanOffset[j]+step] = stor[siteOffset[k]+chanOffset[j]+step]/(_sampleRate*3600/trainingSize);
+                stor[siteOffset[k]+chanOffset[j]+step] = stor[siteOffset[k]+chanOffset[j]+step]/(_hostParams.array[24]*3600/trainingSize);
                 new_input[siteOffset[k]+chanOffset[j]+step] = stor[siteOffset[k]+chanOffset[j]+step];
             }
         }
@@ -235,9 +237,9 @@ void NetworkGenetic::reformatTraining(std::vector<int>* old_input, std::vector<d
     CUDA_SAFE_CALL(cudaMemcpyToSymbol(siteData, sitedata->data(), sitedata->size()*sizeof(double), 0, cudaMemcpyHostToDevice));
     CUDA_SAFE_CALL(cudaMemcpyToSymbol(globalQuakes,globalquakes->data(), globalquakes->size()*sizeof(double), 0, cudaMemcpyHostToDevice));
     CUDA_SAFE_CALL(cudaMemcpyToSymbol(Kp, &kp, sizeof(double), 0, cudaMemcpyHostToDevice));
-    CUDA_SAFE_CALL(cudaMemcpyToSymbol(input, new_input, trainingSize*_numofSites*3*sizeof(int), 0,  cudaMemcpyHostToDevice));
+    CUDA_SAFE_CALL(cudaMemcpyToSymbol(input, new_input, trainingSize*_hostParams.array[23]*3*sizeof(int), 0,  cudaMemcpyHostToDevice));
     CUDA_SAFE_CALL(cudaMemcpyToSymbol(trainingsize, &trainingSize, sizeof(int), 0, cudaMemcpyHostToDevice));
-    CUDA_SAFE_CALL(cudaMemcpyToSymbol(site_offset, siteOffset, _numofSites*sizeof(int), 0, cudaMemcpyHostToDevice));
+    CUDA_SAFE_CALL(cudaMemcpyToSymbol(site_offset, siteOffset, _hostParams.array[23]*sizeof(int), 0, cudaMemcpyHostToDevice));
     CUDA_SAFE_CALL(cudaMemcpyToSymbol(channel_offset, chanOffset, 3*sizeof(int), 0, cudaMemcpyHostToDevice));
     delete[] siteOffset;
     delete[] chanOffset;
@@ -249,10 +251,10 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
     //were going to normalize the inputs using v` = v-mean/stdev, so we need mean and stdev for each channel.
     double meanCh[3]{0}, stdCh[3]{0};
     int num=0;
-    for(int i=0; i<3600*_sampleRate; i++){
-        for(int j=0; j < _numofSites; j++){
+    for(int i=0; i<3600*_hostParams.array[24]; i++){
+        for(int j=0; j < _hostParams.array[23]; j++){
             for(int k=0; k<3; k++){
-                meanCh[k] += data->at(3600*_sampleRate*j*3 + k*3600*_sampleRate+i);
+                meanCh[k] += data->at(3600*_hostParams.array[24]*j*3 + k*3600*_hostParams.array[24]+i);
             }
             num++;
         }
@@ -272,7 +274,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         int regBlockSize = 512;
         int regGridSize = (_hostParams.array[10])/regBlockSize;
         int evoGridsize[_numOfStreams];
-        retVec.size = 2160*_numofSites;
+        retVec.size = 2160*_hostParams.array[23];
         dConnect.size = _connect->size();
         partial_reduce_sums.size = (regGridSize);
         double *hfitnessAvg, *dfitnessAvg;
@@ -313,7 +315,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
             std::cerr<<"stream number: "<<n<<std::endl;
             CUDA_SAFE_CALL(cudaMemcpyAsync(&device_genetics.array[device_offset], &host_genetics.array[host_offset], _streambytes, cudaMemcpyHostToDevice, _stream[n]));
 
-            NetKern<<<regGridSize, regBlockSize, _connect->size()*sizeof(std::pair<const int, const int>), _stream[n]>>>(device_genetics,_deviceParams,  dConnect, _numofSites, hour, dmeanCh, dstdCh, device_offset);
+            NetKern<<<regGridSize, regBlockSize, _connect->size()*sizeof(std::pair<const int, const int>), _stream[n]>>>(device_genetics,_deviceParams,  dConnect, hour, dmeanCh, dstdCh, device_offset);
 
 
             reduceFirstKern<<<regGridSize, regBlockSize, regBlockSize*sizeof(double), _stream[n]>>>(device_genetics, partial_reduce_sums, _deviceParams, device_offset);
@@ -335,9 +337,9 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
 
             CUDA_SAFE_CALL(cudaMemcpyAsync(&hchildOffset[n], &dchildOffset[n], sizeof(int), cudaMemcpyDeviceToHost, _stream[n]));
 
-//            evoGridsize[n] = (_hostParams.array[10]-hchildOffset[n])/regBlockSize;
+            evoGridsize[n] = (_hostParams.array[10]-hchildOffset[n])/regBlockSize;
 
-//            evolutionKern<<<evoGridsize[n], regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dchildOffset[n], seed[n], device_offset);
+            evolutionKern<<<evoGridsize[n], regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dchildOffset[n], seed[n], device_offset);
 
             CUDA_SAFE_CALL(cudaMemcpyAsync(&hfitnessAvg[n], &dfitnessAvg[n], sizeof(double), cudaMemcpyDeviceToHost, _stream[n]));
 
@@ -346,20 +348,19 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
             device_offset += _streamSize;
         }
         CUDA_SAFE_CALL(cudaDeviceSynchronize());
-//        for(int j=0; j<_numOfStreams; j++){
-//            std::cerr<<"for stream #: "<<j<<std::endl;
-//            std::cerr<<"average fitness is: "<<hfitnessAvg[j]<<std::endl;
-//        }
-//        int ctr=0;
-//        for(int i=0; i<_hostParams.array[10]; i++){
-//            if(host_genetics.array[_hostParams.array[19] + i] >0)
-//                ctr++;
-//        }
-//        std::cerr<<"for stream num#:0 the number of better than average individuals is: "<<ctr<<std::endl;
-//        std::cerr<<"percentage %: "<<((double)ctr/(double)_hostParams.array[10])*100<<std::endl;
-
-        std::cerr.precision(15);
+        for(int j=0; j<_numOfStreams; j++){
+            std::cerr<<"for stream #: "<<j<<std::endl;
+            std::cerr<<"average fitness is: "<<hfitnessAvg[j]<<std::endl;
+        }
+        int ctr=0;
         for(int i=0; i<_hostParams.array[10]; i++){
+            if(host_genetics.array[_hostParams.array[19] + i] >0)
+                ctr++;
+        }
+        std::cerr<<"percentage %: "<<((double)ctr/(double)_hostParams.array[10])*100<<std::endl;
+
+        std::cerr.precision(25);
+        for(int i=0; i<20; i++){
             std::cerr<<host_genetics.array[_hostParams.array[19]+i]<<std::endl;
         }
         CUDA_SAFE_CALL(cudaFree(dConnect.array));
@@ -385,19 +386,19 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         std::cerr<<"example best vector has been set."<<std::endl;
         double CommunityLat = 0;
         double CommunityLon = 0;
-        std::vector<double> When(_numofSites, 0);
-        std::vector<double> HowCertain(_numofSites,0);
-        std::vector<double> CommunityMag(_numofSites, 1); //give all sites equal mag to start, this value is [0,1]
+        std::vector<double> When(_hostParams.array[23], 0);
+        std::vector<double> HowCertain(_hostParams.array[23],0);
+        std::vector<double> CommunityMag(_hostParams.array[23], 1); //give all sites equal mag to start, this value is [0,1]
         std::cerr<<"all output vectors created and initialized."<<std::endl;
-        for(int step=0; step<3600*_sampleRate; step++){
-            for(int j=0; j<_numofSites; j++){ //sitesWeighted Lat/Lon values are determined based on all previous sites mag output value.
+        for(int step=0; step<3600*_hostParams.array[24]; step++){
+            for(int j=0; j<_hostParams.array[23]; j++){ //sitesWeighted Lat/Lon values are determined based on all previous sites mag output value.
                 CommunityLat += _siteData->at(j*2)*CommunityMag[j];
                 CommunityLon += _siteData->at(j*2+1)*CommunityMag[j];
             }
-            CommunityLat = CommunityLat/_numofSites;
-            CommunityLon = CommunityLon/_numofSites;
+            CommunityLat = CommunityLat/_hostParams.array[23];
+            CommunityLon = CommunityLon/_hostParams.array[23];
 
-            for(int j=0; j<_numofSites; j++){ // each site is run independently of others, but shares an output from the previous step
+            for(int j=0; j<_hostParams.array[23]; j++){ // each site is run independently of others, but shares an output from the previous step
                 double latSite = _siteData->at(j*2);
                 double lonSite = _siteData->at(j*2+1);
                 double avgLatGQuake = globalQuakes->at(0);
@@ -427,7 +428,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
                 int startOfMemGateForget = startOfMemGateOut + _hostParams.array[11];
                 int startOfOutput = startOfMemGateForget + _hostParams.array[11];
                 for(int k=0; k<3; k++){
-                    input[k] = normalize((double)(data->at(3600*_sampleRate*j*3 + k*(3600*_sampleRate)+step)), meanCh[k], stdCh[k]);
+                    input[k] = normalize((double)(data->at(3600*_hostParams.array[24]*j*3 + k*(3600*_hostParams.array[24])+step)), meanCh[k], stdCh[k]);
 
                 }
                 input[3] = shift(GQuakeAvgdist, 40075.1, 0);
@@ -535,17 +536,17 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
                 CommunityMag[j] =  outputs[2]; // set the next sets communityMag = output #3.
             }
         }
-        for(int j=0; j<_numofSites; j++){ // each site has its own when and howcertain vector
-            When[j] = When[j]/3600*_sampleRate;
-            HowCertain[j] = HowCertain[j]/3600*_sampleRate;
+        for(int j=0; j<_hostParams.array[23]; j++){ // each site has its own when and howcertain vector
+            When[j] = When[j]/3600*_hostParams.array[24];
+            HowCertain[j] = HowCertain[j]/3600*_hostParams.array[24];
             std::cerr<<"When for site:"<<j<<" is: "<<When[j]<<std::endl;
         }
         //all done, lets output the return matrix.
         //since right now were using a point value for when & how certain (only one output per site),
         //we're going to approximate using a normal distribution around when with a sigma of howCertain, over the whole array from T=currentHour [T, 2160]
         for(int h=hour; h<2160; h++){
-            for(int j=0; j<_numofSites; j++){
-                ret->at(h*_numofSites+j)= 1/(1/HowCertain[j]*sqrt(2*M_PI))*exp(-pow(h-When[j], 2)/(2*pow(1/HowCertain[j], 2))); // normal distribution with a mu of When and a sigma of 1/HowCertain
+            for(int j=0; j<_hostParams.array[23]; j++){
+                ret->at(h*_hostParams.array[23]+j)= 1/(1/HowCertain[j]*sqrt(2*M_PI))*exp(-pow(h-When[j], 2)/(2*pow(1/HowCertain[j], 2))); // normal distribution with a mu of When and a sigma of 1/HowCertain
             }
         }
     }

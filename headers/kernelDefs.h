@@ -24,26 +24,18 @@ __host__ __device__ float shift(float x, float max, float min);
 
 __host__ __device__ float ActFunc(float x);
 
-__device__ void release_semaphore(volatile int *lock);
+__host__ __device__ double scoreFunc(double whenGuess, double whenAns, int hour, float latGuess, float lonGuess, float latAns, float lonAns);
 
-__device__ void acquire_semaphore(volatile int *lock);
-
-extern __device__ volatile int sem;
 
 
 //mutations union definition
-union mutations{
-    char c[8];
-    int f[2];
-    double result;
-};
 
 
 //main kernels
 __global__ void genWeightsKern( kernelArray<double> ref, uint32_t in, kernelArray<int> params, size_t offset);
 
 __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kernelArray<std::pair<const int, const int> > connections,
-                        int numOfSites,int hour, kernelArray<double> meanCh, kernelArray<double> stdCh, size_t device_offset);
+                        int hour, kernelArray<double> meanCh, kernelArray<double> stdCh, size_t device_offset);
 
 __global__ void reduceFirstKern(kernelArray<double> Vec,
                                 kernelArray<double> per_block_results,
