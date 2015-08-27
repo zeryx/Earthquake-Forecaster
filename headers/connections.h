@@ -10,17 +10,15 @@ enum neuronType{
     typeMemGateForget = 6,
     typeOutput = 7
 };
-typedef std::pair<neuronType, int> con;
 
-//template <typename T, typename H>
-//struct mypair{
-//    T first;
-//    H second;
-//};
+template <typename T, typename H>
+struct devicePair{
+    T first;
+    H second;
+};
+typedef std::pair<neuronType, int> hcon;
+typedef devicePair<neuronType, int>dcon;
 
-//struct con{
-//    neuronType first;
-//    int second;
-//};
+
 
 #endif

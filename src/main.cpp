@@ -17,8 +17,10 @@ int main(int argc, char** arg){
     int numMemGateForget = 3;
     int numOutputs = 3;
     int numWeights;
-    std::vector<std::pair<con, con> >connections;
+    std::vector<std::pair<hcon, hcon> >connections;
     //beginning of 3 channel data inputs
+
+
     connections.push_back(make_pair(make_pair(typeInput, 0), make_pair(typeHidden, 0)));
     connections.push_back(make_pair(make_pair(typeInput, 0), make_pair(typeMemGateIn, 0))); // connect input 0 to memorygateIn 0
     connections.push_back(make_pair(make_pair(typeInput, 0), make_pair(typeMemGateOut, 0))); // connect input 10 to memory gateoutput 0

@@ -39,5 +39,5 @@ __host__ __device__ float ActFunc(float x){
 }
 
 __host__ __device__ double scoreFunc(float whenGuess, int whenAns, float latGuess, float lonGuess, float latAns, float lonAns, double oldFit){
-    return (oldFit + exp(-(fabs(whenGuess-whenAns)+distCalc(latGuess, lonGuess, latAns, lonAns))))/2; // emphasizes longevity and reliability.
+    return (oldFit*2 + exp(-(fabs(whenGuess-whenAns)+distCalc(latGuess, lonGuess, latAns, lonAns))))/3; // emphasizes longevity and reliability.
 }
