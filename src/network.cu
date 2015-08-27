@@ -331,12 +331,9 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
 
             normalizeKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dfitnessAvg[n], device_offset);
 
-
             cutoffKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams,  &dchildOffset[n], &dfitnessAvg[n], device_offset);
 
-
             CUDA_SAFE_CALL(cudaMemcpyAsync(&hchildOffset[n], &dchildOffset[n], sizeof(int), cudaMemcpyDeviceToHost, _stream[n]));
-
 
             evoGridsize[n] = (_hostParams.array[10]-hchildOffset[n])/regBlockSize;
 
@@ -351,7 +348,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         CUDA_SAFE_CALL(cudaDeviceSynchronize());
 
         std::cerr.precision(25);
-        for(int i=0; i<hchildOffset[0]-1; i++){
+        for(int i=0; i<100; i++){
             std::cerr<<host_genetics.array[_hostParams.array[19]+i]<<std::endl;
         }
         for(int j=0; j<_numOfStreams; j++){
@@ -552,7 +549,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         }
         float ansLat = _siteData->at((int)_answers[0]*2);
         float ansLon = _siteData->at((int)_answers[0]*2+1);
-        float whenAns = _answers[1];
-        ret->at(0) = scoreFunc(whenGuess, whenAns, hour, guessLat, guessLon, ansLat, ansLon);//larger is better, negative numbers are impossible.
+        int whenAns = (int)_answers[1]-hour;
+        ret->at(0) = scoreFunc(whenGuess, whenAns, guessLat, guessLon, ansLat, ansLon);//larger is better, negative numbers are impossible.
     }
 }

@@ -134,8 +134,8 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kerne
                 }
                 if(Vec.array[memGateForgetOffset+gate*ind] > 0.5){// if memGateForget is greater than 0.5, then tell mem to forget
                     for(int pair=0; pair<connections.size; pair++){
-                        if(shdConnect[pair].first.first == typeMemGateForget && shdConnect[pair].first.second == gate && shdConnect[pair].second.first == typeMemory){
-                            Vec.array[memOffset+shdConnect[pair].second.second*ind] =0;
+                        if(shdConnect[pair].second.first == typeMemGateForget && shdConnect[pair].second.second == gate && shdConnect[pair].first.first == typeMemory){
+                            Vec.array[memOffset+shdConnect[pair].first.second*ind] =0;
                         }
                     }
                 }
@@ -198,6 +198,6 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kerne
     }
     float ansLat = siteData[(int)answers[0]*2];
     float ansLon = siteData[(int)answers[0]*2+1];
-    float whenAns = answers[1];
-    Vec.array[fitnessOffset] = scoreFunc(whenGuess, whenAns, hour, guessLat, guessLon, ansLat, ansLon);//larger is better, negative numbers are impossible.
+    int whenAns = (int)answers[1] - hour;
+    Vec.array[fitnessOffset] = scoreFunc(whenGuess, whenAns, guessLat, guessLon, ansLat, ansLon);//larger is better, negative numbers are impossible.
 }
