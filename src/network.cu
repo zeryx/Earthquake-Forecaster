@@ -566,6 +566,7 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         float ansLat = _siteData->at((int)_answers[0]*2);
         float ansLon = _siteData->at((int)_answers[0]*2+1);
         int whenAns = (int)_answers[1]-hour;
-        ret->at(0) = scoreFunc(whenGuess, whenAns, guessLat, guessLon, ansLat, ansLon);//larger is better, negative numbers are impossible.
+        double oldFit = ret->at(0);
+        ret->at(0) = scoreFunc(whenGuess, whenAns, guessLat, guessLon, ansLat, ansLon, oldFit);//larger is better, negative numbers are impossible.
     }
 }

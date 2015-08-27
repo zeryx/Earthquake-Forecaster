@@ -214,6 +214,7 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kerne
     float ansLat = siteData[(int)answers[0]*2];
     float ansLon = siteData[(int)answers[0]*2+1];
     int whenAns = (int)answers[1] - hour;
-    Vec.array[ageOffset] += 1; //this indvidiual has exited for 1 iteration.
-    Vec.array[fitnessOffset] = (Vec.array[fitnessOffset] + scoreFunc(whenGuess, whenAns, guessLat, guessLon, ansLat, ansLon))/2; //we take the average beacuse consistency is more important than anything else.
+    Vec.array[ageOffset] += 1; //this indvidiual has existed for 1 more iteration.
+    double oldFit = Vec.array[fitnessOffset];
+    Vec.array[fitnessOffset] = scoreFunc(whenGuess, whenAns, guessLat, guessLon, ansLat, ansLon, oldFit); //we take the average beacuse consistency is more important than being really good at this particular hour.
 }
