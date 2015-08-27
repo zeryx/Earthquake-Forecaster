@@ -46,9 +46,9 @@ __global__ void reduceSecondKern(kernelArray<double> per_block_results, kernelAr
 
 __global__ void normalizeKern(kernelArray<double> Vec, kernelArray<int> params, double *avgFitness, size_t device_offset);
 
-__global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params, int *childOffset, size_t in, size_t device_offset);
+__global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params, int *childOffset, int *realGridSize, size_t in, size_t device_offset);
 
 __global__ void bitonicSortKern(kernelArray<double> Vec, kernelArray<int> params, int j, int k, size_t device_offset);
 
-__global__ void cutoffKern(kernelArray<double>vect, kernelArray<int> params, int *childOffset, double *avgFitness, size_t device_offset);
+__global__ void cutoffKern(kernelArray<double>vect, kernelArray<int> params, int *childOffset, int *evoGridSize, double *avgFitness, size_t device_offset);
 #endif

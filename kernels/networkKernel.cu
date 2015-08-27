@@ -14,12 +14,13 @@ extern __constant__ int trainingsize;
 __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kernelArray<std::pair<con, con> > connections,
                         int hour, kernelArray<double> meanCh, kernelArray<double> stdCh, size_t device_offset){
     extern __shared__ std::pair<con, con> shdConnect[];
-    if(threadIdx.x ==0){
-        for(int i=0; i<connections.size; i++){
-            shdConnect[i].first.first = connections.array[i].first.first;
-            shdConnect[i].first.second = connections.array[i].first.second;
-            shdConnect[i].second.first = connections.array[i].second.first;
-            shdConnect[i].second.second = connections.array[i].second.second;
+    const int tix = threadIdx.x;
+    for(int i=0; i<connections.size; i=i+blockDim.x){
+        if((tix+i)<connections.size){
+            shdConnect[tix+i].first.first = connections.array[tix+i].first.first;
+            shdConnect[tix+i].first.second = connections.array[tix+i].first.second;
+            shdConnect[tix+i].second.first = connections.array[tix+i].second.first;
+            shdConnect[tix+i].second.second = connections.array[tix+i].second.second;
 
         }
     }
@@ -39,8 +40,9 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kerne
     const int communityMagOffset = params.array[20] +idx +device_offset;
     const int whenOffset = params.array[21] + idx + device_offset;
     const int howCertainOffset = params.array[22] + idx + device_offset;
+    const int ageOffset = params.array[25] + idx + device_offset;
 
-    //for connections --imagined offsets if we strided instead of interleaved
+
     //reset values from previous individual.
     //community magnitude is not set, as this needs to be continued.
     for(int i=0; i<params.array[23]; i++){
@@ -212,5 +214,6 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,  kerne
     float ansLat = siteData[(int)answers[0]*2];
     float ansLon = siteData[(int)answers[0]*2+1];
     int whenAns = (int)answers[1] - hour;
-    Vec.array[fitnessOffset] = scoreFunc(whenGuess, whenAns, guessLat, guessLon, ansLat, ansLon);//larger is better, negative numbers are impossible.
+    Vec.array[ageOffset] += 1; //this indvidiual has exited for 1 iteration.
+    Vec.array[fitnessOffset] = (Vec.array[fitnessOffset] + scoreFunc(whenGuess, whenAns, guessLat, guessLon, ansLat, ansLon))/2; //we take the average beacuse consistency is more important than anything else.
 }
