@@ -35,7 +35,7 @@ S = sizeof(NN) * (2 * G * - sum of squared values in NN) -1
 * NN is the normalized submatrix of your returned matrix N, within the hours of 768> x <=2160.
 * G is the hour of the quake event.
 
-* the internal scoring method follows a different approach, as the original scoring was quite rudamentary compared to the scope of the project (it doesn't say where the quake is, it only cares about when, which is naieve as the inter-site distances could be quite large), following the below formula
+* the internal scoring method follows a different approach, as the original scoring was quite rudamentary compared to the scope of the project (it doesn't say where the quake is, it only cares about when, which somewhat naive for this type of project since the inter-site distances could be quite large), following the below formula
 
 ```
 #!c++
