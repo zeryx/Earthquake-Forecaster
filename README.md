@@ -1,4 +1,4 @@
-# README #
+# Earthquake Forecasting #
 
 ### What is this repository for? ###
 
