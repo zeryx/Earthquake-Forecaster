@@ -54,7 +54,6 @@ S = (oldFit*2 + exp(-(fabs(whenGuess-whenAns)+distCalc(latGuess, lonGuess, latAn
 
 ### How do I get set up? ###
 
-* Summary of set up
 * Configuration
 requires cmake 3.2.1 or newer to configure
 * Dependencies
