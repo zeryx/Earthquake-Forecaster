@@ -136,7 +136,7 @@ int main(int argc, char** arg){
 
         std::cin>>hour;
         if(hour== -1)
-            exit(1);
+            break;
         std::cin>>DLEN;
         for(int i=0; i<DLEN; i++){
             data.push_back(0);

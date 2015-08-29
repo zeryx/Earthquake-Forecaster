@@ -30,7 +30,7 @@ public:
 private:
     kernelArray<double> device_genetics;
     kernelArray<double> host_genetics;
-    std::vector<std::pair<hcon, hcon> > *_connect;
+    std::pair<hcon, hcon> *_connect;
     std::vector<double> *_siteData;
     std::vector<double> _answers;
     std::vector<double> _best;

@@ -13,7 +13,6 @@ extern __constant__ double Kp;
 extern __constant__ int site_offset[];
 extern __constant__ int channel_offset[];
 extern __constant__ int trainingsize;
-extern __constant__ devicePair<dcon, dcon> connections[];
 //functions
 __host__ __device__ float bearingCalc(float lat1, float lon1, float lat2, float lon2);
 
@@ -25,8 +24,8 @@ __host__ __device__ float shift(float x, float max, float min);
 
 __host__ __device__ float ActFunc(float x);
 
-__host__ __device__ double scoreFunc(float whenGuess, int whenAns, float latGuess, float lonGuess, float latAns, float lonAns, double oldFit);
 
+__host__  __device__ double scoreFunc(float whenGuess, int whenAns, float latGuess, float lonGuess, float latAns, float lonAns, double oldFit);
 
 
 //mutations union definition
@@ -35,7 +34,7 @@ __host__ __device__ double scoreFunc(float whenGuess, int whenAns, float latGues
 //main kernels
 __global__ void genWeightsKern( kernelArray<double> ref, size_t in, kernelArray<int> params, size_t offset);
 
-__global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params,int hour, kernelArray<double> meanCh,
+__global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, devicePair<dcon, dcon>* connections, int hour, kernelArray<double> meanCh,
                         kernelArray<double> stdCh, size_t device_offset);
 
 __global__ void reduceFirstKern(kernelArray<double> Vec,
