@@ -52,12 +52,12 @@ S = (oldFit*2 + exp(-(fabs(whenGuess-whenAns)+distCalc(latGuess, lonGuess, latAn
  * fabs is a double precison absolute value function.
  * distCalc calculates the scalar distance between coordinates on an oblate spheroid (the earth)
 
-### How do I get set up? ###
+## How do I get set up? ##
 
-* Configuration
-requires cmake 3.2.1 or newer to configure
-* Dependencies
-requires cuda toolkit 7.0 or newer to compile
-requires a cuda device architecture of 3.0 or newer to run
-* Deployment instructions
-run the java scoring tool located [here](http://www.topcoder.com/contest/problem/QuakePredictor/manual.html), rather than the compiled program directly.
+### Configuration ###
+* requires cmake 3.2.1 or newer to configure
+### Dependencies ###
+* requires cuda toolkit 7.0 or newer to compile
+* requires a cuda device architecture of 3.0 or newer to run
+### Deployment instructions ###
+*run the java scoring tool located [here](http://www.topcoder.com/contest/problem/QuakePredictor/manual.html), rather than the compiled program directly.
