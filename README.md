@@ -60,4 +60,4 @@ S = (oldFit*2 + exp(-(fabs(whenGuess-whenAns)+distCalc(latGuess, lonGuess, latAn
 * requires cuda toolkit 7.0 or newer to compile
 * requires a cuda device architecture of 3.0 or newer to run
 ### Deployment instructions ###
-*run the java scoring tool located [here](http://www.topcoder.com/contest/problem/QuakePredictor/manual.html), rather than the compiled program directly.
+* run the java scoring tool located [here](http://www.topcoder.com/contest/problem/QuakePredictor/manual.html), rather than the compiled program directly.
