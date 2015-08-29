@@ -94,17 +94,15 @@ void NetworkGenetic::allocateHostAndGPUObjects( float pMax, size_t deviceRam, si
     _numOfStreams = totalHost/_streambytes; // number of streams = totalHost/streamBytes, device does not store extra weights for simplicity.
     totalHost = _streambytes*_numOfStreams;
     assert(_streambytes * _numOfStreams == totalHost);
-    std::cerr<<"number of streams: "<<_numOfStreams<<std::endl;
     device_genetics.size = (totalDevice)/sizeof(double);
     host_genetics.size = totalHost/sizeof(double);
     std::cerr<<"device ram to allocate: "<<totalDevice<<std::endl;
     std::cerr<<"host ram to allocate: "<<totalHost<<std::endl;
-    std::cerr<<"stream size: "<<_streamSize<<std::endl;
+    std::cerr<<"number of streams: "<<_numOfStreams<<std::endl;
     CUDA_SAFE_CALL(cudaHostAlloc((void**)&host_genetics.array, totalHost, cudaHostAllocWriteCombined));
     CUDA_SAFE_CALL(cudaMalloc((void**) &device_genetics.array, totalDevice));
     std::fill(host_genetics.array, host_genetics.array+host_genetics.size, 0);
     CUDA_SAFE_CALL(cudaMemset(device_genetics.array, 0, totalDevice));
-    std::cerr<<"all allocated, moving on."<<std::endl;
     _stream.resize(_numOfStreams);
     for(int i=0; i<_numOfStreams; i++){
         CUDA_SAFE_CALL(cudaStreamCreate(&_stream.at(i)));
@@ -136,9 +134,7 @@ void NetworkGenetic::setParams(){
     _hostParams.array[21] = _hostParams.array[20] + _hostParams.array[10] *_hostParams.array[23]; // when offset.
     _hostParams.array[22] = _hostParams.array[21] + _hostParams.array[10] *_hostParams.array[23]; // howCertain offset.
     _hostParams.array[25] = _hostParams.array[22] + _hostParams.array[10] *_hostParams.array[23]; // age offset.
-    std::cerr<<"allocating params memory"<<std::endl;
     CUDA_SAFE_CALL(cudaMalloc((void**)&_deviceParams.array, _hostParams.size*sizeof(int)));
-    std::cerr<<"setting params memory"<<std::endl;
     std::cerr<<"number of individuals in stream is: "<<_hostParams.array[10]<<std::endl;
     CUDA_SAFE_CALL(cudaMemcpy(_deviceParams.array, _hostParams.array, _hostParams.size*sizeof(int), cudaMemcpyHostToDevice));
     _deviceParams.size = _hostParams.size;
@@ -372,13 +368,6 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
         for(int j=0; j<_numOfStreams; j++){
             std::cerr<<"for stream #: "<<j<<" average fitness is: "<<hfitnessAvg[j]<<std::endl;
         }
-        //        int ctr=0;
-        //        for(int i=0; i<_hostParams.array[10]; i++){
-        //            if(host_genetics.array[_hostParams.array[19] + i] >0)
-        //                ctr++;
-        //        }
-
-        //        std::cerr<<"percentage %: "<<((double)ctr/(double)_hostParams.array[10])*100<<std::endl;
         int age =0, oldest=0;
         for(int i=0; i<_hostParams.array[10]; i++){
             if(host_genetics.array[_hostParams.array[25] + i] >age){
@@ -386,8 +375,11 @@ void NetworkGenetic::forecast(std::vector<double> *ret, int &hour, std::vector<i
                 oldest = i;
             }
         }
-        std::cerr<<"oldest individual is: "<<oldest<<" with an age of: "<<age<<std::endl;
+        std::cerr<<"oldest, best individual is: "<<oldest<<" with an age of: "<<age<<std::endl;
         std::cerr<<"with a weight #0 of "<<host_genetics.array[_hostParams.array[11] + oldest]<<std::endl;
+        for(int i=0; i<_hostParams.array[5]; i++){
+            std::cerr<<"and a memory #"<<i<<" of"<<host_genetics.array[_hostParams.array[14] + oldest+i*_hostParams.array[10]]<<std::endl;
+        }
 
         CUDA_SAFE_CALL(cudaFree(retVec.array));
         CUDA_SAFE_CALL(cudaFree(partial_reduce_sums.array));

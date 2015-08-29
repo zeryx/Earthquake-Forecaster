@@ -20,10 +20,10 @@ int main(int argc, char** arg){
     std::vector<std::pair<hcon, hcon> >connections;
     //beginning of 3 channel data inputs
 
-
+    //inputs 0-2 are site sensor data (3 channels, 3 inputs per timestep)
     connections.push_back(make_pair(make_pair(typeInput, 0), make_pair(typeHidden, 0)));
-    connections.push_back(make_pair(make_pair(typeInput, 0), make_pair(typeMemGateIn, 0))); // connect input 0 to memorygateIn 0
-    connections.push_back(make_pair(make_pair(typeInput, 0), make_pair(typeMemGateOut, 0))); // connect input 10 to memory gateoutput 0
+    connections.push_back(make_pair(make_pair(typeInput, 0), make_pair(typeMemGateIn, 0)));
+    connections.push_back(make_pair(make_pair(typeInput, 0), make_pair(typeMemGateOut, 0)));
     connections.push_back(make_pair(make_pair(typeInput, 0), make_pair(typeMemGateForget, 0)));
 
     connections.push_back(make_pair(make_pair(typeInput, 1), make_pair(typeHidden, 0)));
@@ -34,50 +34,63 @@ int main(int argc, char** arg){
     connections.push_back(make_pair(make_pair(typeInput, 2), make_pair(typeHidden, 0)));
     connections.push_back(make_pair(make_pair(typeInput, 2), make_pair(typeMemGateIn, 0)));
     connections.push_back(make_pair(make_pair(typeInput, 2), make_pair(typeMemGateOut, 0)));
-
     connections.push_back(make_pair(make_pair(typeInput, 2), make_pair(typeMemGateForget, 0)));
-    connections.push_back(make_pair(make_pair(typeInput, 3), make_pair(typeHidden, 0)));
-    connections.push_back(make_pair(make_pair(typeInput, 3), make_pair(typeMemGateIn, 0)));
-    connections.push_back(make_pair(make_pair(typeInput, 3), make_pair(typeMemGateOut, 0)));
-    connections.push_back(make_pair(make_pair(typeInput, 3), make_pair(typeMemGateForget, 0)));
-    //end of 3 channel data inputs
+
+
+    //global quake avg scalar distance is input 3
+    connections.push_back(make_pair(make_pair(typeInput, 3), make_pair(typeHidden, 1)));
+    connections.push_back(make_pair(make_pair(typeInput, 3), make_pair(typeMemGateIn, 1)));
+    connections.push_back(make_pair(make_pair(typeInput, 3), make_pair(typeMemGateOut, 1)));
+    connections.push_back(make_pair(make_pair(typeInput, 3), make_pair(typeMemGateForget,1)));
+    //global quake avg bearing is input 4
     connections.push_back(make_pair(make_pair(typeInput, 4), make_pair(typeHidden, 1)));
     connections.push_back(make_pair(make_pair(typeInput, 4), make_pair(typeMemGateIn, 1)));
     connections.push_back(make_pair(make_pair(typeInput, 4), make_pair(typeMemGateOut, 1)));
     connections.push_back(make_pair(make_pair(typeInput, 4), make_pair(typeMemGateForget, 1)));
-
+    //global quake avg magnitude is input 5
     connections.push_back(make_pair(make_pair(typeInput, 5), make_pair(typeHidden, 1)));
     connections.push_back(make_pair(make_pair(typeInput, 5), make_pair(typeMemGateIn, 1)));
     connections.push_back(make_pair(make_pair(typeInput, 5), make_pair(typeMemGateOut, 1)));
     connections.push_back(make_pair(make_pair(typeInput, 5), make_pair(typeMemGateForget, 1)));
-
-    connections.push_back(make_pair(make_pair(typeInput, 6), make_pair(typeHidden, 1)));
-    connections.push_back(make_pair(make_pair(typeInput, 6), make_pair(typeMemGateIn, 1)));
-    connections.push_back(make_pair(make_pair(typeInput, 6), make_pair(typeMemGateOut, 1)));
-    connections.push_back(make_pair(make_pair(typeInput, 6), make_pair(typeMemGateForget, 1)));
-
+    //planetary electromagnetic actvity index is input 6
+    connections.push_back(make_pair(make_pair(typeInput, 6), make_pair(typeHidden, 2)));
+    connections.push_back(make_pair(make_pair(typeInput, 6), make_pair(typeMemGateIn, 2)));
+    connections.push_back(make_pair(make_pair(typeInput, 6), make_pair(typeMemGateOut, 2)));
+    connections.push_back(make_pair(make_pair(typeInput, 6), make_pair(typeMemGateForget, 2)));
+    //community avg scalar distance is input 7
     connections.push_back(make_pair(make_pair(typeInput, 7), make_pair(typeHidden, 2)));
     connections.push_back(make_pair(make_pair(typeInput, 7), make_pair(typeMemGateIn, 2)));
     connections.push_back(make_pair(make_pair(typeInput, 7), make_pair(typeMemGateOut, 2)));
     connections.push_back(make_pair(make_pair(typeInput, 7), make_pair(typeMemGateForget, 2)));
-
+    //community avg bearing is input 8
     connections.push_back(make_pair(make_pair(typeInput, 8), make_pair(typeHidden, 2)));
     connections.push_back(make_pair(make_pair(typeInput, 8), make_pair(typeMemGateIn, 2)));
     connections.push_back(make_pair(make_pair(typeInput, 8), make_pair(typeMemGateOut, 2)));
     connections.push_back(make_pair(make_pair(typeInput, 8), make_pair(typeMemGateForget, 2)));
 
-    //connect memory gate in/outs/forgets to the memory node.
+    //connect memory gate in/outs/forgets to the memory node, and vice versa.
     connections.push_back(make_pair(make_pair(typeMemGateIn, 0), make_pair(typeMemory, 0)));
     connections.push_back(make_pair(make_pair(typeMemGateOut, 0), make_pair(typeMemory, 0)));
     connections.push_back(make_pair(make_pair(typeMemGateForget, 0), make_pair(typeMemory, 0)));
+    connections.push_back(make_pair(make_pair(typeMemory, 0), make_pair(typeMemGateIn, 0)));
+    connections.push_back(make_pair(make_pair(typeMemory, 0), make_pair(typeMemGateOut, 0)));
+    connections.push_back(make_pair(make_pair(typeMemory, 0), make_pair(typeMemGateForget, 0)));
+
 
     connections.push_back(make_pair(make_pair(typeMemGateIn, 1), make_pair(typeMemory, 1)));
     connections.push_back(make_pair(make_pair(typeMemGateOut, 1), make_pair(typeMemory, 1)));
     connections.push_back(make_pair(make_pair(typeMemGateForget, 1), make_pair(typeMemory, 1)));
+    connections.push_back(make_pair(make_pair(typeMemory, 1), make_pair(typeMemGateIn, 1)));
+    connections.push_back(make_pair(make_pair(typeMemory, 1), make_pair(typeMemGateOut, 1)));
+    connections.push_back(make_pair(make_pair(typeMemory, 1), make_pair(typeMemGateForget, 1)));
 
     connections.push_back(make_pair(make_pair(typeMemGateIn, 2), make_pair(typeMemory, 2)));
     connections.push_back(make_pair(make_pair(typeMemGateOut, 2), make_pair(typeMemory, 2)));
     connections.push_back(make_pair(make_pair(typeMemGateForget, 2), make_pair(typeMemory, 2)));
+    connections.push_back(make_pair(make_pair(typeMemory, 2), make_pair(typeMemGateIn, 2)));
+    connections.push_back(make_pair(make_pair(typeMemory, 2), make_pair(typeMemGateOut, 2)));
+    connections.push_back(make_pair(make_pair(typeMemory, 2), make_pair(typeMemGateForget, 2)));
+
     //connect memory neurons to hidden neurons, they don't have weights
     connections.push_back(make_pair(make_pair(typeMemory, 0), make_pair(typeHidden, 0)));
     connections.push_back(make_pair(make_pair(typeMemory, 1), make_pair(typeHidden, 1)));

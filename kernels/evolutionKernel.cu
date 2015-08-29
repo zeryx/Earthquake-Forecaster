@@ -27,7 +27,7 @@ __global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params,
         const int child_mem = params.array[14] + child + device_offset;
         const int child_communityMag = params.array[20] + child + device_offset;
 
-        float mut = 0.714;
+        float mut = 0.7692;
         double chance[14];
         chance[0] = 0;
         for(int i=1; i<14; i++){
@@ -44,7 +44,7 @@ __global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params,
 
         for(int i=0; i<params.array[1]; i++){//for each weight, lets determine how the weights of the child are altered.
             thrust::uniform_real_distribution<double> weightSpin(0, 10);
-            randEng.discard(idx+20);
+            randEng.discard(idx+4);
             double result;
             double rng = weightSpin(randEng);
 
@@ -94,7 +94,7 @@ __global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params,
                 result = vect.array[your_wt+i*ind];
             else if(rng>=chance[12] && rng<chance[13])
                 result = vect.array[partner_wt+i*ind];
-            else
+            else // this should almost never be the set value.
                 result =10;
 
             vect.array[child_wt +i*ind] = result;
