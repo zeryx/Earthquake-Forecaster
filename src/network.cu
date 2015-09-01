@@ -356,6 +356,8 @@ void NetworkGenetic::trainForecast(std::vector<double> *ret, int &hour, std::vec
     CUDA_SAFE_CALL(cudaFree(dmeanCh.array));
     CUDA_SAFE_CALL(cudaFree(dstdCh.array));
     delete[] seed;
+    cudaDeviceReset();
+    exit(1);
 }
 
 void NetworkGenetic::challengeForecast(std::vector<double> *ret, int &hour, std::vector<int> &data, double &Kp,
@@ -434,122 +436,122 @@ void NetworkGenetic::challengeForecast(std::vector<double> *ret, int &hour, std:
 
                 //set stuff to zero
                 if(connections[itr].first.def == typeInput && connections[itr].second.def == typeZero)
-                    neuroZero(&input[connections[itr].first.id]);
+                    neuroZero(input[connections[itr].first.id]);
 
                 else if(connections[itr].first.def == typeHidden && connections[itr].second.def == typeZero)
-                    neuroZero(&hidden[connections[itr].first.id]);
+                    neuroZero(hidden[connections[itr].first.id]);
 
                 else if(connections[itr].first.def == typeMemGateIn && connections[itr].second.def == typeZero)
-                    neuroZero(&memGateIn[+connections[itr].first.id]);
+                    neuroZero(memGateIn[+connections[itr].first.id]);
 
                 else if(connections[itr].first.def == typeMemGateOut && connections[itr].second.def == typeZero)
-                    neuroZero(&memGateOut[connections[itr].first.id]);
+                    neuroZero(memGateOut[connections[itr].first.id]);
 
                 else if(connections[itr].first.def == typeMemGateForget && connections[itr].second.def == typeZero)
-                    neuroZero(&memGateForget[connections[itr].first.id]);
+                    neuroZero(memGateForget[connections[itr].first.id]);
 
                 else if(connections[itr].first.def == typeMemory && connections[itr].second.def == typeZero)
-                    neuroZero(&mem[connections[itr].first.id]);
+                    neuroZero(mem[connections[itr].first.id]);
 
                 else if(connections[itr].first.def == typeOutput && connections[itr].second.def == typeZero)
-                    neuroZero(&output[connections[itr].first.id]);
+                    neuroZero(output[connections[itr].first.id]);
 
                 //first->second summations
                 else if(connections[itr].first.def == typeInput && connections[itr].second.def == typeHidden)
-                    neuroSum(&hidden[connections[itr].second.id],
+                    neuroSum(hidden[connections[itr].second.id],
                             (input[connections[itr].first.id])*(_best[n++]));
 
                 else if(connections[itr].first.def == typeInput && connections[itr].second.def == typeMemGateIn)
-                    neuroSum(&memGateIn[ + connections[itr].second.id],
+                    neuroSum(memGateIn[ + connections[itr].second.id],
                             (input[connections[itr].first.id])*(_best[n++]));
 
                 else if(connections[itr].first.def == typeInput && connections[itr].second.def == typeMemGateOut)
-                    neuroSum(&memGateIn[connections[itr].second.id],
+                    neuroSum(memGateIn[connections[itr].second.id],
                             (input[connections[itr].first.id])*(_best[n++]));
 
                 else if(connections[itr].first.def == typeInput && connections[itr].second.def == typeMemGateForget)
-                    neuroSum(&memGateForget[connections[itr].second.id],
+                    neuroSum(memGateForget[connections[itr].second.id],
                             (input[connections[itr].first.id])*(_best[n++]));
 
                 else if(connections[itr].first.def == typeHidden && connections[itr].second.def == typeHidden)
-                    neuroSum(&hidden[connections[itr].second.id],
+                    neuroSum(hidden[connections[itr].second.id],
                             (hidden[connections[itr].first.id])*(_best[n++]));
 
                 else if(connections[itr].first.def == typeHidden && connections[itr].second.def == typeMemGateIn)
-                    neuroSum(&memGateIn[connections[itr].second.id],
+                    neuroSum(memGateIn[connections[itr].second.id],
                             (hidden[connections[itr].first.id])*(_best[n++]));
 
                 else if(connections[itr].first.def == typeHidden && connections[itr].second.def == typeMemGateOut)
-                    neuroSum(&memGateIn[connections[itr].second.id],
+                    neuroSum(memGateIn[connections[itr].second.id],
                             (hidden[connections[itr].first.id])*(_best[n++]));
 
                 else if(connections[itr].first.def == typeHidden && connections[itr].second.def == typeMemGateForget)
-                    neuroSum(&memGateForget[connections[itr].second.id],
+                    neuroSum(memGateForget[connections[itr].second.id],
                             (hidden[connections[itr].first.id])*(_best[n++]));
 
                 //memory gates
                 else if(connections[itr].first.def == typeInput && connections[itr].second.def == typeMemory && connections[itr].third.def == typeMemGateIn)
                     neuroMemGate(memGateIn[connections[itr].third.id],
                             input[connections[itr].first.id],
-                            &mem[connections[itr].second.id], 0.5);
+                            mem[connections[itr].second.id], 0.5);
 
                 else if(connections[itr].first.def == typeHidden && connections[itr].second.def == typeMemory && connections[itr].third.def == typeMemGateIn)
                     neuroMemGate(memGateIn[+connections[itr].third.id],
                             hidden[connections[itr].first.id],
-                            &mem[connections[itr].second.id], 0.5);
+                            mem[connections[itr].second.id], 0.5);
 
                 else if(connections[itr].first.def == typeOutput && connections[itr].second.def == typeMemory && connections[itr].third.def == typeMemGateIn)
                     neuroMemGate(memGateIn[connections[itr].third.id],
                             output[connections[itr].first.id],
-                            &mem[connections[itr].second.id], 0.5);
+                            mem[connections[itr].second.id], 0.5);
 
                 else if(connections[itr].first.def == typeMemory && connections[itr].second.def == typeHidden && connections[itr].third.def == typeMemGateOut)
                     neuroMemGate(memGateOut[connections[itr].third.id],
                             mem[connections[itr].first.id],
-                            &hidden[connections[itr].second.id], 0.5);
+                            hidden[connections[itr].second.id], 0.5);
 
                 else if(connections[itr].first.def == typeMemory && connections[itr].second.def == typeOutput && connections[itr].third.def == typeMemGateOut)
                     neuroMemGate(memGateOut[connections[itr].third.id],
                             mem[connections[itr].first.id],
-                            &output[connections[itr].second.id], 0.5);
+                            output[connections[itr].second.id], 0.5);
 
                 else if(connections[itr].first.def == typeMemory && connections[itr].second.def == typeMemGateForget)
                     neuroMemForget(memGateForget[connections[itr].second.id],
-                            &mem[connections[itr].first.id], 0.5);
+                            mem[connections[itr].first.id], 0.5);
 
 
 
                 //bias
                 else if(connections[itr].first.def == typeBias && connections[itr].second.def == typeHidden)
-                    neuroSum(&hidden[connections[itr].second.id], (1*(_best[n++])));
+                    neuroSum(hidden[connections[itr].second.id], (1*(_best[n++])));
 
                 else if(connections[itr].first.def == typeBias && connections[itr].second.def == typeMemGateIn)
-                    neuroSum(&memGateIn[connections[itr].second.id], (1*(_best[n++])));
+                    neuroSum(memGateIn[connections[itr].second.id], (1*(_best[n++])));
 
                 else if(connections[itr].first.def == typeBias && connections[itr].second.def == typeMemGateOut)
-                    neuroSum(&memGateIn[connections[itr].second.id], (1*(_best[n++])));
+                    neuroSum(memGateIn[connections[itr].second.id], (1*(_best[n++])));
 
                 else if(connections[itr].first.def == typeBias && connections[itr].second.def == typeMemGateForget)
-                    neuroSum(&memGateForget[connections[itr].second.id], (1*(_best[n++])));
+                    neuroSum(memGateForget[connections[itr].second.id], (1*(_best[n++])));
 
                 else if(connections[itr].first.def == typeBias && connections[itr].second.def == typeOutput)
-                    neuroSum(&output[connections[itr].second.id], (1*(_best[n++])));
+                    neuroSum(output[connections[itr].second.id], (1*(_best[n++])));
 
                 //squashing
                 else if(connections[itr].first.def == typeHidden && connections[itr].second.def == typeSquash)
-                    neuroSquash(&hidden[connections[itr].second.id]);
+                    neuroSquash(hidden[connections[itr].second.id]);
 
                 else if(connections[itr].first.def == typeMemGateIn && connections[itr].second.def == typeSquash)
-                    neuroSquash(&memGateIn[ + connections[itr].second.id]);
+                    neuroSquash(memGateIn[ + connections[itr].second.id]);
 
                 else if(connections[itr].first.def == typeMemGateOut && connections[itr].second.def == typeSquash)
-                    neuroSquash(&memGateIn[connections[itr].second.id]);
+                    neuroSquash(memGateIn[connections[itr].second.id]);
 
                 else if(connections[itr].first.def == typeMemGateForget && connections[itr].second.def == typeSquash)
-                    neuroSquash(&memGateForget[connections[itr].second.id]);
+                    neuroSquash(memGateForget[connections[itr].second.id]);
 
                 else if(connections[itr].first.def == typeOutput && connections[itr].second.def == typeSquash)
-                    neuroSquash(&output[connections[itr].second.id]);
+                    neuroSquash(output[connections[itr].second.id]);
 
             }
 

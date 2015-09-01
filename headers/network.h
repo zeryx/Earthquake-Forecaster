@@ -4,7 +4,6 @@
 #include <connections.h>
 #include <vector>
 #include <string>
-#include <map>
 #include <cuda_runtime_api.h>
 #include <utility>
 #ifndef CUDA_SAFE_CALL

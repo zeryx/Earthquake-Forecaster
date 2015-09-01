@@ -31,10 +31,12 @@ int main(int argc, char** arg){
 
         if(start.checkForGenomes("/weights.bin")){
             std::cerr<<"running a hot start"<<std::endl;
+
             start.hotStart("/weights.bin", 0.85);
         }
         else{
             std::cerr<<"running a cold start"<<std::endl;
+
             start.coldStart(0.85);
         }
     }

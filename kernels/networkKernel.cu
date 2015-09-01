@@ -85,81 +85,81 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
 
                 //set stuff to zero
                 if(commandQueue[itr].first.def == typeHidden && commandQueue[itr].second.def == typeZero){
-                    neuroZero(&Vec.array[hiddenOffset+commandQueue[itr].first.id*ind]);
+                    neuroZero(Vec.array[hiddenOffset+commandQueue[itr].first.id*ind]);
                     zeros++;
                 }
 
                 else if(commandQueue[itr].first.def == typeMemGateIn && commandQueue[itr].second.def == typeZero){
-                    neuroZero(&Vec.array[memGateInOffset+commandQueue[itr].first.id*ind]);
+                    neuroZero(Vec.array[memGateInOffset+commandQueue[itr].first.id*ind]);
                     zeros++;
                 }
 
                 else if(commandQueue[itr].first.def == typeMemGateOut && commandQueue[itr].second.def == typeZero){
-                    neuroZero(&Vec.array[memGateOutOffset+commandQueue[itr].first.id*ind]);
+                    neuroZero(Vec.array[memGateOutOffset+commandQueue[itr].first.id*ind]);
                     zeros++;
                 }
 
                 else if(commandQueue[itr].first.def == typeMemGateForget && commandQueue[itr].second.def == typeZero){
-                    neuroZero(&Vec.array[memGateForgetOffset+commandQueue[itr].first.id*ind]);
+                    neuroZero(Vec.array[memGateForgetOffset+commandQueue[itr].first.id*ind]);
                     zeros++;
                 }
 
                 else if(commandQueue[itr].first.def == typeMemory && commandQueue[itr].second.def == typeZero){
-                    neuroZero(&Vec.array[memOffset+commandQueue[itr].first.id*ind]);
+                    neuroZero(Vec.array[memOffset+commandQueue[itr].first.id*ind]);
                     zeros++;
                 }
 
                 else if(commandQueue[itr].first.def == typeOutput && commandQueue[itr].second.def == typeZero){
-                    neuroZero(&Vec.array[outputOffset+commandQueue[itr].first.id*ind]);
+                    neuroZero(Vec.array[outputOffset+commandQueue[itr].first.id*ind]);
                     zeros++;
                 }
 
                 //first->second summations
                 else if(commandQueue[itr].first.def == typeInput && commandQueue[itr].second.def == typeHidden){
-                    neuroSum(&Vec.array[hiddenOffset + commandQueue[itr].second.id*ind],
+                    neuroSum(Vec.array[hiddenOffset + commandQueue[itr].second.id*ind],
                             (Vec.array[inputOffset + commandQueue[itr].first.id*ind])*(Vec.array[weightsOffset+n++*ind]));
                     adds++;
                 }
 
                 else if(commandQueue[itr].first.def == typeInput && commandQueue[itr].second.def == typeMemGateIn){
-                    neuroSum(&Vec.array[memGateInOffset + commandQueue[itr].second.id*ind],
+                    neuroSum(Vec.array[memGateInOffset + commandQueue[itr].second.id*ind],
                             (Vec.array[inputOffset + commandQueue[itr].first.id*ind])*Vec.array[weightsOffset+n++*ind]);
                     adds++;
                 }
 
                 else if(commandQueue[itr].first.def == typeInput && commandQueue[itr].second.def == typeMemGateOut){
-                    neuroSum(&Vec.array[memGateOutOffset + commandQueue[itr].second.id*ind],
+                    neuroSum(Vec.array[memGateOutOffset + commandQueue[itr].second.id*ind],
                             (Vec.array[inputOffset + commandQueue[itr].first.id*ind])*Vec.array[weightsOffset+n++*ind]);
                     adds++;
                 }
 
                 else if(commandQueue[itr].first.def == typeInput && commandQueue[itr].second.def == typeMemGateForget){
-                    neuroSum(&Vec.array[memGateForgetOffset + commandQueue[itr].second.id*ind],
+                    neuroSum(Vec.array[memGateForgetOffset + commandQueue[itr].second.id*ind],
                             (Vec.array[inputOffset + commandQueue[itr].first.id*ind])*Vec.array[weightsOffset+n++*ind]);
                     adds++;
                 }
 
                 else if(commandQueue[itr].first.def == typeHidden && commandQueue[itr].second.def == typeHidden){
-                    neuroSum(&Vec.array[hiddenOffset + commandQueue[itr].second.id*ind],
+                    neuroSum(Vec.array[hiddenOffset + commandQueue[itr].second.id*ind],
                             (Vec.array[hiddenOffset + commandQueue[itr].first.id*ind])*Vec.array[weightsOffset+n++*ind]);
                     adds++;
                 }
 
                 else if(commandQueue[itr].first.def == typeHidden && commandQueue[itr].second.def == typeMemGateIn){
-                    neuroSum(&Vec.array[memGateInOffset + commandQueue[itr].second.id*ind],
+                    neuroSum(Vec.array[memGateInOffset + commandQueue[itr].second.id*ind],
                             (Vec.array[hiddenOffset + commandQueue[itr].first.id*ind])*Vec.array[weightsOffset+n++*ind]);
                     adds++;
                 }
 
 
                 else if(commandQueue[itr].first.def == typeHidden && commandQueue[itr].second.def == typeMemGateOut){
-                    neuroSum(&Vec.array[memGateOutOffset + commandQueue[itr].second.id*ind],
+                    neuroSum(Vec.array[memGateOutOffset + commandQueue[itr].second.id*ind],
                             (Vec.array[hiddenOffset + commandQueue[itr].first.id*ind])*Vec.array[weightsOffset+n++*ind]);
                     adds++;
                 }
 
                 else if(commandQueue[itr].first.def == typeHidden && commandQueue[itr].second.def == typeMemGateForget){
-                    neuroSum(&Vec.array[memGateForgetOffset + commandQueue[itr].second.id*ind],
+                    neuroSum(Vec.array[memGateForgetOffset + commandQueue[itr].second.id*ind],
                             (Vec.array[hiddenOffset + commandQueue[itr].first.id*ind])*Vec.array[weightsOffset+n++*ind]);
                     adds++;
                 }
@@ -169,93 +169,93 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
                 else if(commandQueue[itr].first.def == typeInput && commandQueue[itr].second.def == typeMemory && commandQueue[itr].third.def == typeMemGateIn){
                     neuroMemGate(Vec.array[memGateInOffset+commandQueue[itr].third.id*ind],
                             Vec.array[inputOffset+commandQueue[itr].first.id*ind],
-                            &Vec.array[memOffset+commandQueue[itr].second.id*ind], 0.5);
+                            Vec.array[memOffset+commandQueue[itr].second.id*ind], 0.5);
                     memsets++;
                 }
 
                 else if(commandQueue[itr].first.def == typeHidden && commandQueue[itr].second.def == typeMemory && commandQueue[itr].third.def == typeMemGateIn){
                     neuroMemGate(Vec.array[memGateInOffset+commandQueue[itr].third.id*ind],
                             Vec.array[hiddenOffset+commandQueue[itr].first.id*ind],
-                            &Vec.array[memOffset+commandQueue[itr].second.id*ind], 0.5);
+                            Vec.array[memOffset+commandQueue[itr].second.id*ind], 0.5);
                     memsets++;
                 }
 
                 else if(commandQueue[itr].first.def == typeOutput && commandQueue[itr].second.def == typeMemory && commandQueue[itr].third.def == typeMemGateIn){
                     neuroMemGate(Vec.array[memGateInOffset+commandQueue[itr].third.id*ind],
                             Vec.array[outputOffset+commandQueue[itr].first.id*ind],
-                            &Vec.array[memOffset+commandQueue[itr].second.id*ind], 0.5);
+                            Vec.array[memOffset+commandQueue[itr].second.id*ind], 0.5);
                     memsets++;
                 }
 
                 else if(commandQueue[itr].first.def == typeMemory && commandQueue[itr].second.def == typeHidden && commandQueue[itr].third.def == typeMemGateOut){
                     neuroMemGate(Vec.array[memGateOutOffset+commandQueue[itr].third.id*ind],
                             Vec.array[memOffset+commandQueue[itr].first.id*ind],
-                            &Vec.array[hiddenOffset+commandQueue[itr].second.id*ind], 0.5);
+                            Vec.array[hiddenOffset+commandQueue[itr].second.id*ind], 0.5);
                     mempushes++;
                 }
 
                 else if(commandQueue[itr].first.def == typeMemory && commandQueue[itr].second.def == typeOutput && commandQueue[itr].third.def == typeMemGateOut){
                     neuroMemGate(Vec.array[memGateOutOffset+commandQueue[itr].third.id*ind],
                             Vec.array[memOffset+commandQueue[itr].first.id*ind],
-                            &Vec.array[outputOffset+commandQueue[itr].second.id*ind], 0.5);
+                            Vec.array[outputOffset+commandQueue[itr].second.id*ind], 0.5);
                     mempushes++;
                 }
 
                 else if(commandQueue[itr].first.def == typeMemory && commandQueue[itr].second.def == typeMemGateForget)
                     neuroMemForget(Vec.array[memGateForgetOffset+commandQueue[itr].second.id*ind],
-                            &Vec.array[memOffset + commandQueue[itr].first.id*ind], 0.5);
+                            Vec.array[memOffset + commandQueue[itr].first.id*ind], 0.5);
 
 
 
                 //bias
                 else if(commandQueue[itr].first.def == typeBias && commandQueue[itr].second.def == typeHidden){
-                    neuroSum(&Vec.array[hiddenOffset + commandQueue[itr].second.id*ind], (1*Vec.array[weightsOffset+n++*ind]));
+                    neuroSum(Vec.array[hiddenOffset + commandQueue[itr].second.id*ind], (1*Vec.array[weightsOffset+n++*ind]));
                     adds++;
                 }
 
                 else if(commandQueue[itr].first.def == typeBias && commandQueue[itr].second.def == typeMemGateIn){
-                    neuroSum(&Vec.array[memGateInOffset + commandQueue[itr].second.id*ind], (1*Vec.array[weightsOffset+n++*ind]));
+                    neuroSum(Vec.array[memGateInOffset + commandQueue[itr].second.id*ind], (1*Vec.array[weightsOffset+n++*ind]));
                     adds++;
                 }
 
                 else if(commandQueue[itr].first.def == typeBias && commandQueue[itr].second.def == typeMemGateOut){
                     adds++;
-                    neuroSum(&Vec.array[memGateOutOffset + commandQueue[itr].second.id*ind], (1*Vec.array[weightsOffset+n++*ind]));
+                    neuroSum(Vec.array[memGateOutOffset + commandQueue[itr].second.id*ind], (1*Vec.array[weightsOffset+n++*ind]));
                 }
 
                 else if(commandQueue[itr].first.def == typeBias && commandQueue[itr].second.def == typeMemGateForget){
-                    neuroSum(&Vec.array[memGateForgetOffset + commandQueue[itr].second.id*ind], (1*Vec.array[weightsOffset+n++*ind]));
+                    neuroSum(Vec.array[memGateForgetOffset + commandQueue[itr].second.id*ind], (1*Vec.array[weightsOffset+n++*ind]));
                     adds++;
                 }
 
                 else if(commandQueue[itr].first.def == typeBias && commandQueue[itr].second.def == typeOutput){
-                    neuroSum(&Vec.array[outputOffset + commandQueue[itr].second.id*ind], (1*Vec.array[weightsOffset+n++*ind]));
+                    neuroSum(Vec.array[outputOffset + commandQueue[itr].second.id*ind], (1*Vec.array[weightsOffset+n++*ind]));
                     adds++;
                 }
 
                 //squashing
                 else if(commandQueue[itr].first.def == typeHidden && commandQueue[itr].second.def == typeSquash){
-                    neuroSquash(&Vec.array[hiddenOffset + commandQueue[itr].second.id*ind]);
+                    neuroSquash(Vec.array[hiddenOffset + commandQueue[itr].second.id*ind]);
                     squashes++;
                 }
 
                 else if(commandQueue[itr].first.def == typeMemGateIn && commandQueue[itr].second.def == typeSquash){
-                    neuroSquash(&Vec.array[memGateInOffset + commandQueue[itr].second.id*ind]);
+                    neuroSquash(Vec.array[memGateInOffset + commandQueue[itr].second.id*ind]);
                     squashes++;
                 }
 
                 else if(commandQueue[itr].first.def == typeMemGateOut && commandQueue[itr].second.def == typeSquash){
-                    neuroSquash(&Vec.array[memGateOutOffset + commandQueue[itr].second.id*ind]);
+                    neuroSquash(Vec.array[memGateOutOffset + commandQueue[itr].second.id*ind]);
                     squashes++;
                 }
 
                 else if(commandQueue[itr].first.def == typeMemGateForget && commandQueue[itr].second.def == typeSquash){
-                    neuroSquash(&Vec.array[memGateForgetOffset + commandQueue[itr].second.id*ind]);
+                    neuroSquash(Vec.array[memGateForgetOffset + commandQueue[itr].second.id*ind]);
                     squashes++;
                 }
 
                 else if(commandQueue[itr].first.def == typeOutput && commandQueue[itr].second.def == typeSquash){
-                    neuroSquash(&Vec.array[outputOffset + commandQueue[itr].second.id*ind]);
+                    neuroSquash(Vec.array[outputOffset + commandQueue[itr].second.id*ind]);
                     squashes++;
                 }
 
@@ -288,5 +288,6 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
     float ansLon = siteData[(int)answers[0]*2+1];
     int whenAns = (int)answers[1] - hour;
     double oldFit = Vec.array[fitnessOffset];
-    Vec.array[fitnessOffset] = scoreFunc(whenGuess, whenAns, guessLat, guessLon, ansLat, ansLon, oldFit); //we take the average beacuse consistency is more important than being really good at this particular hour.
+    Vec.array[fitnessOffset] = Vec.array[outputOffset];
+//    Vec.array[fitnessOffset] = scoreFunc(whenGuess, whenAns, guessLat, guessLon, ansLat, ansLon, oldFit); //we take the average beacuse consistency is more important than being really good at this particular hour.
 }
