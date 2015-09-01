@@ -1,0 +1,1819 @@
+{
+    "neurons": {
+        "input": 9,
+        "hidden": 3,
+        "memory": 5,
+        "memIn": 5,
+        "memOut": 5,
+        "memForget": 5,
+        "output": 3
+    },
+    "orders": [
+        {
+            "first": {
+                "def": "memGateIn",
+                "id": 0
+            },
+            "second": {
+                "def": "zero",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateIn",
+                "id": 1
+            },
+            "second": {
+                "def": "zero",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateIn",
+                "id": 2
+            },
+            "second": {
+                "def": "zero",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateIn",
+                "id": 3
+            },
+            "second": {
+                "def": "zero",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateIn",
+                "id": 4
+            },
+            "second": {
+                "def": "zero",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateOut",
+                "id": 0
+            },
+            "second": {
+                "def": "zero",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateOut",
+                "id": 1
+            },
+            "second": {
+                "def": "zero",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateOut",
+                "id": 2
+            },
+            "second": {
+                "def": "zero",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateOut",
+                "id": 3
+            },
+            "second": {
+                "def": "zero",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateOut",
+                "id": 4
+            },
+            "second": {
+                "def": "zero",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateForget",
+                "id": 0
+            },
+            "second": {
+                "def": "zero",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateForget",
+                "id": 1
+            },
+            "second": {
+                "def": "zero",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateForget",
+                "id": 2
+            },
+            "second": {
+                "def": "zero",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateForget",
+                "id": 3
+            },
+            "second": {
+                "def": "zero",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateForget",
+                "id": 4
+            },
+            "second": {
+                "def": "zero",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "output",
+                "id": 0
+            },
+            "second": {
+                "def": "zero",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "output",
+                "id": 1
+            },
+            "second": {
+                "def": "zero",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "output",
+                "id": 2
+            },
+            "second": {
+                "def": "zero",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 0
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 0
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 0
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 0
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 0
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 1
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 1
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 1
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 1
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 1
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 2
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 2
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 2
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 2
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 2
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 0
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 0
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 0
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 0
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 0
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 1
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 1
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 1
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 1
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 1
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 2
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 2
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 2
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 2
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 2
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 0
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 0
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 0
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 0
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 0
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 1
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 1
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 1
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 1
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 1
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 2
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 2
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 2
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 2
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 2
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 0
+            },
+            "second": {
+                "def": "zero",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 1
+            },
+            "second": {
+                "def": "zero",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 2
+            },
+            "second": {
+                "def": "zero",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 0
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 1
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 2
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 3
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 4
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 5
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 6
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 7
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 8
+            },
+            "second": {
+                "def": "memGateIn",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 0
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 1
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 2
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 3
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 4
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 5
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 6
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 7
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 8
+            },
+            "second": {
+                "def": "memGateOut",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 0
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 1
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 2
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 3
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 4
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 5
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 6
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 7
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 8
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "memGateIn",
+                "id": 0
+            },
+            "second": {
+                "def": "squash",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateIn",
+                "id": 1
+            },
+            "second": {
+                "def": "squash",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateIn",
+                "id": 2
+            },
+            "second": {
+                "def": "squash",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateIn",
+                "id": 3
+            },
+            "second": {
+                "def": "squash",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateIn",
+                "id": 4
+            },
+            "second": {
+                "def": "squash",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateOut",
+                "id": 0
+            },
+            "second": {
+                "def": "squash",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateOut",
+                "id": 1
+            },
+            "second": {
+                "def": "squash",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateOut",
+                "id": 2
+            },
+            "second": {
+                "def": "squash",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateOut",
+                "id": 3
+            },
+            "second": {
+                "def": "squash",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateOut",
+                "id": 4
+            },
+            "second": {
+                "def": "squash",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateForget",
+                "id": 0
+            },
+            "second": {
+                "def": "squash",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateForget",
+                "id": 1
+            },
+            "second": {
+                "def": "squash",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateForget",
+                "id": 2
+            },
+            "second": {
+                "def": "squash",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateForget",
+                "id": 3
+            },
+            "second": {
+                "def": "squash",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memGateForget",
+                "id": 4
+            },
+            "second": {
+                "def": "squash",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 0
+            },
+            "second": {
+                "def": "hidden",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 1
+            },
+            "second": {
+                "def": "hidden",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 2
+            },
+            "second": {
+                "def": "hidden",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 3
+            },
+            "second": {
+                "def": "hidden",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 4
+            },
+            "second": {
+                "def": "hidden",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 5
+            },
+            "second": {
+                "def": "hidden",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 6
+            },
+            "second": {
+                "def": "hidden",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 7
+            },
+            "second": {
+                "def": "hidden",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 8
+            },
+            "second": {
+                "def": "hidden",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 0
+            },
+            "second": {
+                "def": "hidden",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 1
+            },
+            "second": {
+                "def": "hidden",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 2
+            },
+            "second": {
+                "def": "hidden",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 3
+            },
+            "second": {
+                "def": "hidden",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 4
+            },
+            "second": {
+                "def": "hidden",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 5
+            },
+            "second": {
+                "def": "hidden",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 6
+            },
+            "second": {
+                "def": "hidden",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 7
+            },
+            "second": {
+                "def": "hidden",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 8
+            },
+            "second": {
+                "def": "hidden",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 0
+            },
+            "second": {
+                "def": "hidden",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 1
+            },
+            "second": {
+                "def": "hidden",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 2
+            },
+            "second": {
+                "def": "hidden",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 3
+            },
+            "second": {
+                "def": "hidden",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 4
+            },
+            "second": {
+                "def": "hidden",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 5
+            },
+            "second": {
+                "def": "hidden",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 6
+            },
+            "second": {
+                "def": "hidden",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 7
+            },
+            "second": {
+                "def": "hidden",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 8
+            },
+            "second": {
+                "def": "hidden",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 0
+            },
+            "second": {
+                "def": "memory",
+                "id": 0
+            },
+            "third": {
+                "def": "memGateIn",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 1
+            },
+            "second": {
+                "def": "memory",
+                "id": 1
+            },
+            "third": {
+                "def": "memGateIn",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 2
+            },
+            "second": {
+                "def": "memory",
+                "id": 2
+            },
+            "third": {
+                "def": "memGateIn",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 3
+            },
+            "second": {
+                "def": "memory",
+                "id": 3
+            },
+            "third": {
+                "def": "memGateIn",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 4
+            },
+            "second": {
+                "def": "memory",
+                "id": 3
+            },
+            "third": {
+                "def": "memGateIn",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 5
+            },
+            "second": {
+                "def": "memory",
+                "id": 3
+            },
+            "third": {
+                "def": "memGateIn",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 6
+            },
+            "second": {
+                "def": "memory",
+                "id": 4
+            },
+            "third": {
+                "def": "memGateIn",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 7
+            },
+            "second": {
+                "def": "memory",
+                "id": 4
+            },
+            "third": {
+                "def": "memGateIn",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "input",
+                "id": 8
+            },
+            "second": {
+                "def": "memory",
+                "id": 4
+            },
+            "third": {
+                "def": "memGateIn",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "memory",
+                "id": 0
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memory",
+                "id": 1
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "memory",
+                "id": 2
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "memory",
+                "id": 3
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "memory",
+                "id": 4
+            },
+            "second": {
+                "def": "memGateForget",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "memory",
+                "id": 0
+            },
+            "second": {
+                "def": "hidden",
+                "id": 0
+            },
+            "third": {
+                "def": "memGateOut",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "memory",
+                "id": 1
+            },
+            "second": {
+                "def": "hidden",
+                "id": 0
+            },
+            "third": {
+                "def": "memGateOut",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "memory",
+                "id": 2
+            },
+            "second": {
+                "def": "hidden",
+                "id": 0
+            },
+            "third": {
+                "def": "memGateOut",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "memory",
+                "id": 3
+            },
+            "second": {
+                "def": "hidden",
+                "id": 1
+            },
+            "third": {
+                "def": "memGateOut",
+                "id": 3
+            }
+        },
+        {
+            "first": {
+                "def": "memory",
+                "id": 4
+            },
+            "second": {
+                "def": "hidden",
+                "id": 2
+            },
+            "third": {
+                "def": "memGateOut",
+                "id": 4
+            }
+        },
+        {
+            "first": {
+                "def": "bias",
+                "id": 0
+            },
+            "second": {
+                "def": "hidden",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "bias",
+                "id": 0
+            },
+            "second": {
+                "def": "hidden",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "bias",
+                "id": 0
+            },
+            "second": {
+                "def": "hidden",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 0
+            },
+            "second": {
+                "def": "squash",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 1
+            },
+            "second": {
+                "def": "squash",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 2
+            },
+            "second": {
+                "def": "squash",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 0
+            },
+            "second": {
+                "def": "output",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 1
+            },
+            "second": {
+                "def": "output",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 2
+            },
+            "second": {
+                "def": "output",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 0
+            },
+            "second": {
+                "def": "output",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 1
+            },
+            "second": {
+                "def": "output",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 2
+            },
+            "second": {
+                "def": "output",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 0
+            },
+            "second": {
+                "def": "output",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 1
+            },
+            "second": {
+                "def": "output",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "hidden",
+                "id": 2
+            },
+            "second": {
+                "def": "output",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "bias",
+                "id": 0
+            },
+            "second": {
+                "def": "output",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "bias",
+                "id": 0
+            },
+            "second": {
+                "def": "output",
+                "id": 1
+            }
+        },
+        {
+            "first": {
+                "def": "bias",
+                "id": 0
+            },
+            "second": {
+                "def": "output",
+                "id": 2
+            }
+        },
+        {
+            "first": {
+                "def": "output",
+                "id": 0
+            },
+            "second": {
+                "def": "squash",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "output",
+                "id": 1
+            },
+            "second": {
+                "def": "squash",
+                "id": 0
+            }
+        },
+        {
+            "first": {
+                "def": "output",
+                "id": 2
+            },
+            "second": {
+                "def": "squash",
+                "id": 0
+            }
+        }
+    ]
+}

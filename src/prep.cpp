@@ -118,7 +118,6 @@ bool prep::checkForJson(const char* filepath){
         tmp.second.id = orders[itr]["second"]["id"].GetInt();
         tmp.first.def = this->strcmp(def1);
         tmp.second.def= this->strcmp(def2);
-        std::cerr<<"first "<<tmp.first.def<<std::endl;
         if(orders[itr].HasMember("third")){
             std::string def3 = orders[itr]["third"]["def"].GetString();
             tmp.third.id = orders[itr]["third"]["id"].GetInt();
@@ -139,6 +138,7 @@ bool prep::checkForJson(const char* filepath){
 
         //check if weights should be incremented.
         if(tmp.first.def != typeMemory
+                && tmp.second.def != typeMemory
                 && tmp.second.def != typeZero
                 && tmp.second.def != typeSquash
                 && tmp.third.def != typeNULL)
