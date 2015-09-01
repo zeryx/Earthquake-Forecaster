@@ -13,36 +13,36 @@
 
 class  NetworkGenetic{
 public:
-    NetworkGenetic(const int &numInNeurons, const int &numHiddenNeurons, const int &numMemoryNeurons, const int &numMemoryIn, const int &numMemoryOut, const int &numMemoryForget,
-                   const int &numOutNeurons, const int &numWeights,  std::vector< std::pair<hcon, hcon> >&connections);
-    void errorFunc();
+    NetworkGenetic();
     void generateWeights(); //initializes _data array and fills with random numbers
-        void setParams();
     void allocateHostAndGPUObjects(float pMax, size_t deviceRam, size_t hostRam);
-    bool init(int sampleRate, int SiteNum, std::vector<double> *siteData);
-    void doingTraining(int site, int hour, double lat,
-                       double lon, double mag, double dist);
-    void forecast(std::vector<double> *ret, int& hour, std::vector<int> *data, double &K, std::vector<double> *globalQuakes);
-    void reformatTraining(std::vector<int>* old_input, std::vector<double> ans, std::vector<double>* sitedata,
-                          std::vector<double>* globalquakes, double kp);
-    void storeWeights(std::string filepath);
-    bool checkForWeights(std::string filepath);
-    void sort();
-private:
-    kernelArray<double> device_genetics;
-    kernelArray<double> host_genetics;
-    std::pair<hcon, hcon> *_connect;
-    std::vector<double> *_siteData;
-    std::vector<double> _answers;
-    std::vector<double> _best;
+
+    void trainForecast(std::vector<double> *ret, int &hour, std::vector<int> &data, double &Kp, std::vector<double> &globalQuakes, Order *connections, std::vector<double> &answers, std::vector<double> &siteData);
+
+    void challengeForecast(std::vector<double> *ret, int &hour, std::vector<int> &data, double &K, std::vector<double> &globalQuakes, Order *connections, std::vector<double> &siteData);
+
+    void reformatTraining(std::vector<int>& old_input, std::vector<double> &ans, std::vector<double> &sitedata, std::vector<double>& globalquakes, double& kp);
+
+    void setParams(int num, int val);
+
+    void confDeviceParams();
+
+    void confBasicParams(const int &numInNeurons, const int &numHiddenNeurons, const int &numMemoryNeurons, const int &numMemoryIn, const int &numMemoryOut, const int &numMemoryForget,
+                         const int &numOutNeurons, const int &numWeights);
+
+    bool loadFromFile(std::ifstream &stream, float pMax);
+        ~NetworkGenetic();
+public:
     kernelArray<int>_hostParams;
-    kernelArray<int>_deviceParams;
-    bool _istraining;
+
+private:
     int _numOfStreams;
     size_t _streambytes;
     int _streamSize;
-    int *_channel_offset;
-    int *_site_offset;
+    kernelArray<double> device_genetics;
+    kernelArray<double> host_genetics;
+    std::vector<double> _best;
+    kernelArray<int>_deviceParams;
     std::vector<cudaStream_t> _stream;
 };
 

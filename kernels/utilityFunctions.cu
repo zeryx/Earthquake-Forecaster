@@ -1,4 +1,4 @@
-#include <kernelDefs.h>
+#include <utilFunc.h>
 
 __host__ __device__ float bearingCalc(float lat1, float lon1, float lat2, float lon2){
 
@@ -34,10 +34,11 @@ __host__ __device__ float shift(float x, float max, float min){
     return (x-min)/(max-min);
 }
 
-__host__ __device__ float ActFunc(float x){
+__host__ __device__ double ActFunc(double x){
     return tanh(x);
 }
  __host__ __device__ double scoreFunc(float whenGuess, int whenAns,
                                       float latGuess, float lonGuess, float latAns, float lonAns, double oldFit){
      return (oldFit*2 + exp(-(fabs(whenGuess-whenAns)+distCalc(latGuess, lonGuess, latAns, lonAns))))/3;
  }
+
