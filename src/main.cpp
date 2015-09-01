@@ -10,9 +10,6 @@
 int main(int argc, char** arg){
     prep start;
     start.checkForJson("orders.json");
-    //inputs 0-2 are site sensor data (3 channels, 3 inputs per timestep)
-    //    numWeights = connections.size()-numMemory; //minus 3 because the memory neurons connect without weights.
-    //    std::cerr<<"num of weights is: "<<numWeights<<std::endl;
     int sampleRate, numberOfSites, SLEN;
     std::cin>>sampleRate>>numberOfSites>>SLEN;
     std::vector<double> sitesData;
@@ -32,9 +29,12 @@ int main(int argc, char** arg){
         std::cin>>gtf_site>>gtf_hour>>gtf_lat>>gtf_long>>gtf_mag>>gtf_dist;
         start.doingTraining(gtf_site, gtf_hour, gtf_lat, gtf_long, gtf_mag, gtf_dist);
 
-        if(start.checkForGenomes("/weights.bin"))
+        if(start.checkForGenomes("/weights.bin")){
+            std::cerr<<"running a hot start"<<std::endl;
             start.hotStart("/weights.bin", 0.85);
+        }
         else{
+            std::cerr<<"running a cold start"<<std::endl;
             start.coldStart(0.85);
         }
     }

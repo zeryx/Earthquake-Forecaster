@@ -4,7 +4,7 @@
 #include <rapidjson/filereadstream.h>
 #include <rapidjson/error/error.h>
 #include <rapidjson/error/en.h>
-
+#include <cstdio>
 #include <getsys.h>
 #include <iostream>
 #include <fstream>
@@ -34,16 +34,17 @@ void prep::storeGenomes(const char* filepath){
 bool prep::checkForGenomes(const char* filepath){
     FILE* gFile = std::fopen(filepath, "r");
     std::cerr<<"checking for genomes file.."<<std::endl;
+    bool chk = false;
     if(gFile){
         std::cerr<<"the genomes Files exists"<<std::endl;
-        std::fclose(gFile);
-        return true;
+        fclose(gFile);
+        chk = true;
     }
     else{
         std::cerr<<"no genomes file found"<<std::endl;
-        std::fclose(gFile);
-        return false;
+        chk= false;
     }
+    return chk;
 }
 
 void prep::doingTraining(int site, int hour, double lat,
@@ -59,11 +60,9 @@ void prep::doingTraining(int site, int hour, double lat,
 }
 
 bool prep::init(int sampleRate, int SiteNum, std::vector<double> *siteData){
-    _net.setParams(22, sampleRate);
-    _net.setParams(23, SiteNum);
     _siteData = siteData;
     _istraining = false;
-    _net.setParams(2, _net._hostParams.array[0] + _net._hostParams.array[1] + 2 + 3*SiteNum); //1*numOfSites for community mag, 1 for fitness, and 1 for age.
+    _net.confTestParams(SiteNum, sampleRate);
     return true;
 }
 
@@ -81,7 +80,7 @@ bool prep::checkForJson(const char* filepath){
     assert(doc.IsObject());
     assert(doc.HasMember("neurons"));
     rapidjson::Value &a = doc["neurons"];
-    int input, hidden, memory, memGateIn, memGateOut, memGateForget, output, weights=0;
+    int input, hidden, memory, memGateIn, memGateOut, memGateForget, output, numOrders, weights=0;
     for(rapidjson::Value::ConstMemberIterator itr = a.MemberBegin();
         itr != a.MemberEnd(); ++itr){
         std::string tmp = itr->name.GetString();
@@ -108,8 +107,9 @@ bool prep::checkForJson(const char* filepath){
     }
     rapidjson::Value &orders = doc["orders"];
     assert(orders.IsArray());
-    _connections = new Order[orders.Size()];
-    _net.setParams(26, orders.Size());
+    int size = orders.Size();
+    numOrders = size;
+    _connections = new Order[size];
     for(size_t itr=0; itr<orders.Size(); itr++){
         Order tmp;
         std::string def1 = orders[itr]["first"]["def"].GetString();
@@ -128,7 +128,7 @@ bool prep::checkForJson(const char* filepath){
             }
         }
         else{
-            tmp.third.def= typeNULL;
+            tmp.third.def = typeNULL;
             tmp.third.id =0;
         }
         if(tmp.first.def == typeNULL || tmp.second.def == typeNULL){
@@ -136,16 +136,17 @@ bool prep::checkForJson(const char* filepath){
             exit(1);
         }
 
+
         //check if weights should be incremented.
         if(tmp.first.def != typeMemory
                 && tmp.second.def != typeMemory
                 && tmp.second.def != typeZero
                 && tmp.second.def != typeSquash
-                && tmp.third.def != typeNULL)
+                && tmp.third.def == typeNULL)
             weights++;
         _connections[itr] = tmp;
     }
-    _net.confBasicParams(input, hidden, memory, memGateIn, memGateOut, memGateForget, output, weights);
+    _net.confOrderParams(input, hidden, memory, memGateIn, memGateOut, memGateForget, output, weights, numOrders);
     fclose(orderFile);
     return true;
 }
@@ -190,11 +191,12 @@ void prep::hotStart(std::string filename, float pmax){
     std::ifstream gstream;
     gstream.open(filename.c_str(), std::ios_base::binary | std::ios_base::ate);
     _net.loadFromFile(gstream, pmax);
-    _net.generateWeights();
 }
 
 void prep::coldStart(float pmax){
     _net.allocateHostAndGPUObjects(pmax, GetDeviceRamInBytes(), GetHostRamInBytes());
+    _net.generateWeights();
+
 }
 
 void prep::forecast(std::vector<double> &ret, int &hour, std::vector<int> &data, double &K, std::vector<double> &globalQuakes){

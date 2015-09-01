@@ -27,14 +27,14 @@ public:
 
     void confDeviceParams();
 
-    void confBasicParams(const int &numInNeurons, const int &numHiddenNeurons, const int &numMemoryNeurons, const int &numMemoryIn, const int &numMemoryOut, const int &numMemoryForget,
-                         const int &numOutNeurons, const int &numWeights);
+    void confOrderParams(const int &numInNeurons, const int &numHiddenNeurons, const int &numMemoryNeurons, const int &numMemoryIn,
+                         const int &numMemoryOut, const int &numMemoryForget,  const int &numOutNeurons,
+                         const int &numOrders, const int &numWeights);
+
+    void confTestParams(const int &numOfSites, const int &sampleRate);
 
     bool loadFromFile(std::ifstream &stream, float pMax);
         ~NetworkGenetic();
-public:
-    kernelArray<int>_hostParams;
-
 private:
     int _numOfStreams;
     size_t _streambytes;
@@ -42,6 +42,7 @@ private:
     kernelArray<double> device_genetics;
     kernelArray<double> host_genetics;
     std::vector<double> _best;
+    kernelArray<int>_hostParams;
     kernelArray<int>_deviceParams;
     std::vector<cudaStream_t> _stream;
 };
