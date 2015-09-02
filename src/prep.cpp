@@ -17,17 +17,17 @@ prep::~prep(){
 }
 
 void prep::storeGenomes(const char* filepath){
-    //    std::ofstream ret;
-    //    ret.open(filepath.c_str(), std::ios_base::out | std::ios_base::trunc);
-    //    size_t host_offset=0;
-    //    for(int i=0; i<_net._numOfStreams; i++){
-    //        for(int k=0; k<_net._streamSize; k++){
-    //            ret << _net.device_genetics.array[i+host_offset]<<",";
-    //        }
-    //        ret<<std::endl;
-    //        host_offset += _net._streamSize;
-    //    }
-    //    ret.close();
+//        std::ofstream ret;
+//        ret.open(filepath.c_str(), std::ios_base::out | std::ios_base::trunc);
+//        size_t host_offset=0;
+//        for(int i=0; i<_net._numOfStreams; i++){
+//            for(int k=0; k<_net._streamSize; k++){
+//                ret << _net.device_genetics.array[i+host_offset]<<",";
+//            }
+//            ret<<std::endl;
+//            host_offset += _net._streamSize;
+//        }
+//        ret.close();
 
 }
 
@@ -138,15 +138,14 @@ bool prep::checkForJson(const char* filepath){
 
 
         //check if weights should be incremented.
-        if(tmp.first.def != typeMemory
-                && tmp.second.def != typeMemory
-                && tmp.second.def != typeZero
+        if(tmp.second.def != typeZero
                 && tmp.second.def != typeSquash
                 && tmp.third.def == typeNULL)
             weights++;
         _connections[itr] = tmp;
     }
-    _net.confOrderParams(input, hidden, memory, memGateIn, memGateOut, memGateForget, output, weights, numOrders);
+
+    _net.confOrderParams(input, hidden, memory, memGateIn, memGateOut, memGateForget, output, numOrders, weights);
     fclose(orderFile);
     return true;
 }

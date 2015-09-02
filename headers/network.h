@@ -33,6 +33,7 @@ public:
     void confTestParams(const int &numOfSites, const int &sampleRate);
 
     bool loadFromFile(std::ifstream &stream, float pMax);
+    bool loadToFile (std::ifstream &stream);
         ~NetworkGenetic();
 private:
     int _numOfStreams;

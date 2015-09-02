@@ -88,6 +88,6 @@ int main(int argc, char** arg){
         std::cout.flush();
     }
     if(doTraining == 1)
-        start.storeGenomes("/weights.bin");
+        start.storeGenomes("weights.bin");
     return 0;
 }
