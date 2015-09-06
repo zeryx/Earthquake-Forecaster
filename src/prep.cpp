@@ -16,21 +16,6 @@ prep::~prep(){
 
 }
 
-void prep::storeGenomes(const char* filepath){
-//        std::ofstream ret;
-//        ret.open(filepath.c_str(), std::ios_base::out | std::ios_base::trunc);
-//        size_t host_offset=0;
-//        for(int i=0; i<_net._numOfStreams; i++){
-//            for(int k=0; k<_net._streamSize; k++){
-//                ret << _net.device_genetics.array[i+host_offset]<<",";
-//            }
-//            ret<<std::endl;
-//            host_offset += _net._streamSize;
-//        }
-//        ret.close();
-
-}
-
 bool prep::checkForGenomes(const char* filepath){
     FILE* gFile = std::fopen(filepath, "r");
     std::cerr<<"checking for genomes file.."<<std::endl;
@@ -144,7 +129,7 @@ bool prep::checkForJson(const char* filepath){
             weights++;
         _connections[itr] = tmp;
     }
-
+    std::cerr<<"number of weights: "<<weights<<std::endl;
     _net.confOrderParams(input, hidden, memory, memGateIn, memGateOut, memGateForget, output, numOrders, weights);
     fclose(orderFile);
     return true;
@@ -186,14 +171,27 @@ neuroType prep::strcmp(std::string def){
 
     return ret;
 }
-void prep::hotStart(std::string filename, float pmax){
-    std::ifstream gstream;
-    gstream.open(filename.c_str(), std::ios_base::binary | std::ios_base::ate);
-    _net.loadFromFile(gstream, pmax);
+
+void prep::EndOfTrial(const char* filepath){
+    _net.endOfTrial();
+    std::ofstream ret;
+    ret.open(filepath,  std::ofstream::trunc | std::ifstream::binary);
+    _net.saveToFile(ret);
+    ret.close();
+    std::cerr<<"weights stored successfully"<<std::endl;
+
 }
 
-void prep::coldStart(float pmax){
-    _net.allocateHostAndGPUObjects(pmax, GetDeviceRamInBytes(), GetHostRamInBytes());
+
+void prep::hotStart(const char* filepath){
+    std::ifstream gstream;
+    gstream.open(filepath, std::ifstream::ate | std::ifstream::binary);
+    _net.loadFromFile(gstream);
+    gstream.close();
+}
+
+void prep::coldStart(){
+    _net.allocateHostAndGPUObjects(GetDeviceRamInBytes()*0.85, GetHostRamInBytes()*0.45);
     _net.generateWeights();
 
 }

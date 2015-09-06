@@ -29,15 +29,15 @@ int main(int argc, char** arg){
         std::cin>>gtf_site>>gtf_hour>>gtf_lat>>gtf_long>>gtf_mag>>gtf_dist;
         start.doingTraining(gtf_site, gtf_hour, gtf_lat, gtf_long, gtf_mag, gtf_dist);
 
-        if(start.checkForGenomes("/weights.bin")){
+        if(start.checkForGenomes("/home/ubuntu/mount/genome/weights.bin")){
             std::cerr<<"running a hot start"<<std::endl;
 
-            start.hotStart("/weights.bin", 0.85);
+            start.hotStart("/home/ubuntu/mount/genome/weights.bin");
         }
         else{
             std::cerr<<"running a cold start"<<std::endl;
 
-            start.coldStart(0.85);
+            start.coldStart();
         }
     }
     while(1)
@@ -87,7 +87,8 @@ int main(int argc, char** arg){
         }
         std::cout.flush();
     }
-    if(doTraining == 1)
-        start.storeGenomes("weights.bin");
-    return 0;
+    if(doTraining == 1){
+        start.EndOfTrial("/home/ubuntu/mount/genome/weights.bin");
+    }
+    return 1;
 }

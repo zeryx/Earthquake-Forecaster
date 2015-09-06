@@ -52,7 +52,7 @@ __global__ void evolutionKern(kernelArray<double> vect, kernelArray<int> params,
                 result = vect.array[partner_wt+i*ind]*2;
 
 
-            else if(rng >=chance[1] && rng <chance[2])
+            else if(rng >=chance[1] && rng<chance[2])
                 result = vect.array[your_wt+i*ind]*2;
 
 

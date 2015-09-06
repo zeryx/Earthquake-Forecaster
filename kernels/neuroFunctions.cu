@@ -14,11 +14,11 @@ __host__ __device__ void neuroSquash(double &store){
 }
 
 __host__ __device__ void neuroMemGate(double &memIn, double &input, double &output, float min){
-    if(memIn > min)
+    if(memIn > min || memIn < -min)
         neuroSum(output, input);
 }
 __host__ __device__ void neuroMemForget(double &memForget, double &mem, float min){
-    if(memForget > min)
+    if(memForget > min || memForget < -min)
         neuroZero(mem);
 
 }

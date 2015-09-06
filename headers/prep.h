@@ -9,9 +9,9 @@ public:
 
     ~prep();
 
-    void hotStart(std::string filename, float pmax);
+    void hotStart(const char*);
 
-    void coldStart(float pmax);
+    void coldStart();
 
     void doingTraining(int site, int hour, double lat,
                        double lon, double mag, double dist);
@@ -19,7 +19,7 @@ public:
 
     bool checkForGenomes(const char* filepath);
 
-    void storeGenomes(const char* filepath);
+    void EndOfTrial(const char* filepath);
 
     bool init(int sampleRate, int SiteNum, std::vector<double> *siteData);
 
