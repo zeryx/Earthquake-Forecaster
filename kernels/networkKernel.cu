@@ -12,7 +12,7 @@ extern __constant__ int channel_offset[];
 extern __constant__ int trainingsize;
 //endof using
 
-__global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order* commandQueue, int hour, kernelArray<double> meanCh,
+__global__ void NetKern(kernelArray<float> Vec, kernelArray<int> params, Order* commandQueue, int hour, kernelArray<double> meanCh,
                         kernelArray<double> stdCh, size_t device_offset){
     const int idx = blockIdx.x * blockDim.x + threadIdx.x; // for each thread is one individual
     const int ind = params.array[10];
@@ -79,7 +79,7 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
             Vec.array[inputOffset+8*ind] = shift(CommunityBearing, 360, 0);
             //run the neuroCommand order tree
             for(int itr=0; itr< params.array[26]; itr++){//every order is sequential and run after the previous order to massively simplify the workload in this kernel.
-                double tmp;
+                float tmp;
                 //set stuff to zero
                 if(commandQueue[itr].first.def == typeHidden && commandQueue[itr].second.def == typeZero){
                     neuroZero(Vec.array[hiddenOffset+commandQueue[itr].first.id*ind]);

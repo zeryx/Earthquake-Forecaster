@@ -52,10 +52,10 @@ private:
     int _numOfStreams;
     long int _streambytes;
     long int _streamSize;
-    kernelArray<double> device_genetics;
-    kernelArray<double> host_genetics;
-    kernelArray<double> host_fitness;
-    std::vector<double> _best;
+    kernelArray<float> device_genetics;
+    kernelArray<float> host_genetics;
+    kernelArray<float> host_fitness;
+    std::vector<float> _best;
     kernelArray<int>_hostParams;
     kernelArray<int>_deviceParams;
     std::vector<cudaStream_t> _stream;

@@ -27,7 +27,7 @@ void NetworkGenetic::generateWeights(){
     size_t device_offset=0;
     std::cerr<<"generating weights.. "<<std::endl;
     std::cerr<<"grid size: "<<gridSize<<std::endl;
-    for(int n=0; n<_numOfStreams; _best[n++]){//fill the host first.
+    for(int n=0; n<_numOfStreams; n++){//fill the host first.
         if(n%2==0 && n !=0)
             device_offset =0;
         size_t seed;
@@ -55,22 +55,22 @@ void NetworkGenetic::allocateHostAndGPUObjects( size_t deviceRam, size_t hostRam
     std::cerr<<"total free host ram : "<<hostRam<<std::endl;
 
     //this block below makes sure that the number of objects in stream is exactly half of the total amount of allocatable space on the GPU
-    _streamSize = deviceGenSize/(sizeof(double)*2);
+    _streamSize = deviceGenSize/(sizeof(float)*2);
 
     while(_streamSize%_hostParams.array[2] || (_streamSize/_hostParams.array[2])&(_streamSize/_hostParams.array[2]-1)) // get the largest number divisible by the individual size, the threads in a block, and the size of a double
         _streamSize= _streamSize -1;
 
-    _streambytes = _streamSize * sizeof(double);
+    _streambytes = _streamSize * sizeof(float);
     deviceGenSize = _streambytes * 2;
     assert(deviceGenSize == _streambytes * 2);
     device_genetics.size = _streamSize * 2;
     std::cerr<<"streamsize is: "<<_streamSize<<std::endl;
 
     //this block below makes sure that the allocated host ram for genetics is a number evently divisible by the stream size in bytes.
-    host_genetics.size = hostGenSize/sizeof(double);
+    host_genetics.size = hostGenSize/sizeof(float);
     _numOfStreams =  host_genetics.size/_streamSize; // number of streams = hostGenSize/streamBytes, device does not store extra weights for simplicity.
     host_genetics.size = _numOfStreams * _streamSize;
-    hostGenSize = host_genetics.size * sizeof(double);
+    hostGenSize = host_genetics.size * sizeof(float);
     host_fitness.size =(host_genetics.size/_hostParams.array[2]);
     std::cerr<<"genetics device ram to allocate: "<<deviceGenSize<<std::endl;
     std::cerr<<"genetics host ram to allocate: "<<hostGenSize<<std::endl;
@@ -268,14 +268,14 @@ void NetworkGenetic::trainForecast(std::vector<double> *ret, int &hour, std::vec
         stdCh[k] = sqrt(meanCh[k]);
     }
     //input data from all sites and all channels normalized
-    kernelArray<double>retVec, dmeanCh, dstdCh;
+    kernelArray<double> retVec, dmeanCh, dstdCh;
 
     int regBlockSize = 512;
     int regGridSize = (_hostParams.array[10])/regBlockSize;
     retVec.size = 2160*_hostParams.array[23];
     Order *dConnect;
 
-    CUDA_SAFE_CALL(cudaMalloc((void**)&retVec.array, ret->size()*sizeof(double)));
+    CUDA_SAFE_CALL(cudaMalloc((void**)&retVec.array, ret->size()*sizeof(float)));
     CUDA_SAFE_CALL(cudaMalloc((void**)&dmeanCh.array, 3*sizeof(double)));
     CUDA_SAFE_CALL(cudaMalloc((void**)&dstdCh.array, 3*sizeof(double)));
     CUDA_SAFE_CALL(cudaMalloc((void**)&dConnect, _hostParams.array[26]*sizeof(Order)));
@@ -352,17 +352,17 @@ void NetworkGenetic::endOfTrial(){
     int regBlockSize = 512;
     int regGridSize = (_hostParams.array[10])/regBlockSize;
 
-    kernelArray<double> partial_reduce_sums;
-    double *hfitnessAvg, *dfitnessAvg;
+    kernelArray<float> partial_reduce_sums;
+    float *hfitnessAvg, *dfitnessAvg;
     int *hparentChildCutoff, *dparentChildCutoff;
     int *evoGridSize;
     partial_reduce_sums.size = regBlockSize*_numOfStreams;
     CUDA_SAFE_CALL(cudaHostAlloc((void**)&hparentChildCutoff, _numOfStreams*sizeof(int), cudaHostAllocWriteCombined));
-    CUDA_SAFE_CALL(cudaHostAlloc((void**)&hfitnessAvg, _numOfStreams*sizeof(double), cudaHostAllocWriteCombined));
-    CUDA_SAFE_CALL(cudaMalloc((void**)&partial_reduce_sums.array, regBlockSize*_numOfStreams*sizeof(double)));
+    CUDA_SAFE_CALL(cudaHostAlloc((void**)&hfitnessAvg, _numOfStreams*sizeof(float), cudaHostAllocWriteCombined));
+    CUDA_SAFE_CALL(cudaMalloc((void**)&partial_reduce_sums.array, regBlockSize*_numOfStreams*sizeof(float)));
     CUDA_SAFE_CALL(cudaMalloc((void**)&evoGridSize, _numOfStreams*sizeof(int)));
     CUDA_SAFE_CALL(cudaMalloc((void**)&dparentChildCutoff, _numOfStreams*sizeof(int)));
-    CUDA_SAFE_CALL(cudaMalloc((void**)&dfitnessAvg, _numOfStreams*sizeof(double)));
+    CUDA_SAFE_CALL(cudaMalloc((void**)&dfitnessAvg, _numOfStreams*sizeof(float)));
     partial_reduce_sums.size = (regGridSize);
 
     size_t host_offset = 0;
@@ -400,7 +400,7 @@ void NetworkGenetic::endOfTrial(){
         }
         CUDA_SAFE_CALL(cudaPeekAtLastError());
 
-        reduceFirstKern<<<regGridSize, regBlockSize, regBlockSize*sizeof(double), _stream[n]>>>(device_genetics, partial_reduce_sums, _deviceParams, device_offset);
+        reduceFirstKern<<<regGridSize, regBlockSize, regBlockSize*sizeof(float), _stream[n]>>>(device_genetics, partial_reduce_sums, _deviceParams, device_offset);
         CUDA_SAFE_CALL(cudaPeekAtLastError());
         reduceSecondKern<<<1, 1, 0, _stream[n]>>>(partial_reduce_sums, _deviceParams, &dfitnessAvg[n]);
         CUDA_SAFE_CALL(cudaPeekAtLastError());

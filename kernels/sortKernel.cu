@@ -1,6 +1,6 @@
 #include <kernelDefs.h>
 
-__global__ void bitonicSortKern(kernelArray<double> vec, kernelArray<int> params, int j, int k, size_t device_offset){
+__global__ void bitonicSortKern(kernelArray<float> vec, kernelArray<int> params, int j, int k, size_t device_offset){
     const int idx = threadIdx.x + blockDim.x * blockIdx.x;
     const int first=idx;
     const int second = first^j;
@@ -19,28 +19,28 @@ __global__ void bitonicSortKern(kernelArray<double> vec, kernelArray<int> params
             if (vec.array[first+fitOffset]>vec.array[second+fitOffset]) {
                 /* exchange(first,second); */
                 //pass fitness
-                double tmp_fit = vec.array[first+fitOffset];
+                float tmp_fit = vec.array[first+fitOffset];
                 vec.array[first+fitOffset] = vec.array[second+fitOffset];
                 vec.array[second+fitOffset] = tmp_fit;
                 //pass age
-                double tmp_age = vec.array[first +ageOffset];
+                float tmp_age = vec.array[first +ageOffset];
                 vec.array[first+ageOffset] = vec.array[second+ageOffset];
                 vec.array[second+ageOffset] = tmp_age;
                 //pass communityMag
                 for(int n=0; n<params.array[23]; n++){
-                    double tmp_mag = vec.array[magOffset + first + n*ind];
+                    float tmp_mag = vec.array[magOffset + first + n*ind];
                     vec.array[magOffset+first+n*ind] = vec.array[magOffset+second+n*ind];
                     vec.array[magOffset+second+n*ind] = tmp_mag;
                 }
                 //pass memory
                 for(int n=0; n<params.array[5]; n++){
-                    double tmp_mem = vec.array[mem_offset + first + n*ind];
+                    float tmp_mem = vec.array[mem_offset + first + n*ind];
                     vec.array[mem_offset+first+n*ind] = vec.array[mem_offset+second+n*ind];
                     vec.array[mem_offset+second+n*ind] = tmp_mem;
                 }
                 //pass weights
                 for(int n=0; n<params.array[1]; n++){
-                    double tmp_wt = vec.array[wtOffset + first + n*ind];
+                    float tmp_wt = vec.array[wtOffset + first + n*ind];
                     vec.array[wtOffset+first+n*ind] = vec.array[wtOffset+second+n*ind];
                     vec.array[wtOffset+second+n*ind] = tmp_wt;
                 }
@@ -51,28 +51,28 @@ __global__ void bitonicSortKern(kernelArray<double> vec, kernelArray<int> params
             if (vec.array[first+fitOffset]<vec.array[second+fitOffset]) {
                 /* exchange(first,second); */
                 //pass fitness
-                double tmp_fit = vec.array[first+fitOffset];
+                float tmp_fit = vec.array[first+fitOffset];
                 vec.array[first+fitOffset] = vec.array[second+fitOffset];
                 vec.array[second+fitOffset] = tmp_fit;
                 //pass age
-                double tmp_age = vec.array[first +ageOffset];
+                float tmp_age = vec.array[first +ageOffset];
                 vec.array[first+ageOffset] = vec.array[second+ageOffset];
                 vec.array[second+ageOffset] = tmp_age;
                 //pass communityMag
                 for(int n=0; n<params.array[23]; n++){
-                    double tmp_mag = vec.array[magOffset + first + n*ind];
+                    float tmp_mag = vec.array[magOffset + first + n*ind];
                     vec.array[magOffset+first+n*ind] = vec.array[magOffset+second+n*ind];
                     vec.array[magOffset+second+n*ind] = tmp_mag;
                 }
                 //pass memory
                 for(int n=0; n<params.array[5]; n++){
-                    double tmp_mem = vec.array[mem_offset + first + n*ind];
+                    float tmp_mem = vec.array[mem_offset + first + n*ind];
                     vec.array[mem_offset+first+n*ind] = vec.array[mem_offset+second+n*ind];
                     vec.array[mem_offset+second+n*ind] = tmp_mem;
                 }
                 //pass weights
                 for(int n=0; n<params.array[1]; n++){
-                    double tmp_wt = vec.array[wtOffset + first + n*ind];
+                    float tmp_wt = vec.array[wtOffset + first + n*ind];
                     vec.array[wtOffset+first+n*ind] = vec.array[wtOffset+second+n*ind];
                     vec.array[wtOffset+second+n*ind] = tmp_wt;
                 }
