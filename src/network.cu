@@ -275,7 +275,7 @@ void NetworkGenetic::trainForecast(std::vector<double> *ret, int &hour, std::vec
     retVec.size = 2160*_hostParams.array[23];
     Order *dConnect;
 
-    CUDA_SAFE_CALL(cudaMalloc((void**)&retVec.array, ret->size()*sizeof(float)));
+    CUDA_SAFE_CALL(cudaMalloc((void**)&retVec.array, ret->size()*sizeof(double)));
     CUDA_SAFE_CALL(cudaMalloc((void**)&dmeanCh.array, 3*sizeof(double)));
     CUDA_SAFE_CALL(cudaMalloc((void**)&dstdCh.array, 3*sizeof(double)));
     CUDA_SAFE_CALL(cudaMalloc((void**)&dConnect, _hostParams.array[26]*sizeof(Order)));
@@ -304,7 +304,7 @@ void NetworkGenetic::trainForecast(std::vector<double> *ret, int &hour, std::vec
         std::cerr<<"stream number #"<<n+1<<std::endl;
         CUDA_SAFE_CALL(cudaMemcpyAsync(&device_genetics.array[device_offset], &host_genetics.array[host_offset], _streambytes, cudaMemcpyHostToDevice, _stream[n]));
 
-        NetKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics,_deviceParams, dConnect, hour, dmeanCh, dstdCh, device_offset);
+        NetKern<<<regGridSize, regBlockSize, regGridSize*_hostParams.array[26]*sizeof(Order), _stream[n]>>>(device_genetics,_deviceParams, dConnect, hour, dmeanCh, dstdCh, device_offset);
 
         CUDA_SAFE_CALL(cudaMemcpyAsync(&host_genetics.array[host_offset], &device_genetics.array[device_offset], _streambytes, cudaMemcpyDeviceToHost, _stream[n]));
         host_offset += _streamSize;
