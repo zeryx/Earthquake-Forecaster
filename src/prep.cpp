@@ -191,7 +191,7 @@ void prep::hotStart(const char* filepath){
 }
 
 void prep::coldStart(){
-    _net.allocateHostAndGPUObjects(GetDeviceRamInBytes()*0.85, GetHostRamInBytes()*0.45);
+    _net.allocateHostAndGPUObjects(GetDeviceRamInBytes()*0.85, GetHostRamInBytes()*0.40);
     _net.generateWeights();
 
 }

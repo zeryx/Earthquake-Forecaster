@@ -1,6 +1,6 @@
 #include <kernelDefs.h>
 
-__global__ void cutoffKern(kernelArray<float> Vec, kernelArray<int> params, int *childOffset, int *evoGridSize, float *avgFitness, size_t device_offset){
+__global__ void cutoffKern(kernelArray<double> Vec, kernelArray<int> params, int *childOffset, int *evoGridSize, double *avgFitness, size_t device_offset){
     const int idx = blockIdx.x * blockDim.x +threadIdx.x;
     const int fitnessval = params.array[19] + idx + device_offset;
     if(Vec.array[fitnessval] > 0 && Vec.array[fitnessval+1] == 0){

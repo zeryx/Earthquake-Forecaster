@@ -1,6 +1,6 @@
 #include <kernelDefs.h>
 
-__global__ void reduceFirstKern(kernelArray<float> Vec, kernelArray<float> per_block_sum, kernelArray<int> params,  size_t device_offset){
+__global__ void reduceFirstKern(kernelArray<double> Vec, kernelArray<double> per_block_sum, kernelArray<int> params,  size_t device_offset){
     extern __shared__ float sumData[];
 
     unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -36,7 +36,7 @@ __global__ void reduceFirstKern(kernelArray<float> Vec, kernelArray<float> per_b
     }
 }
 
-__global__ void reduceSecondKern(kernelArray<float> per_block_results, kernelArray<int> params, float *result){
+__global__ void reduceSecondKern(kernelArray<double> per_block_results, kernelArray<int> params, double *result){
     unsigned int idx = threadIdx.x+ blockIdx.x*blockDim.x;
     if(idx ==0){
         *result =0;

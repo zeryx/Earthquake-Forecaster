@@ -2,7 +2,7 @@
 #include <thrust/random.h>
 
 
-__global__ void evolutionKern(kernelArray<float> Vec, kernelArray<int> params, int *childOffset, int *realGridSize, size_t in, size_t device_offset){
+__global__ void evolutionKern(kernelArray<double> Vec, kernelArray<int> params, int *childOffset, int *realGridSize, size_t in, size_t device_offset){
     const int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if(idx < *realGridSize){
         const int ind = params.array[10];
@@ -45,7 +45,7 @@ __global__ void evolutionKern(kernelArray<float> Vec, kernelArray<int> params, i
         for(int i=0; i<params.array[1]; i++){//for each weight, lets determine how the weights of the child are altered.
             thrust::uniform_real_distribution<float> weightSpin(0, 10);
             randEng.discard(idx+4);
-            float result;
+            double result;
             float rng = weightSpin(randEng);
 
             if(rng >=chance[0] && rng<chance[1])

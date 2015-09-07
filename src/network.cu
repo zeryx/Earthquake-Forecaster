@@ -55,22 +55,22 @@ void NetworkGenetic::allocateHostAndGPUObjects( size_t deviceRam, size_t hostRam
     std::cerr<<"total free host ram : "<<hostRam<<std::endl;
 
     //this block below makes sure that the number of objects in stream is exactly half of the total amount of allocatable space on the GPU
-    _streamSize = deviceGenSize/(sizeof(float)*2);
+    _streamSize = deviceGenSize/(sizeof(double)*2);
 
     while(_streamSize%_hostParams.array[2] || (_streamSize/_hostParams.array[2])&(_streamSize/_hostParams.array[2]-1)) // get the largest number divisible by the individual size, the threads in a block, and the size of a double
         _streamSize= _streamSize -1;
 
-    _streambytes = _streamSize * sizeof(float);
+    _streambytes = _streamSize * sizeof(double);
     deviceGenSize = _streambytes * 2;
     assert(deviceGenSize == _streambytes * 2);
     device_genetics.size = _streamSize * 2;
     std::cerr<<"streamsize is: "<<_streamSize<<std::endl;
 
     //this block below makes sure that the allocated host ram for genetics is a number evently divisible by the stream size in bytes.
-    host_genetics.size = hostGenSize/sizeof(float);
+    host_genetics.size = hostGenSize/sizeof(double);
     _numOfStreams =  host_genetics.size/_streamSize; // number of streams = hostGenSize/streamBytes, device does not store extra weights for simplicity.
     host_genetics.size = _numOfStreams * _streamSize;
-    hostGenSize = host_genetics.size * sizeof(float);
+    hostGenSize = host_genetics.size * sizeof(double);
     host_fitness.size =(host_genetics.size/_hostParams.array[2]);
     std::cerr<<"genetics device ram to allocate: "<<deviceGenSize<<std::endl;
     std::cerr<<"genetics host ram to allocate: "<<hostGenSize<<std::endl;
@@ -151,9 +151,9 @@ bool NetworkGenetic::loadFromFile(std::ifstream &stream){
     stream.seekg(0, stream.beg);
     assert(stream.good());
     while(std::getline(stream, item, ',')){ // each value in the array
-        host_genetics.array[itr] = std::stod(item);
+        host_genetics.array[itr] = std::stof(item);
         if(itr%(host_genetics.size/100) == 0){
-            std::cerr<<(double)(itr/host_genetics.size)<<std::endl;
+            std::cerr<<itr/host_genetics.size<<std::endl;
         }
         itr++;
     }
@@ -167,7 +167,7 @@ void NetworkGenetic::saveToFile(std::ofstream &stream){
     for(int itr=0; itr<host_genetics.size; itr++){
         stream<< host_genetics.array[itr]<<",";
         if(itr%(host_genetics.size/100) == 0){
-            std::cerr<<(double)(itr/host_genetics.size)<<std::endl;
+            std::cerr<<itr/host_genetics.size<<std::endl;
         }
     }
 }
@@ -203,7 +203,7 @@ void NetworkGenetic::setParams(int num, int val){
 
 
 void NetworkGenetic::reformatTraining(std::vector<int>&old_input, std::vector<double> &ans, std::vector<double> &sitedata, std::vector<double>&globalquakes, double &kp){ // increase the timestep and reduce resolution, takes too long.
-    int trainingSize = 7;
+    int trainingSize = 5;
     int * new_input = new int[trainingSize*3*_hostParams.array[23]];
     int *siteOffset = new int[15], *chanOffset = new int[3];
     long long stor[trainingSize*3*_hostParams.array[23]];
@@ -304,7 +304,7 @@ void NetworkGenetic::trainForecast(std::vector<double> *ret, int &hour, std::vec
         std::cerr<<"stream number #"<<n+1<<std::endl;
         CUDA_SAFE_CALL(cudaMemcpyAsync(&device_genetics.array[device_offset], &host_genetics.array[host_offset], _streambytes, cudaMemcpyHostToDevice, _stream[n]));
 
-        NetKern<<<regGridSize, regBlockSize, regGridSize*_hostParams.array[26]*sizeof(Order), _stream[n]>>>(device_genetics,_deviceParams, dConnect, hour, dmeanCh, dstdCh, device_offset);
+        NetKern<<<regGridSize, regBlockSize, _hostParams.array[26]*sizeof(Order), _stream[n]>>>(device_genetics,_deviceParams, dConnect, hour, dmeanCh, dstdCh, device_offset);
 
         CUDA_SAFE_CALL(cudaMemcpyAsync(&host_genetics.array[host_offset], &device_genetics.array[device_offset], _streambytes, cudaMemcpyDeviceToHost, _stream[n]));
         host_offset += _streamSize;
@@ -352,17 +352,17 @@ void NetworkGenetic::endOfTrial(){
     int regBlockSize = 512;
     int regGridSize = (_hostParams.array[10])/regBlockSize;
 
-    kernelArray<float> partial_reduce_sums;
-    float *hfitnessAvg, *dfitnessAvg;
+    kernelArray<double> partial_reduce_sums;
+    double *hfitnessAvg, *dfitnessAvg;
     int *hparentChildCutoff, *dparentChildCutoff;
     int *evoGridSize;
     partial_reduce_sums.size = regBlockSize*_numOfStreams;
     CUDA_SAFE_CALL(cudaHostAlloc((void**)&hparentChildCutoff, _numOfStreams*sizeof(int), cudaHostAllocWriteCombined));
-    CUDA_SAFE_CALL(cudaHostAlloc((void**)&hfitnessAvg, _numOfStreams*sizeof(float), cudaHostAllocWriteCombined));
-    CUDA_SAFE_CALL(cudaMalloc((void**)&partial_reduce_sums.array, regBlockSize*_numOfStreams*sizeof(float)));
+    CUDA_SAFE_CALL(cudaHostAlloc((void**)&hfitnessAvg, _numOfStreams*sizeof(double), cudaHostAllocWriteCombined));
+    CUDA_SAFE_CALL(cudaMalloc((void**)&partial_reduce_sums.array, regBlockSize*_numOfStreams*sizeof(double)));
     CUDA_SAFE_CALL(cudaMalloc((void**)&evoGridSize, _numOfStreams*sizeof(int)));
     CUDA_SAFE_CALL(cudaMalloc((void**)&dparentChildCutoff, _numOfStreams*sizeof(int)));
-    CUDA_SAFE_CALL(cudaMalloc((void**)&dfitnessAvg, _numOfStreams*sizeof(float)));
+    CUDA_SAFE_CALL(cudaMalloc((void**)&dfitnessAvg, _numOfStreams*sizeof(double)));
     partial_reduce_sums.size = (regGridSize);
 
     size_t host_offset = 0;
@@ -400,7 +400,7 @@ void NetworkGenetic::endOfTrial(){
         }
         CUDA_SAFE_CALL(cudaPeekAtLastError());
 
-        reduceFirstKern<<<regGridSize, regBlockSize, regBlockSize*sizeof(float), _stream[n]>>>(device_genetics, partial_reduce_sums, _deviceParams, device_offset);
+        reduceFirstKern<<<regGridSize, regBlockSize, regBlockSize*sizeof(double), _stream[n]>>>(device_genetics, partial_reduce_sums, _deviceParams, device_offset);
         CUDA_SAFE_CALL(cudaPeekAtLastError());
         reduceSecondKern<<<1, 1, 0, _stream[n]>>>(partial_reduce_sums, _deviceParams, &dfitnessAvg[n]);
         CUDA_SAFE_CALL(cudaPeekAtLastError());

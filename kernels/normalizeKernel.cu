@@ -1,6 +1,6 @@
 #include <kernelDefs.h>
 
-__global__ void normalizeKern(kernelArray<float> vect, kernelArray<int> params, float *avgFitness,  size_t device_offset){
+__global__ void normalizeKern(kernelArray<double> vect, kernelArray<int> params, double *avgFitness,  size_t device_offset){
     const int idx = blockIdx.x * blockDim.x + threadIdx.x; // for each thread is one individual
     const int fit = params.array[19] + idx + device_offset;
     const int age = params.array[25] + idx + device_offset;

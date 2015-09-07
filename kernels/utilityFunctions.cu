@@ -34,10 +34,10 @@ __host__ __device__ float shift(float x, float max, float min){
     return (x-min)/(max-min);
 }
 
-__host__ __device__ float ActFunc(float x){
+__host__ __device__ double ActFunc(double x){
     return tanh(x);
 }
- __host__ __device__ float scoreFunc(float whenGuess, int whenAns, float latGuess, float lonGuess, float latAns, float lonAns){
+ __host__ __device__ double scoreFunc(double whenGuess, int whenAns, double latGuess, double lonGuess, double latAns, double lonAns){
      return  exp(-(fabs(whenGuess-whenAns)+distCalc(latGuess, lonGuess, latAns, lonAns)));
  }
 

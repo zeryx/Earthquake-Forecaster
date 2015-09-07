@@ -1,6 +1,6 @@
 #include <kernelDefs.h>
 
-__global__ void bitonicSortKern(kernelArray<float> vec, kernelArray<int> params, int j, int k, size_t device_offset){
+__global__ void bitonicSortKern(kernelArray<double> vec, kernelArray<int> params, int j, int k, size_t device_offset){
     const int idx = threadIdx.x + blockDim.x * blockIdx.x;
     const int first=idx;
     const int second = first^j;

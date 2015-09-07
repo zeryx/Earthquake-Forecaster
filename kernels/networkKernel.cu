@@ -12,17 +12,18 @@ extern __constant__ int channel_offset[];
 extern __constant__ int trainingsize;
 //endof using
 
-__global__ void NetKern(kernelArray<float> Vec, kernelArray<int> params, Order* commandQueue, int hour, kernelArray<double> meanCh,
+__global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order* commandQueue, int hour, kernelArray<double> meanCh,
                         kernelArray<double> stdCh, size_t device_offset){
     extern __shared__  Order sharedQueue[];
     const int tix = threadIdx.x;
-    if(tix <params.array[26]){
+    if(tix < params.array[26]){
         sharedQueue[tix].first = commandQueue[tix].first;
         sharedQueue[tix].second = commandQueue[tix].second;
     }
     __syncthreads();
     const int idx = blockIdx.x * blockDim.x + threadIdx.x; // for each thread is one individual
     const int ind = params.array[10];
+
     const int weightsOffset = params.array[11] + idx + device_offset;
     const int inputOffset = params.array[12] + idx + device_offset;
     const int hiddenOffset = params.array[13] + idx + device_offset;
@@ -37,6 +38,15 @@ __global__ void NetKern(kernelArray<float> Vec, kernelArray<int> params, Order* 
     const int howCertainOffset = params.array[22] + idx + device_offset;
     const int ageOffset = params.array[25] + idx + device_offset;
 
+    const double avgLatGQuake = globalQuakes[0];
+    const double avgLonGQuake = globalQuakes[1];
+    const double GQuakeAvgMag = globalQuakes[3];
+
+
+    const double ansLat = siteData[(int)answers[0]*2];
+    const double ansLon = siteData[(int)answers[0]*2+1];
+    const int whenAns = (int)answers[1] - hour;
+
     Vec.array[ageOffset] += 1; //this indvidiual has existed for 1 more iteration.
 
     //reset values from previous individual.
@@ -47,8 +57,8 @@ __global__ void NetKern(kernelArray<float> Vec, kernelArray<int> params, Order* 
     }
     for(int i=0; i<trainingsize; i++){ // training size is a constant parameter for the size of each timestep
 
-        float CommunityLat = 0;
-        float CommunityLon = 0;
+        double CommunityLat = 0;
+        double CommunityLon = 0;
 
         for(int j=0; j<params.array[23]; j++){//sitesWeighted Lat/Lon values are determined based on all previous zsites mag output value.
             CommunityLat += siteData[j*2]*Vec.array[communityMagOffset+j*ind];
@@ -61,15 +71,14 @@ __global__ void NetKern(kernelArray<float> Vec, kernelArray<int> params, Order* 
 
         for(int j=0; j<params.array[23]; j++){ //each site is run independently of others, but shares an output from the previous step
 
-            float latSite = siteData[j*2];
-            float lonSite = siteData[j*2+1];
-            float avgLatGQuake = globalQuakes[0];
-            float avgLonGQuake = globalQuakes[1];
-            float GQuakeAvgMag = globalQuakes[3];
-            float GQuakeAvgdist = distCalc(latSite, lonSite, avgLatGQuake, avgLonGQuake);
-            float GQuakeAvgBearing = bearingCalc(latSite, lonSite, avgLatGQuake, avgLonGQuake);
-            float CommunityDist = distCalc(latSite, lonSite, CommunityLat, CommunityLon);
-            float CommunityBearing = bearingCalc(latSite, lonSite, CommunityLat, CommunityLon);
+            const double latSite = siteData[j*2];
+            const double lonSite = siteData[j*2+1];
+            const double GQuakeAvgdist = distCalc(latSite, lonSite, avgLatGQuake, avgLonGQuake);
+            const double GQuakeAvgBearing = bearingCalc(latSite, lonSite, avgLatGQuake, avgLonGQuake);
+            const double CommunityDist = distCalc(latSite, lonSite, CommunityLat, CommunityLon);
+            const double CommunityBearing = bearingCalc(latSite, lonSite, CommunityLat, CommunityLon);
+
+
             /* 3 outputs, 1 with an hour in the future when the earthquake will hit,
                         1 with the porbability of that earthquake happening (between [0,1]) and 1 with the sites magnitude (for community feedback) */
             int n =0; // n is the weight number
@@ -86,7 +95,7 @@ __global__ void NetKern(kernelArray<float> Vec, kernelArray<int> params, Order* 
             Vec.array[inputOffset+8*ind] = shift(CommunityBearing, 360, 0);
             //run the neuroCommand order tree
             for(int itr=0; itr< params.array[26]; itr++){//every order is sequential and run after the previous order to massively simplify the workload in this kernel.
-                float tmp;
+                double tmp;
                 //set stuff to zero
                 if(sharedQueue[itr].first.def == typeHidden && sharedQueue[itr].second.def == typeZero){
                     neuroZero(Vec.array[hiddenOffset+sharedQueue[itr].first.id*ind]);
@@ -274,10 +283,10 @@ __global__ void NetKern(kernelArray<float> Vec, kernelArray<int> params, Order* 
         Vec.array[howCertainOffset+j*ind] = Vec.array[howCertainOffset+j*ind]/trainingsize;
     }
     /*calculate score for this individual during this round, current scoring mechanism is - e^(-(abs(whenGuess-whenAns)+distToCorrectSite)), closer to 1 the better.   */
-    float maxCertainty=0;
-    float whenGuess=0;
-    float guessLat=0;
-    float guessLon=0;
+    double maxCertainty=0;
+    double whenGuess=0;
+    double guessLat=0;
+    double guessLon=0;
 
     for(int j=0; j<params.array[23]; j++){
         if(Vec.array[howCertainOffset+j*ind] > maxCertainty){
@@ -287,9 +296,6 @@ __global__ void NetKern(kernelArray<float> Vec, kernelArray<int> params, Order* 
             guessLon = siteData[j*2+1];
         }
     }
-    float ansLat = siteData[(int)answers[0]*2];
-    float ansLon = siteData[(int)answers[0]*2+1];
-    int whenAns = (int)answers[1] - hour;
 
     Vec.array[fitnessOffset] = scoreFunc(whenGuess, whenAns, guessLat, guessLon, ansLat, ansLon); //we take the average beacuse consistency is more important than being really good at this particular hour.
 }
