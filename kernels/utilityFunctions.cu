@@ -38,9 +38,10 @@ __host__ __device__ double ActFunc(double x){
     return tanh(x);
 }
  __host__ __device__ double scoreFunc(double whenMinGuess, double whenMaxGuess, int whenAns, double latGuess, double lonGuess, double latAns, double lonAns){
-     if(whenMinGuess >= whenAns && whenMaxGuess <= whenAns){
+
+     if(whenMinGuess >= whenAns && whenMaxGuess <= whenAns)
+
          return exp(-(distCalc(latGuess, lonGuess, latAns, lonAns)+fabs(whenMaxGuess-whenMinGuess))); // emphasize smaller boundaries when more certain, otherwise set fit to 0.
-     }
      else
          return 0;
  }

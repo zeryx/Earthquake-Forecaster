@@ -10,7 +10,6 @@ __global__ void bitonicSortKern(kernelArray<double> vec, kernelArray<int> params
     const int mem_offset = params.array[14] + device_offset;
     const int fitOffset= params.array[19] + device_offset;
     const int magOffset = params.array[20] + device_offset;
-    const int ageOffset = params.array[25] + device_offset;
     const int ind = params.array[10];
     /* The threads with the lowest ids sort the array. */
     if ((second)>first){
@@ -22,10 +21,6 @@ __global__ void bitonicSortKern(kernelArray<double> vec, kernelArray<int> params
                 float tmp_fit = vec.array[first+fitOffset];
                 vec.array[first+fitOffset] = vec.array[second+fitOffset];
                 vec.array[second+fitOffset] = tmp_fit;
-                //pass age
-                float tmp_age = vec.array[first +ageOffset];
-                vec.array[first+ageOffset] = vec.array[second+ageOffset];
-                vec.array[second+ageOffset] = tmp_age;
                 //pass communityMag
                 for(int n=0; n<params.array[23]; n++){
                     float tmp_mag = vec.array[magOffset + first + n*ind];
@@ -54,10 +49,6 @@ __global__ void bitonicSortKern(kernelArray<double> vec, kernelArray<int> params
                 float tmp_fit = vec.array[first+fitOffset];
                 vec.array[first+fitOffset] = vec.array[second+fitOffset];
                 vec.array[second+fitOffset] = tmp_fit;
-                //pass age
-                float tmp_age = vec.array[first +ageOffset];
-                vec.array[first+ageOffset] = vec.array[second+ageOffset];
-                vec.array[second+ageOffset] = tmp_age;
                 //pass communityMag
                 for(int n=0; n<params.array[23]; n++){
                     float tmp_mag = vec.array[magOffset + first + n*ind];
