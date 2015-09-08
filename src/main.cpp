@@ -52,7 +52,7 @@ int main(int argc, char** arg){
 
 
         std::cin>>hour;
-        if(hour== -1)
+        if(hour== -1 || hour == 20)
             break;
         std::cin>>DLEN;
         for(int i=0; i<DLEN; i++){

@@ -81,6 +81,7 @@ void NetworkGenetic::allocateHostAndGPUObjects( size_t deviceRam, size_t hostRam
     CUDA_SAFE_CALL(cudaHostAlloc((void**)&host_fitness.array, host_fitness.size * sizeof(double), cudaHostAllocWriteCombined));
     CUDA_SAFE_CALL(cudaMalloc((void**) &device_genetics.array, deviceGenSize));
     std::fill(host_genetics.array, host_genetics.array+host_genetics.size, 0);
+    std::fill(host_fitness.array, host_fitness.array+host_fitness.size, 0);
     CUDA_SAFE_CALL(cudaMemset(device_genetics.array, 0, deviceGenSize));
     _stream.resize(_numOfStreams);
 
@@ -94,7 +95,7 @@ void NetworkGenetic::allocateHostAndGPUObjects( size_t deviceRam, size_t hostRam
 void NetworkGenetic:: confTestParams(const int &numOfSites, const int &sampleRate){
     this->setParams(23, numOfSites);
     this->setParams(24, sampleRate);
-    this->setParams(2, _hostParams.array[0] + _hostParams.array[1] + 2 + 3*_hostParams.array[23]); //size of an individual
+    this->setParams(2, _hostParams.array[0] + _hostParams.array[1] + 1 + 4*_hostParams.array[23]); //size of an individual
 }
 
 void NetworkGenetic::confOrderParams(const int &numInNeurons, const int &numHiddenNeurons, const int &numMemoryNeurons, const int &numMemoryIn,
@@ -122,11 +123,11 @@ void NetworkGenetic::confOrderParams(const int &numInNeurons, const int &numHidd
     //    _hostParams.array[18] = output neurons offset
     //    _hostParams.array[19] = fitness offset
     //    _hostParams.array[20] = community magnitude offset
-    //    _hostParams.array[21] = when offset
+    //    _hostParams.array[21] = whenMin offset
     //    _hostParams.array[22] = howCertain offset
     //    _hostParams.array[23] = number of sites
     //    _hostParams.array[24] = sample rate
-    //    _hostParams.array[25] = age offset
+    //    _hostParams.array[25] = whenMax Offset
     //    _hostParams.array[26] = number of orders
     this->setParams(26, numOrders); //number of orders for the networkKernel
     std::cerr<<numOrders<<std::endl;
@@ -150,10 +151,11 @@ bool NetworkGenetic::loadFromFile(std::ifstream &stream){
     stream.clear();
     stream.seekg(0, stream.beg);
     assert(stream.good());
+    std::cerr.precision(2);
     while(std::getline(stream, item, ',')){ // each value in the array
-        host_genetics.array[itr] = std::stof(item);
+        host_genetics.array[itr] = std::stod(item);
         if(itr%(host_genetics.size/100) == 0){
-            std::cerr<<itr/host_genetics.size<<std::endl;
+            std::cerr<<(float)itr/(float)host_genetics.size<<std::endl;
         }
         itr++;
     }
@@ -163,11 +165,11 @@ bool NetworkGenetic::loadFromFile(std::ifstream &stream){
 
 void NetworkGenetic::saveToFile(std::ofstream &stream){
     std::cerr<<"saving to file."<<std::endl;
-
+    std::cerr.precision(2);
     for(int itr=0; itr<host_genetics.size; itr++){
         stream<< host_genetics.array[itr]<<",";
         if(itr%(host_genetics.size/100) == 0){
-            std::cerr<<itr/host_genetics.size<<std::endl;
+            std::cerr<<(float)itr/(float)host_genetics.size<<std::endl;
         }
     }
 }
@@ -184,9 +186,9 @@ void NetworkGenetic::confDeviceParams(){
     this->setParams(18, _hostParams.array[17] + _hostParams.array[10] * _hostParams.array[8]);  // output neurons offset. (memForget_offset + numMemOut*numIndividuals)
     this->setParams(19, _hostParams.array[18] + _hostParams.array[10] * _hostParams.array[9]);  // fitness offset.
     this->setParams(20, _hostParams.array[20] + _hostParams.array[10] * 1);                     // community magnitude offset
-    this->setParams(21, _hostParams.array[20] + _hostParams.array[10] * _hostParams.array[23]); // when offset.
+    this->setParams(21, _hostParams.array[20] + _hostParams.array[10] * _hostParams.array[23]); // whenMin offset.
     this->setParams(22, _hostParams.array[21] + _hostParams.array[10] * _hostParams.array[23]); // howCertain offset.
-    this->setParams(25, _hostParams.array[22] + _hostParams.array[10] * _hostParams.array[23]); // age offset.
+    this->setParams(25, _hostParams.array[22] + _hostParams.array[10] * _hostParams.array[23]); // whenMax offset.
 
     CUDA_SAFE_CALL(cudaMalloc((void**)&_deviceParams.array, _hostParams.size*sizeof(int)));
     std::cerr<<"number of individuals in stream is: "<<_hostParams.array[10]<<std::endl;
@@ -324,6 +326,10 @@ void NetworkGenetic::trainForecast(std::vector<double> *ret, int &hour, std::vec
     for(int i=0; i<_hostParams.array[5]; i++){
         std::cerr<<"and a memory #"<<i<<" of"<<host_genetics.array[_hostParams.array[14] + i*_hostParams.array[10]]<<std::endl;
     }
+    for(int i=0; i<20; i++){
+        std::cerr<<host_genetics.array[_hostParams.array[19]+i]<<std::endl;
+
+    }
     CUDA_SAFE_CALL(cudaFree(dConnect));
     CUDA_SAFE_CALL(cudaFree(retVec.array));
     CUDA_SAFE_CALL(cudaFree(dmeanCh.array));
@@ -339,6 +345,7 @@ void NetworkGenetic::trainHourSync(){
             host_fitness.array[i + n*_streamSize] += host_genetics.array[_hostParams.array[19] + i + n*_streamSize];
         }
     }
+    std::cerr<<"after sync.."<<std::endl;
 }
 
 void NetworkGenetic::endOfTrial(){
@@ -411,8 +418,6 @@ void NetworkGenetic::endOfTrial(){
         CUDA_SAFE_CALL(cudaMemcpyAsync(&hparentChildCutoff[n], &dparentChildCutoff[n], sizeof(int), cudaMemcpyDeviceToHost, _stream[n]));
 
         evolutionKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dparentChildCutoff[n], &evoGridSize[n], seed[n], device_offset);
-        CUDA_SAFE_CALL(cudaPeekAtLastError());
-
         CUDA_SAFE_CALL(cudaPeekAtLastError());
 
         CUDA_SAFE_CALL(cudaMemcpyAsync(&hfitnessAvg[n], &dfitnessAvg[n], sizeof(double), cudaMemcpyDeviceToHost, _stream[n]));

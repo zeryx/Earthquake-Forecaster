@@ -30,14 +30,18 @@ __host__ __device__ float normalize(float x, float mean, float stdev){
     return (fabs(x-mean))/(stdev*2);
 }
 
-__host__ __device__ float shift(float x, float max, float min){
+__host__ __device__ double shift(double x, double max, double min){
     return (x-min)/(max-min);
 }
 
 __host__ __device__ double ActFunc(double x){
     return tanh(x);
 }
- __host__ __device__ double scoreFunc(double whenGuess, int whenAns, double latGuess, double lonGuess, double latAns, double lonAns){
-     return  exp(-(fabs(whenGuess-whenAns)+distCalc(latGuess, lonGuess, latAns, lonAns)));
+ __host__ __device__ double scoreFunc(double whenMinGuess, double whenMaxGuess, int whenAns, double latGuess, double lonGuess, double latAns, double lonAns){
+     if(whenMinGuess >= whenAns && whenMaxGuess <= whenAns){
+         return exp(-(distCalc(latGuess, lonGuess, latAns, lonAns)+fabs(whenMaxGuess-whenMinGuess))); // emphasize smaller boundaries when more certain, otherwise set fit to 0.
+     }
+     else
+         return 0;
  }
 
