@@ -5,7 +5,7 @@ __global__ void bitonicSortKern(kernelArray<double> vec, kernelArray<int> params
     const int first=idx;
     const int second = first^j;
     /* it's important to pass identifying and important data between the individuals, so nothing gets lost during soring.
-     * the important attached data is the weigts, memory, fitness, community magnitude, and age */
+     * the important attached data is the weigts, memory, fitness, and community magnitude */
     const int wtOffset = params.array[11] + device_offset;
     const int mem_offset = params.array[14] + device_offset;
     const int fitOffset= params.array[19] + device_offset;

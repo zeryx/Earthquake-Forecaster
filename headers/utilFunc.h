@@ -9,7 +9,7 @@ __host__ __device__ float distCalc(float lat1, float lon1, float lat2, float lon
 
 __host__ __device__ float normalize(float x, float mean, float stdev);
 
-__host__ __device__ double shift(double x, double max, double min);
+__host__ __device__ double shift(double x, double oldMax, double oldMin, double newMax, double newMin);
 
 __host__ __device__ double ActFunc(double x);
 

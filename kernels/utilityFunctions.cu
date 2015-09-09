@@ -30,19 +30,17 @@ __host__ __device__ float normalize(float x, float mean, float stdev){
     return (fabs(x-mean))/(stdev*2);
 }
 
-__host__ __device__ double shift(double x, double max, double min){
-    return (x-min)/(max-min);
+__host__ __device__ double shift(double x, double oldMax, double oldMin, double newMax, double newMin){
+    return (x/(oldMax)-oldMin)*(newMax-newMin)+newMin;
 }
 
 __host__ __device__ double ActFunc(double x){
     return tanh(x);
 }
- __host__ __device__ double scoreFunc(double whenMinGuess, double whenMaxGuess, int whenAns, double latGuess, double lonGuess, double latAns, double lonAns){
+__host__ __device__ double scoreFunc(double whenMinGuess, double whenMaxGuess, int whenAns, double latGuess, double lonGuess, double latAns, double lonAns){
+    if(whenMinGuess <= ((double)whenAns/(double)2160) && whenMaxGuess >= ((double)whenAns/(double)2160) && whenMinGuess > 0 && whenMaxGuess >0)
+        return exp(-(1*distCalc(latGuess, lonGuess, latAns, lonAns) + 2*fabs(whenMaxGuess-whenMinGuess))/3); // emphasize smaller boundaries when more certain, otherwise set fit to 0.
+    else
+        return 0;
 
-     if(whenMinGuess >= whenAns && whenMaxGuess <= whenAns)
-
-         return exp(-(distCalc(latGuess, lonGuess, latAns, lonAns)+fabs(whenMaxGuess-whenMinGuess))); // emphasize smaller boundaries when more certain, otherwise set fit to 0.
-     else
-         return 0;
- }
-
+}

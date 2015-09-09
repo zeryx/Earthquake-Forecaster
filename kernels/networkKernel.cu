@@ -86,12 +86,12 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
                 Vec.array[inputOffset+k*ind] = normalize(inputData[site_offset[j]+channel_offset[k]+i], meanCh.array[k], stdCh.array[k]);//channels 1-3
             }
 
-            Vec.array[inputOffset+3*ind] = shift(GQuakeAvgdist, 40075.1, 0);
-            Vec.array[inputOffset+4*ind] = shift(GQuakeAvgBearing, 360, 0);
-            Vec.array[inputOffset+5*ind] = shift(GQuakeAvgMag, 9.5, 0);
-            Vec.array[inputOffset+6*ind] = shift(Kp, 10, 0);
-            Vec.array[inputOffset+7*ind] = shift(CommunityDist,40075.1, 0);
-            Vec.array[inputOffset+8*ind] = shift(CommunityBearing, 360, 0);
+            Vec.array[inputOffset+3*ind] = shift(GQuakeAvgdist, 40075.1, 0, 1, 0);
+            Vec.array[inputOffset+4*ind] = shift(GQuakeAvgBearing, 360, 0, 1, 0);
+            Vec.array[inputOffset+5*ind] = shift(GQuakeAvgMag, 10, 0, 1, 0);
+            Vec.array[inputOffset+6*ind] = shift(Kp, 10, 0, 1, 0);
+            Vec.array[inputOffset+7*ind] = shift(CommunityDist, 40075.1, 0, 1, 0);
+            Vec.array[inputOffset+8*ind] = shift(CommunityBearing, 360, 0, 1, 0);
             //run the neuroCommand order tree
             for(int itr=0; itr< params.array[26]; itr++){//every order is sequential and run after the previous order to massively simplify the workload in this kernel.
                 double tmp;
@@ -272,8 +272,8 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
 
             }
 
-            Vec.array[whenMinOffset+j*ind] += shift(Vec.array[outputOffset+0*ind], 2160, 0); // nv = ((ov - omin)*(nmax-nmin) / (omax - omin))+nmin
-            Vec.array[whenMaxOffset+j*ind] += shift(Vec.array[outputOffset+1*ind], 2160, 0);
+            Vec.array[whenMinOffset+j*ind] += Vec.array[outputOffset+0*ind]; // nv = ((ov - omin)*(nmax-nmin) / (omax - omin))+nmin
+            Vec.array[whenMaxOffset+j*ind] += Vec.array[outputOffset+1*ind];
             Vec.array[howCertainOffset+j*ind] += Vec.array[outputOffset+2*ind];
             Vec.array[communityMagOffset+j*ind] =  Vec.array[outputOffset+3*ind]; // set the next sets communityMag = output #3.
         }

@@ -172,6 +172,7 @@ void NetworkGenetic::saveToFile(std::ofstream &stream){
             std::cerr<<(float)itr/(float)host_genetics.size<<std::endl;
         }
     }
+    CUDA_SAFE_CALL(cudaDeviceReset());
 }
 
 void NetworkGenetic::confDeviceParams(){
@@ -314,6 +315,10 @@ void NetworkGenetic::trainForecast(std::vector<double> *ret, int &hour, std::vec
     }
     CUDA_SAFE_CALL(cudaDeviceSynchronize());
     std::cerr.precision(40);
+    for(int i=0; i<70; i++){
+        std::cerr<<host_genetics.array[_hostParams.array[19]+i]<<std::endl;
+
+    }
     std::cerr<<"first weight is: "<<host_genetics.array[_hostParams.array[11]]<<std::endl;
 
     for(int i=0; i<_hostParams.array[4]; i++){
@@ -326,10 +331,9 @@ void NetworkGenetic::trainForecast(std::vector<double> *ret, int &hour, std::vec
     for(int i=0; i<_hostParams.array[5]; i++){
         std::cerr<<"and a memory #"<<i<<" of"<<host_genetics.array[_hostParams.array[14] + i*_hostParams.array[10]]<<std::endl;
     }
-    for(int i=0; i<20; i++){
-        std::cerr<<host_genetics.array[_hostParams.array[19]+i]<<std::endl;
+    std::cerr<<"first whenMin is: "<<host_genetics.array[_hostParams.array[21]]<<std::endl;
+    std::cerr<<"first whenMax is: "<<host_genetics.array[_hostParams.array[25]]<<std::endl;
 
-    }
     CUDA_SAFE_CALL(cudaFree(dConnect));
     CUDA_SAFE_CALL(cudaFree(retVec.array));
     CUDA_SAFE_CALL(cudaFree(dmeanCh.array));
@@ -340,9 +344,10 @@ void NetworkGenetic::trainForecast(std::vector<double> *ret, int &hour, std::vec
 
 void NetworkGenetic::trainHourSync(){
     std::cerr<<"end of hour sync"<<std::endl;
+    assert(_hostParams.array[10]*_numOfStreams == host_fitness.size);
     for(int n=0; n<_numOfStreams; n++){
         for(int i=0; i<_hostParams.array[10]; i++){
-            host_fitness.array[i + n*_streamSize] += host_genetics.array[_hostParams.array[19] + i + n*_streamSize];
+                host_fitness.array[i + n*_streamSize] += host_genetics.array[_hostParams.array[19] + i + n*_streamSize];
         }
     }
     std::cerr<<"after sync.."<<std::endl;
@@ -352,7 +357,7 @@ void NetworkGenetic::endOfTrial(){
     std::cerr<<"end of trial reached."<<std::endl;
     for(int n=0; n<_numOfStreams; n++){ // replace the fitness values for each individual  with that individuals average fitness for this trial
         for(int i=0; i<_hostParams.array[10]; i++){
-            host_genetics.array[_hostParams.array[19]+i+n*_streamSize] = host_fitness.array[i + n*_streamSize]/(2160);
+            host_genetics.array[_hostParams.array[19]+i+n*_streamSize] = host_fitness.array[i + n*_streamSize]/(double)(2160);
         }
     }
 
@@ -409,25 +414,33 @@ void NetworkGenetic::endOfTrial(){
 
         reduceFirstKern<<<regGridSize, regBlockSize, regBlockSize*sizeof(double), _stream[n]>>>(device_genetics, partial_reduce_sums, _deviceParams, device_offset);
         CUDA_SAFE_CALL(cudaPeekAtLastError());
+
         reduceSecondKern<<<1, 1, 0, _stream[n]>>>(partial_reduce_sums, _deviceParams, &dfitnessAvg[n]);
         CUDA_SAFE_CALL(cudaPeekAtLastError());
+
         normalizeKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dfitnessAvg[n], device_offset);
         CUDA_SAFE_CALL(cudaPeekAtLastError());
+
+        CUDA_SAFE_CALL(cudaMemcpyAsync(&hfitnessAvg[n], &dfitnessAvg[n], sizeof(double), cudaMemcpyDeviceToHost, _stream[n]));
+        CUDA_SAFE_CALL(cudaPeekAtLastError());
+
+
         cutoffKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams,  &dparentChildCutoff[n], &evoGridSize[n], &dfitnessAvg[n], device_offset);
         CUDA_SAFE_CALL(cudaPeekAtLastError());
+
         CUDA_SAFE_CALL(cudaMemcpyAsync(&hparentChildCutoff[n], &dparentChildCutoff[n], sizeof(int), cudaMemcpyDeviceToHost, _stream[n]));
 
         evolutionKern<<<regGridSize, regBlockSize, 0, _stream[n]>>>(device_genetics, _deviceParams, &dparentChildCutoff[n], &evoGridSize[n], seed[n], device_offset);
         CUDA_SAFE_CALL(cudaPeekAtLastError());
 
-        CUDA_SAFE_CALL(cudaMemcpyAsync(&hfitnessAvg[n], &dfitnessAvg[n], sizeof(double), cudaMemcpyDeviceToHost, _stream[n]));
-        CUDA_SAFE_CALL(cudaPeekAtLastError());
 
         CUDA_SAFE_CALL(cudaMemcpyAsync(&host_genetics.array[host_offset], &device_genetics.array[device_offset], _streambytes, cudaMemcpyDeviceToHost, _stream[n]));
 
         host_offset += _streamSize;
         device_offset += _streamSize;
     }
+    CUDA_SAFE_CALL(cudaDeviceSynchronize());
+    std::cerr<<"average fitness for first stream is: "<< hfitnessAvg[0]<<std::endl;
 
     CUDA_SAFE_CALL(cudaFree(partial_reduce_sums.array));
     CUDA_SAFE_CALL(cudaFreeHost(hfitnessAvg));
@@ -435,6 +448,8 @@ void NetworkGenetic::endOfTrial(){
     CUDA_SAFE_CALL(cudaFree(dfitnessAvg));
     CUDA_SAFE_CALL(cudaFree(evoGridSize));
     CUDA_SAFE_CALL(cudaFree(dparentChildCutoff));
+    CUDA_SAFE_CALL(cudaFree(device_genetics.array));
+    CUDA_SAFE_CALL(cudaFreeHost(host_fitness.array));
     delete[] seed;
 }
 
