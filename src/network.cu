@@ -64,7 +64,6 @@ void NetworkGenetic::allocateHostAndGPUObjects( size_t deviceRam, size_t hostRam
     deviceGenSize = _streambytes * 2;
     assert(deviceGenSize == _streambytes * 2);
     device_genetics.size = _streamSize * 2;
-    std::cerr<<"streamsize is: "<<_streamSize<<std::endl;
 
     //this block below makes sure that the allocated host ram for genetics is a number evently divisible by the stream size in bytes.
     host_genetics.size = hostGenSize/sizeof(double);
@@ -72,9 +71,6 @@ void NetworkGenetic::allocateHostAndGPUObjects( size_t deviceRam, size_t hostRam
     host_genetics.size = _numOfStreams * _streamSize;
     hostGenSize = host_genetics.size * sizeof(double);
     host_fitness.size =(host_genetics.size/_hostParams.array[2]);
-    std::cerr<<"genetics device ram to allocate: "<<deviceGenSize<<std::endl;
-    std::cerr<<"genetics host ram to allocate: "<<hostGenSize<<std::endl;
-    std::cerr<<"number of streams: "<<_numOfStreams<<std::endl;
     assert(host_genetics.size == _numOfStreams * _streamSize);
 
     CUDA_SAFE_CALL(cudaHostAlloc((void**)&host_genetics.array, hostGenSize, cudaHostAllocWriteCombined));
@@ -142,7 +138,7 @@ bool NetworkGenetic::loadFromFile(std::ifstream &stream){
     std::cerr<<"preparing to load from file..."<<std::endl;
     size_t entry=0;
     int itr =0;
-    while(std::getline(stream, item, ',')){ // each value in the array
+    while(std::getline(stream, item)){ // each value in the array
         entry++;
     }
     std::cerr<<"number of data points: "<<entry<<std::endl;
@@ -152,7 +148,7 @@ bool NetworkGenetic::loadFromFile(std::ifstream &stream){
     stream.seekg(0, stream.beg);
     assert(stream.good());
     std::cerr.precision(2);
-    while(std::getline(stream, item, ',')){ // each value in the array
+    while(std::getline(stream, item)){ // each value in the array
         host_genetics.array[itr] = std::stod(item);
         if(itr%(host_genetics.size/100) == 0){
             std::cerr<<(float)itr/(float)host_genetics.size<<std::endl;
@@ -167,7 +163,7 @@ void NetworkGenetic::saveToFile(std::ofstream &stream){
     std::cerr<<"saving to file."<<std::endl;
     std::cerr.precision(2);
     for(int itr=0; itr<host_genetics.size; itr++){
-        stream<< host_genetics.array[itr]<<",";
+        stream<< host_genetics.array[itr]<<"\n";
         if(itr%(host_genetics.size/100) == 0){
             std::cerr<<(float)itr/(float)host_genetics.size<<std::endl;
         }
@@ -357,7 +353,7 @@ void NetworkGenetic::endOfTrial(){
     std::cerr<<"end of trial reached."<<std::endl;
     for(int n=0; n<_numOfStreams; n++){ // replace the fitness values for each individual  with that individuals average fitness for this trial
         for(int i=0; i<_hostParams.array[10]; i++){
-            host_genetics.array[_hostParams.array[19]+i+n*_streamSize] = host_fitness.array[i + n*_streamSize]/(double)(2160);
+            host_genetics.array[_hostParams.array[19]+i+n*_streamSize] = host_fitness.array[i + n*_streamSize]/(double)(30);
         }
     }
 

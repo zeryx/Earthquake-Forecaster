@@ -31,15 +31,23 @@ __host__ __device__ float normalize(float x, float mean, float stdev){
 }
 
 __host__ __device__ double shift(double x, double oldMax, double oldMin, double newMax, double newMin){
-    return (x/(oldMax)-oldMin)*(newMax-newMin)+newMin;
+    /* shift the value X from the range of oldmin<=x<=oldmax to the new range of newMin<=x<=newMax */
+    return newMin + ((newMax-newMin)/(oldMax-oldMin))*(x-oldMin);
 }
 
 __host__ __device__ double ActFunc(double x){
     return tanh(x);
 }
 __host__ __device__ double scoreFunc(double whenMinGuess, double whenMaxGuess, int whenAns, double latGuess, double lonGuess, double latAns, double lonAns){
-    if(whenMinGuess <= ((double)whenAns/(double)2160) && whenMaxGuess >= ((double)whenAns/(double)2160) && whenMinGuess > 0 && whenMaxGuess >0)
-        return exp(-(1*distCalc(latGuess, lonGuess, latAns, lonAns) + 2*fabs(whenMaxGuess-whenMinGuess))/3); // emphasize smaller boundaries when more certain, otherwise set fit to 0.
+    if(whenMinGuess <= ((double)whenAns/(double)2160)
+            && whenMaxGuess >= ((double)whenAns/(double)2160))
+        //certainty amplifies the value in exp, if the value is on point (low value), then squaring it (certainty = 1) will double the returned fitness.
+        //hoever if the answer is wrong and certainty is high, the value in the exp will double in size, which will return half of the score before the exponent.
+        //the use of certainty trains the network to only be certain when the accuracy of the forecast is high.
+        //Certainty is on a scale from 0-1, and its value is a percent chance.
+
+        return exp(-(1*distCalc(latGuess, lonGuess, latAns, lonAns) + 2*fabs(whenMaxGuess-whenMinGuess))/3);
+
     else
         return 0;
 
