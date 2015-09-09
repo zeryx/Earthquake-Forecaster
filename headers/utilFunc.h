@@ -9,11 +9,11 @@ __host__ __device__ float distCalc(float lat1, float lon1, float lat2, float lon
 
 __host__ __device__ float normalize(float x, float mean, float stdev);
 
-__host__ __device__ float shift(float x, float max, float min);
+__host__ __device__ double shift(double x, double oldMax, double oldMin, double newMax, double newMin);
 
 __host__ __device__ double ActFunc(double x);
 
-__host__  __device__ double scoreFunc(float whenGuess, int whenAns, float latGuess, float lonGuess, float latAns, float lonAns);
+__host__  __device__ double scoreFunc(double whenMinGuess, double whenMaxGuess, int whenAns, double latGuess, double lonGuess, double latAns, double lonAns);
 
 
 

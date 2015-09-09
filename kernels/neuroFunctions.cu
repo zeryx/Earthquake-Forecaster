@@ -13,11 +13,11 @@ __host__ __device__ void neuroSquash(double &store){
     store = ActFunc(store);
 }
 
-__host__ __device__ void neuroMemGate(double &memIn, double &input, double &output, float min){
+__host__ __device__ void neuroMemGate(double &memIn, double &input, double &output, double min){
     if(memIn > min || memIn < -min)
         neuroSum(output, input);
 }
-__host__ __device__ void neuroMemForget(double &memForget, double &mem, float min){
+__host__ __device__ void neuroMemForget(double &memForget, double &mem, double min){
     if(memForget > min || memForget < -min)
         neuroZero(mem);
 

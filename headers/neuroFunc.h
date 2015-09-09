@@ -8,9 +8,9 @@
 
  __host__ __device__ void neuroSquash(double &store);
 
- __host__ __device__ void neuroMemGate(double &memIn, double &input, double &output, float min);
+ __host__ __device__ void neuroMemGate(double &memIn, double &input, double &output, double min);
 
- __host__ __device__ void neuroMemForget(double &memForget, double &mem, float min);
+ __host__ __device__ void neuroMemForget(double &memForget, double &mem, double min);
 
 
 #endif
