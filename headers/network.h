@@ -36,9 +36,10 @@ public:
 
     void confDeviceParams();
 
-    void confOrderParams(const int &numInNeurons, const int &numHiddenNeurons, const int &numMemoryNeurons, const int &numMemoryIn,
-                         const int &numMemoryOut, const int &numMemoryForget,  const int &numOutNeurons,
-                         const int &numOrders, const int &numWeights);
+    void confNetParams(const int &numInNeurons, const int &numHiddenNeurons, const int &numMemoryNeurons, const int &numMemoryIn,
+                         const int &numMemoryOut, const int &numMemoryForget,  const int &numOutNeurons);
+
+    void confOrder(const int &numOrders, const int &numWeights);
 
     void confTestParams(const int &numOfSites, const int &sampleRate);
 

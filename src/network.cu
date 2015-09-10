@@ -11,6 +11,35 @@
 #include <cstdio>
 #include <assert.h>
 
+//parameter definitions
+//    _hostParams.array[0] = number of neurons
+//    _hostparams.array[1] = number of weights per individual
+//    _hostParams.array[2] = size of individual
+//    _hostParams.array[3] = number of input neurons per individual
+//    _hostParams.array[4] = number of hidden neurons per individual
+//    _hostParams.array[5] = number of memory neurons per individual
+//    _hostParams.array[6] = number of memoryGate In nuerons per individual
+//    _hostParams.array[7] = number of memoryGate Out neurons per individual
+//    _hostParams.array[8] = number of memoryGate Forget neurons per individual
+//    _hostParams.array[9] = number of output neurons per individual
+//    _hostParams.array[10] = number of individuals in stream
+//    _hostParams.array[11] = weights offset
+//    _hostParams.array[12] = input offset
+//    _hostParams.array[13] = hidden neurons offset
+//    _hostParams.array[14] = memory neurons offset
+//    _hostParams.array[15] = memoryIn neurons offset
+//    _hostParams.array[16] = memoryOut neurons offset
+//    _hostParams.array[17] = memoryForget neurons offset
+//    _hostParams.array[18] = output neurons offset
+//    _hostParams.array[19] = fitness offset
+//    _hostParams.array[20] = community magnitude offset
+//    _hostParams.array[21] = whenMin offset
+//    _hostParams.array[22] = howCertain offset
+//    _hostParams.array[23] = number of sites
+//    _hostParams.array[24] = sample rate
+//    _hostParams.array[25] = whenMax Offset
+//    _hostParams.array[26] = number of orders
+
 
 NetworkGenetic::NetworkGenetic(){
     _hostParams.array = new int[30];
@@ -94,38 +123,25 @@ void NetworkGenetic:: confTestParams(const int &numOfSites, const int &sampleRat
     this->setParams(2, _hostParams.array[0] + _hostParams.array[1] + 1 + 4*_hostParams.array[23]); //size of an individual
 }
 
-void NetworkGenetic::confOrderParams(const int &numInNeurons, const int &numHiddenNeurons, const int &numMemoryNeurons, const int &numMemoryIn,
-                                     const int &numMemoryOut, const int &numMemoryForget,  const int &numOutNeurons,
-                                     const int &numOrders, const int &numWeights){
+void NetworkGenetic::confNetParams(const int &numInNeurons, const int &numHiddenNeurons,
+                                   const int &numMemoryNeurons, const int &numMemoryIn, const int &numMemoryOut,
+                                   const int &numMemoryForget, const int &numOutNeurons){
 
     this->setParams(0, numInNeurons + numHiddenNeurons + numMemoryNeurons + numMemoryIn + numMemoryOut + numMemoryForget + numOutNeurons);
-    this->setParams(1, numWeights);
-    //    _hostParams.array[2] = size of individual
     this->setParams(3, numInNeurons);
     this->setParams(4, numHiddenNeurons);
-    this->setParams(5, numMemoryNeurons);            //memory neurons per individual
-    this->setParams(6, numMemoryIn);            //memoryIn neurons per individual
-    this->setParams(7, numMemoryOut);            //memoryOut neurons per individual
-    this->setParams(8, numMemoryForget);       //memoryForget neurons per individual
-    this->setParams(9, numOutNeurons);           //output neurons per individual
-    //    _hostParams.array[10] = number of individuals in stream
-    //    _hostParams.array[11] = weights offset
-    //    _hostParams.array[12] = input offset
-    //    _hostParams.array[13] = hidden neurons offset
-    //    _hostParams.array[14] = memory neurons offset
-    //    _hostParams.array[15] = memoryIn neurons offset
-    //    _hostParams.array[16] = memoryOut neurons offset
-    //    _hostParams.array[17] = memoryForget neurons offset
-    //    _hostParams.array[18] = output neurons offset
-    //    _hostParams.array[19] = fitness offset
-    //    _hostParams.array[20] = community magnitude offset
-    //    _hostParams.array[21] = whenMin offset
-    //    _hostParams.array[22] = howCertain offset
-    //    _hostParams.array[23] = number of sites
-    //    _hostParams.array[24] = sample rate
-    //    _hostParams.array[25] = whenMax Offset
-    //    _hostParams.array[26] = number of orders
-    this->setParams(26, numOrders); //number of orders for the networkKernel
+    this->setParams(5, numMemoryNeurons);
+    this->setParams(6, numMemoryIn);
+    this->setParams(7, numMemoryOut);
+    this->setParams(8, numMemoryForget);
+    this->setParams(9, numOutNeurons);
+
+}
+
+void NetworkGenetic::confOrder(const int &numOrders, const int &numWeights){
+
+    this->setParams(1, numWeights);
+    this->setParams(26, numOrders);
     std::cerr<<numOrders<<std::endl;
 }
 
@@ -343,7 +359,7 @@ void NetworkGenetic::trainHourSync(){
     assert(_hostParams.array[10]*_numOfStreams == host_fitness.size);
     for(int n=0; n<_numOfStreams; n++){
         for(int i=0; i<_hostParams.array[10]; i++){
-                host_fitness.array[i + n*_streamSize] += host_genetics.array[_hostParams.array[19] + i + n*_streamSize];
+            host_fitness.array[i + n*_streamSize] += host_genetics.array[_hostParams.array[19] + i + n*_streamSize];
         }
     }
     std::cerr<<"after sync.."<<std::endl;

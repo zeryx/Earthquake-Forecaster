@@ -51,21 +51,19 @@ bool prep::init(int sampleRate, int SiteNum, std::vector<double> *siteData){
     return true;
 }
 
-bool prep::checkForJson(const char* filepath){
+bool prep::readNetParmeters(const char *filepath){
     rapidjson::Document doc;
-    FILE* orderFile = fopen(filepath, "r");
+    FILE* netParamsFile = fopen(filepath, "r");
     char buffer[65536];
-    rapidjson::FileReadStream in(orderFile, buffer, sizeof(buffer));
+    rapidjson::FileReadStream in(netParamsFile, buffer, sizeof(buffer));
     if(doc.ParseStream(in).HasParseError()){
-
-        std::cerr<<"parse error"<<std::endl;
-        exit(1);
-
+        std::cerr<<"orders has parse error"<<std::endl;
+        return false;
     }
     assert(doc.IsObject());
     assert(doc.HasMember("neurons"));
     rapidjson::Value &a = doc["neurons"];
-    int input, hidden, memory, memGateIn, memGateOut, memGateForget, output, numOrders, weights=0;
+    int input, hidden, memory, memGateIn, memGateOut, memGateForget, output;
     for(rapidjson::Value::ConstMemberIterator itr = a.MemberBegin();
         itr != a.MemberEnd(); ++itr){
         std::string tmp = itr->name.GetString();
@@ -89,11 +87,33 @@ bool prep::checkForJson(const char* filepath){
 
         else if(tmp == "output")
             output = itr->value.GetInt();
+
+        else{
+            std::cerr<<"invalid neuron type"<<std::endl;
+            return false;
+        }
     }
+    std::fclose(netParamsFile);
+    _net.confNetParams(input, hidden, memory, memGateIn, memGateOut, memGateForget, output);
+    return true;
+}
+
+bool prep::readOrders(const char* filepath){
+    rapidjson::Document doc;
+    FILE* orderFile = fopen(filepath, "r");
+    char buffer[65536];
+    rapidjson::FileReadStream in(orderFile, buffer, sizeof(buffer));
+    if(doc.ParseStream(in).HasParseError()){
+        std::cerr<<"orders has parse error"<<std::endl;
+        return false;
+
+    }
+    assert(doc.IsObject());
     rapidjson::Value &orders = doc["orders"];
     assert(orders.IsArray());
+    int weights =0;
     int size = orders.Size();
-    numOrders = size;
+    int numOrders = size;
     _connections = new Order[size];
     for(size_t itr=0; itr<orders.Size(); itr++){
         Order tmp;
@@ -101,15 +121,15 @@ bool prep::checkForJson(const char* filepath){
         std::string def2 = orders[itr]["second"]["def"].GetString();
         tmp.first.id = orders[itr]["first"]["id"].GetInt();
         tmp.second.id = orders[itr]["second"]["id"].GetInt();
-        tmp.first.def = this->strcmp(def1);
-        tmp.second.def= this->strcmp(def2);
+        tmp.first.def = this->enumStringcmp(def1);
+        tmp.second.def= this->enumStringcmp(def2);
         if(orders[itr].HasMember("third")){
             std::string def3 = orders[itr]["third"]["def"].GetString();
             tmp.third.id = orders[itr]["third"]["id"].GetInt();
-            tmp.third.def = this->strcmp(def3);
+            tmp.third.def = this->enumStringcmp(def3);
             if(tmp.third.def == typeNULL){
                 std::cerr<<"invalid descriptor for third parameter, at number"<<itr<<std::endl;
-                exit(1);
+                return false;
             }
         }
         else{
@@ -118,7 +138,7 @@ bool prep::checkForJson(const char* filepath){
         }
         if(tmp.first.def == typeNULL || tmp.second.def == typeNULL){
             std::cerr<<"invalid descriptor for first &/or second parameter, at number"<<itr<<std::endl;
-            exit(1);
+            return false;
         }
 
 
@@ -130,12 +150,12 @@ bool prep::checkForJson(const char* filepath){
         _connections[itr] = tmp;
     }
     std::cerr<<"number of weights: "<<weights<<std::endl;
-    _net.confOrderParams(input, hidden, memory, memGateIn, memGateOut, memGateForget, output, numOrders, weights);
+    _net.confOrder( numOrders, weights);
     fclose(orderFile);
     return true;
 }
 
-neuroType prep::strcmp(std::string def){
+neuroType prep::enumStringcmp(std::string def){
 
     neuroType ret = typeNULL;
 

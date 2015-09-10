@@ -41,14 +41,7 @@ __host__ __device__ double ActFunc(double x){
 __host__ __device__ double scoreFunc(double whenMinGuess, double whenMaxGuess, int whenAns, double latGuess, double lonGuess, double latAns, double lonAns){
     if(whenMinGuess <= ((double)whenAns/(double)2160)
             && whenMaxGuess >= ((double)whenAns/(double)2160))
-        //certainty amplifies the value in exp, if the value is on point (low value), then squaring it (certainty = 1) will double the returned fitness.
-        //hoever if the answer is wrong and certainty is high, the value in the exp will double in size, which will return half of the score before the exponent.
-        //the use of certainty trains the network to only be certain when the accuracy of the forecast is high.
-        //Certainty is on a scale from 0-1, and its value is a percent chance.
-
         return exp(-(1*distCalc(latGuess, lonGuess, latAns, lonAns) + 2*fabs(whenMaxGuess-whenMinGuess))/3);
-
     else
         return 0;
-
 }

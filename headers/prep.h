@@ -15,7 +15,10 @@ public:
 
     void doingTraining(int site, int hour, double lat,
                        double lon, double mag, double dist);
-    bool checkForJson(const char* filepath);
+
+    bool readNetParmeters(const char* filepath);
+
+    bool readOrders(const char* filepath);
 
     bool checkForGenomes(const char* filepath);
 
@@ -25,7 +28,8 @@ public:
 
     void forecast(std::vector<double> &ret, int &hour, std::vector<int> &data, double &K, std::vector<double> &globalQuakes);
 
-    neuroType strcmp(std::string);
+    neuroType enumStringcmp(std::string);
+
 private:
     NetworkGenetic _net;
     Order *_connections;

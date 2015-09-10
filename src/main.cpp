@@ -9,7 +9,14 @@
 
 int main(int argc, char** arg){
     prep start;
-    start.checkForJson("orders.json");
+    if(!start.readOrders("orders.json")){
+        std::cerr<<"couldn't read orders.json file..."<<std::endl;
+        return false;
+    }
+    if(!start.readNetParmeters("net.json")){
+        std::cerr<<"couldn't read net.json file..."<<std::endl;
+        return false;
+    }
     int sampleRate, numberOfSites, SLEN;
     std::cin>>sampleRate>>numberOfSites>>SLEN;
     std::vector<double> sitesData;
@@ -30,6 +37,7 @@ int main(int argc, char** arg){
         start.doingTraining(gtf_site, gtf_hour, gtf_lat, gtf_long, gtf_mag, gtf_dist);
 
         if(start.checkForGenomes("/home/ubuntu/mount/genome/weights.bin")){
+
             std::cerr<<"running a hot start"<<std::endl;
 
             start.hotStart("/home/ubuntu/mount/genome/weights.bin");
