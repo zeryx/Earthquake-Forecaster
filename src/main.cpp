@@ -53,20 +53,21 @@ int main(int argc, char** arg){
         int DLEN, QLEN;
         int hour;
         double Kp;
-        std::vector<int> data ;
+        std::vector<int> data;
         std::vector<double> globalQuakes(5, 0);
         std::vector<double> tmpQuakes;
         std::vector<double> retM(2160*numberOfSites, 0);
 
 
         std::cin>>hour;
-        if(hour== -1 || hour == 50)
+        if(hour== -1)
             break;
         std::cin>>DLEN;
         for(int i=0; i<DLEN; i++){
             data.push_back(0);
             std::cin>>data.at(i);
             if(data.at(i) == -1){
+                if(i>0)
                 data.at(i) = data.at(i-1);
             }
         }

@@ -23,7 +23,6 @@ public:
     void trainForecast(std::vector<double> *ret, int &hour, std::vector<int> &data, double &Kp, std::vector<double> &globalQuakes,
                        Order *connections, std::vector<double> &answers, std::vector<double> &siteData);
 
-    void trainHourSync();
 
     void endOfTrial();
 
@@ -45,7 +44,7 @@ public:
 
     bool loadFromFile(std::ifstream &stream);
 
-    void saveToFile (std::ofstream &stream);
+    void saveToFile(std::ofstream &stream);
 
 
         ~NetworkGenetic();
@@ -55,7 +54,6 @@ private:
     long int _streamSize;
     kernelArray<double> device_genetics;
     kernelArray<double> host_genetics;
-    kernelArray<double> host_fitness;
     std::vector<double> _best;
     kernelArray<int>_hostParams;
     kernelArray<int>_deviceParams;

@@ -13,7 +13,8 @@ __host__ __device__ double shift(double x, double oldMax, double oldMin, double 
 
 __host__ __device__ double ActFunc(double x);
 
-__host__  __device__ double scoreFunc(double whenMinGuess, double whenMaxGuess, int whenAns, double latGuess, double lonGuess, double latAns, double lonAns);
+__host__  __device__ double scoreFunc(double whenGuess, float whenAns, double latGuess,
+                                      double lonGuess, double latAns, double lonAns, double avgFit, float certainty);
 
 
 

@@ -34,9 +34,8 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
     const int outputOffset = params.array[18] + idx + device_offset;
     const int fitnessOffset = params.array[19] + idx + device_offset;
     const int communityMagOffset = params.array[20] +idx +device_offset;
-    const int whenMinOffset = params.array[21] + idx + device_offset;
+    const int whenOffset = params.array[21] + idx + device_offset;
     const int howCertainOffset = params.array[22] + idx + device_offset;
-    const int whenMaxOffset = params.array[25] + idx + device_offset;
 
     const double avgLatGQuake = globalQuakes[0];
     const double avgLonGQuake = globalQuakes[1];
@@ -50,8 +49,7 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
     //reset values from previous individual.
     //community magnitude is not set, as this needs to be continued.
     for(int i=0; i<params.array[23]; i++){
-        Vec.array[whenMinOffset +i*ind] = 0;
-        Vec.array[whenMaxOffset +i*ind] =0;
+        Vec.array[whenOffset +i*ind] = 0;
         Vec.array[howCertainOffset +i*ind] =0;
     }
     for(int i=0; i<trainingsize; i++){ // training size is a constant parameter for the size of each timestep
@@ -86,11 +84,11 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
                 Vec.array[inputOffset+k*ind] = normalize(inputData[site_offset[j]+channel_offset[k]+i], meanCh.array[k], stdCh.array[k]);//channels 1-3
             }
 
-            Vec.array[inputOffset+3*ind] = shift(GQuakeAvgdist, 40075.1, 0, 1, 0);
+            Vec.array[inputOffset+3*ind] = shift(GQuakeAvgdist, 80150.2, 0, 1, 0);
             Vec.array[inputOffset+4*ind] = shift(GQuakeAvgBearing, 360, 0, 1, 0);
             Vec.array[inputOffset+5*ind] = shift(GQuakeAvgMag, 10, 0, 1, 0);
             Vec.array[inputOffset+6*ind] = shift(Kp, 10, 0, 1, 0);
-            Vec.array[inputOffset+7*ind] = shift(CommunityDist, 40075.1, 0, 1, 0);
+            Vec.array[inputOffset+7*ind] = shift(CommunityDist, 80150.2, 0, 1, 0);
             Vec.array[inputOffset+8*ind] = shift(CommunityBearing, 360, 0, 1, 0);
             //run the neuroCommand order tree
             for(int itr=0; itr< params.array[26]; itr++){//every order is sequential and run after the previous order to massively simplify the workload in this kernel.
@@ -272,33 +270,29 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
 
             }
 
-            Vec.array[whenMinOffset+j*ind] += Vec.array[outputOffset+0*ind]; // nv = ((ov - omin)*(nmax-nmin) / (omax - omin))+nmin
-            Vec.array[whenMaxOffset+j*ind] += Vec.array[outputOffset+1*ind];
-            Vec.array[howCertainOffset+j*ind] += Vec.array[outputOffset+2*ind];
-            Vec.array[communityMagOffset+j*ind] =  Vec.array[outputOffset+3*ind]; // set the next sets communityMag = output #3.
+            Vec.array[whenOffset+j*ind] += shift(Vec.array[outputOffset+0*ind], 1, -1, 2160, 0);
+            Vec.array[howCertainOffset+j*ind] += shift(Vec.array[outputOffset+1*ind], 1, -1, 1, 0);
+            Vec.array[communityMagOffset+j*ind] =  shift(Vec.array[outputOffset+2*ind], 1, -1, 10, 0); // set the next sets communityMag = output #3.
         }
     }
     for(int j=0; j<params.array[23]; j++){ // now lets get the average when and howcertain values.
-        Vec.array[whenMinOffset+j*ind] = Vec.array[whenMinOffset+j*ind]/trainingsize;
-        Vec.array[whenMaxOffset+j*ind] = Vec.array[whenMaxOffset+j*ind]/trainingsize;
+        Vec.array[whenOffset+j*ind] = Vec.array[whenOffset+j*ind]/trainingsize;
         Vec.array[howCertainOffset+j*ind] = Vec.array[howCertainOffset+j*ind]/trainingsize;
     }
     /*calculate score for this individual during this round, current scoring mechanism is - e^(-(abs(whenGuess-whenAns)+distToCorrectSite)), closer to 1 the better.   */
     double maxCertainty=0;
-    double whenMinGuess=0;
-    double whenMaxGuess=0;
+    double whenGuess=0;
     double guessLat=0;
     double guessLon=0;
 
     for(int j=0; j<params.array[23]; j++){
         if(Vec.array[howCertainOffset+j*ind] > maxCertainty){
             maxCertainty = Vec.array[howCertainOffset+j*ind];
-            whenMinGuess = Vec.array[whenMinOffset+j*ind];
-            whenMaxGuess = Vec.array[whenMaxOffset+j*ind];
+            whenGuess = Vec.array[whenOffset+j*ind];
             guessLat = siteData[j*2];
             guessLon = siteData[j*2+1];
         }
     }
-
-    Vec.array[fitnessOffset] = scoreFunc(whenMinGuess, whenMaxGuess, whenAns, guessLat, guessLon, ansLat, ansLon); //we take the average beacuse consistency is more important than being really good at this particular hour.
+    double oldFit = Vec.array[fitnessOffset];
+    Vec.array[fitnessOffset] = scoreFunc(whenGuess, whenAns, guessLat, guessLon, ansLat, ansLon, oldFit, maxCertainty); //we take the average beacuse consistency is more important than being really good at this particular hour.
 }

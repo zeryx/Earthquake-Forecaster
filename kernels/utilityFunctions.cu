@@ -1,5 +1,4 @@
 #include <utilFunc.h>
-
 __host__ __device__ float bearingCalc(float lat1, float lon1, float lat2, float lon2){
 
     float y = sin(lon2-lon1) * cos(lat2);
@@ -38,10 +37,8 @@ __host__ __device__ double shift(double x, double oldMax, double oldMin, double 
 __host__ __device__ double ActFunc(double x){
     return tanh(x);
 }
-__host__ __device__ double scoreFunc(double whenMinGuess, double whenMaxGuess, int whenAns, double latGuess, double lonGuess, double latAns, double lonAns){
-    if(whenMinGuess <= ((double)whenAns/(double)2160)
-            && whenMaxGuess >= ((double)whenAns/(double)2160))
-        return exp(-(1*distCalc(latGuess, lonGuess, latAns, lonAns) + 2*fabs(whenMaxGuess-whenMinGuess))/3);
-    else
-        return 0;
+__host__ __device__ double scoreFunc(double whenGuess, float whenAns, double latGuess, double lonGuess, double latAns, double lonAns, double avgFit, float certainty){
+    double newFit = pow(exp2(1-(distCalc(latGuess, lonGuess, latAns, lonAns)+fabs(whenAns-whenGuess))), (certainty+1));
+
+    return (2159*avgFit+1*newFit)/2160; //massively increased the weight towards the average, penalizing being wrong much more severely.
 }

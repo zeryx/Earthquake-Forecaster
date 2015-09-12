@@ -57,11 +57,17 @@ bool prep::readNetParmeters(const char *filepath){
     char buffer[65536];
     rapidjson::FileReadStream in(netParamsFile, buffer, sizeof(buffer));
     if(doc.ParseStream(in).HasParseError()){
-        std::cerr<<"orders has parse error"<<std::endl;
+        std::cerr<<"netParams has parse error"<<std::endl;
         return false;
     }
-    assert(doc.IsObject());
-    assert(doc.HasMember("neurons"));
+    if(!doc.IsObject()){
+        std::cerr<<"not in json format or file doesn't exist."<<std::endl;
+        return false;
+    }
+    if(!doc.HasMember("neurons")){
+        std::cerr<<"no member named neurons exists in file"<<std::endl;
+        return false;
+    }
     rapidjson::Value &a = doc["neurons"];
     int input, hidden, memory, memGateIn, memGateOut, memGateForget, output;
     for(rapidjson::Value::ConstMemberIterator itr = a.MemberBegin();
