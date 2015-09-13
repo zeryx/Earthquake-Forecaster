@@ -20,6 +20,8 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
     if(tix < params.array[26]){
         sharedQueue[tix].first = commandQueue[tix].first;
         sharedQueue[tix].second = commandQueue[tix].second;
+        sharedQueue[tix].third = commandQueue[tix].third;
+        sharedQueue[tix].verb = commandQueue[tix].verb;
     }
     __syncthreads();
     const int idx = blockIdx.x * blockDim.x + threadIdx.x; // for each thread is one individual
@@ -29,7 +31,7 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
     const int inputOffset = params.array[12] + idx + device_offset;
     const int hiddenOffset = params.array[13] + idx + device_offset;
     const int shortMemOffset = params.array[14] + idx + device_offset;
-    const int longMemOffset = params["longMemOffset"]+idx*params["numIndividuals"]+device_offset;
+    const int longMemOffset = params[26]+idx*params[10]+device_offset;
     const int memGateInOffset = params.array[15] + idx + device_offset;
     const int memGateOutOffset = params.array[16] + idx + device_offset;
     const int memGateForgetOffset = params.array[17] + idx + device_offset;

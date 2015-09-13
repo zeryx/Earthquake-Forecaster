@@ -25,7 +25,7 @@
 //    _hostParams.array[11] = weights offset
 //    _hostParams.array[12] = input offset
 //    _hostParams.array[13] = hidden neurons offset
-//    _hostParams.array[14] = memory neurons offset
+//    _hostParams.array[14] = short term memory neurons offset
 //    _hostParams.array[15] = memoryIn neurons offset
 //    _hostParams.array[16] = memoryOut neurons offset
 //    _hostParams.array[17] = memoryForget neurons offset
@@ -37,6 +37,8 @@
 //    _hostParams.array[23] = number of sites
 //    _hostParams.array[24] = sample rate
 //    _hostParams.array[26] = number of orders
+//    _hostParams.array[27] = number of long term memory neurons per individual
+//_hostParams.array[28] = long term memory neurons offset
 
 
 NetworkGenetic::NetworkGenetic(){
@@ -187,8 +189,9 @@ void NetworkGenetic::confDeviceParams(){
     this->setParams(11, 0);
     this->setParams(12, _hostParams.array[11] + _hostParams.array[10] * _hostParams.array[1]);  // input neurons offset. (weights_offset + numweights*numindividuals)
     this->setParams(13, _hostParams.array[12] + _hostParams.array[10] * _hostParams.array[3]);  // hidden neurons offset. (input_offset +numInputs*numIndividuals)
-    this->setParams(14, _hostParams.array[13] + _hostParams.array[10] * _hostParams.array[4]);  // memory neurons offset. (hidden_offset + numHidden*numIndividuals)
-    this->setParams(15, _hostParams.array[14] + _hostParams.array[10] * _hostParams.array[5]);  // memoryIn Gate nodes offset. (mem_offset + numMem*numIndividuals)
+    this->setParams(14, _hostParams.array[13] + _hostParams.array[10] * _hostParams.array[4]);  // short memory neurons offset. (hidden_offset + numHidden*numIndividuals)
+    this->setParams(28, _hostParams.array[14] + _hostParams.array[10] * _hostParams.array[5]);  //long memory neurons offset (smem_offset + numsmem*numIndividuals)
+    this->setParams(15, _hostParams.array[14] + _hostParams.array[10] * _hostParams.array[27]);  // memoryIn Gate nodes offset. (lmem_offset + numlMem*numIndividuals)
     this->setParams(16, _hostParams.array[15] + _hostParams.array[10] * _hostParams.array[6]);  // memoryOut Gate nodes offset. (memIn_offset + numMemIn*numIndividuals)
     this->setParams(17, _hostParams.array[16] + _hostParams.array[10] * _hostParams.array[7]);  // memoryForget Gate nodes offset. (memOut_offset + numMemOut*numIndividuals)
     this->setParams(18, _hostParams.array[17] + _hostParams.array[10] * _hostParams.array[8]);  // output neurons offset. (memForget_offset + numMemOut*numIndividuals)
