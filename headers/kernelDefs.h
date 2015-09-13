@@ -23,16 +23,17 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
                         kernelArray<double> stdCh, size_t device_offset);
 
 __global__ void reduceFirstKern(kernelArray<double> Vec,
-                                kernelArray<double> per_block_results,
-                                kernelArray<int> params, size_t device_offset);
+                                kernelArray<double> per_block_results, kernelArray<int> params, size_t device_offset);
 
 __global__ void reduceSecondKern(kernelArray<double> per_block_results, kernelArray<int> params, double *result);
 
 __global__ void normalizeKern(kernelArray<double> Vec, kernelArray<int> params, double *avgFitness, size_t device_offset);
 
-__global__ void evolutionKern(kernelArray<double> Vect, kernelArray<int> params, int *childOffset, int *realGridSize, size_t in, size_t device_offset);
+__global__ void evolutionKern(kernelArray<double> Vec, kernelArray<int> params, int *childOffset, int *realGridSize,
+                              size_t in, size_t device_offset);
 
 __global__ void bitonicSortKern(kernelArray<double> Vec, kernelArray<int> params, int j, int k, size_t device_offset);
 
-__global__ void cutoffKern(kernelArray<double> Vec, kernelArray<int> params, int *childOffset, int *evoGridSize, double *avgFitness, size_t device_offset);
+__global__ void cutoffKern(kernelArray<double> Vec, kernelArray<int> params, int *childOffset, int *evoGridSize,
+                           double *avgFitness, size_t device_offset);
 #endif

@@ -24,22 +24,12 @@ __global__ void evolutionKern(kernelArray<double> Vec, kernelArray<int> params, 
         child = parentsIndex + idx; // num threads = num eligible children
 
         const int child_wt = params.array[11] + child + device_offset; // set the weights location for the child
-        const int child_mem = params.array[14] + child + device_offset;
-        const int child_communityMag = params.array[20] + child + device_offset;
 
         float mut = 0.7692;
         float chance[14];
         chance[0] = 0;
         for(int i=1; i<14; i++){
             chance[i] = chance[i-1] + mut;
-        }
-        //reset parameters for this child.
-
-        for(int i=0; i<params.array[5]; i++){
-            Vec.array[child_mem + i*ind] =0;
-        }
-        for(int i=0; i<params.array[23]; i++){
-            Vec.array[child_communityMag + i*ind] = 0;
         }
 
         for(int i=0; i<params.array[1]; i++){//for each weight, lets determine how the weights of the child are altered.

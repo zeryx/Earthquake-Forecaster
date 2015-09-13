@@ -1,6 +1,7 @@
 #include <kernelDefs.h>
 #include <neuroFunc.h>
 #include <utilFunc.h>
+
 //using
 extern __constant__ int inputData[];
 extern __constant__ double answers[];
@@ -83,7 +84,6 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
             for(int k=0; k<3; k++){
                 Vec.array[inputOffset+k*ind] = normalize(inputData[site_offset[j]+channel_offset[k]+i], meanCh.array[k], stdCh.array[k]);//channels 1-3
             }
-
             Vec.array[inputOffset+3*ind] = shift(GQuakeAvgdist, 80150.2, 0, 1, 0);
             Vec.array[inputOffset+4*ind] = shift(GQuakeAvgBearing, 360, 0, 1, 0);
             Vec.array[inputOffset+5*ind] = shift(GQuakeAvgMag, 10, 0, 1, 0);
@@ -280,12 +280,14 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
         Vec.array[howCertainOffset+j*ind] = Vec.array[howCertainOffset+j*ind]/trainingsize;
     }
     /*calculate score for this individual during this round, current scoring mechanism is - e^(-(abs(whenGuess-whenAns)+distToCorrectSite)), closer to 1 the better.   */
-    double maxCertainty=0;
-    double whenGuess=0;
-    double guessLat=0;
-    double guessLon=0;
+    double maxCertainty = 0;
+    float avgCertainty = 0;
+    float whenGuess=0;
+    float guessLat=0;
+    float guessLon=0;
 
     for(int j=0; j<params.array[23]; j++){
+        avgCertainty += Vec.array[howCertainOffset+j*ind];
         if(Vec.array[howCertainOffset+j*ind] > maxCertainty){
             maxCertainty = Vec.array[howCertainOffset+j*ind];
             whenGuess = Vec.array[whenOffset+j*ind];
@@ -293,6 +295,7 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
             guessLon = siteData[j*2+1];
         }
     }
+    avgCertainty = avgCertainty/params.array[23];
     double oldFit = Vec.array[fitnessOffset];
-    Vec.array[fitnessOffset] = scoreFunc(whenGuess, whenAns, guessLat, guessLon, ansLat, ansLon, oldFit, maxCertainty); //we take the average beacuse consistency is more important than being really good at this particular hour.
+    Vec.array[fitnessOffset] = scoreFunc(whenGuess, whenAns, guessLat, guessLon, ansLat, ansLon, oldFit, avgCertainty); //we take the average beacuse consistency is more important than being really good at this particular hour.
 }

@@ -1,4 +1,5 @@
 #include <utilFunc.h>
+#include <float.h>
 __host__ __device__ float bearingCalc(float lat1, float lon1, float lat2, float lon2){
 
     float y = sin(lon2-lon1) * cos(lat2);
@@ -29,16 +30,25 @@ __host__ __device__ float normalize(float x, float mean, float stdev){
     return (fabs(x-mean))/(stdev*2);
 }
 
-__host__ __device__ double shift(double x, double oldMax, double oldMin, double newMax, double newMin){
-    /* shift the value X from the range of oldmin<=x<=oldmax to the new range of newMin<=x<=newMax */
+__host__ __device__ double shift(const double x, float oldMax, float oldMin, float newMax, float newMin){
+    /* shift the value X from one range to a new range */
     return newMin + ((newMax-newMin)/(oldMax-oldMin))*(x-oldMin);
 }
 
-__host__ __device__ double ActFunc(double x){
+__host__ __device__ double ActFunc(double &x){
     return tanh(x);
 }
-__host__ __device__ double scoreFunc(double whenGuess, float whenAns, double latGuess, double lonGuess, double latAns, double lonAns, double avgFit, float certainty){
-    double newFit = pow(exp2(1-(distCalc(latGuess, lonGuess, latAns, lonAns)+fabs(whenAns-whenGuess))), (certainty+1));
 
-    return (2159*avgFit+1*newFit)/2160; //massively increased the weight towards the average, penalizing being wrong much more severely.
+__host__ __device__ double scoreFunc(double whenGuess, float whenAns, double latGuess, double lonGuess,
+                                     double latAns, double lonAns, double avgFit, float certainty){
+
+    const double shiftedWhere = shift(distCalc(latGuess, lonGuess, latAns, lonAns), 80150.2, 0, 100, 0);
+    const double shiftedWhen = shift(fabs(whenAns-whenGuess), 2160, 0, 100, 0);
+    const double newFit = exp((certainty+1)*(-(shiftedWhere+shiftedWhen)));
+
+    if( newFit < avgFit*exp(-20.0))
+        return 0;
+
+    else
+        return (avgFit+newFit/(2160*20)); //massively increased the weight towards the average, penalizing being wrong much more severely.
 }

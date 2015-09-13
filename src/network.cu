@@ -327,15 +327,16 @@ void NetworkGenetic::trainForecast(std::vector<double> *ret, int &hour, std::vec
 
         std::cerr<<"first weight is: "<<host_genetics.array[_hostParams.array[11]+n]<<std::endl;
 
-            std::cerr<<"with a hidden 1 of "<<host_genetics.array[_hostParams.array[13]  + n ]<<std::endl;
+            std::cerr<<"hidden 1 of "<<host_genetics.array[_hostParams.array[13]  + n ]<<std::endl;
 
-            std::cerr<<"with a output 1 of "<<host_genetics.array[_hostParams.array[18] + n ]<<std::endl;
+            std::cerr<<"output 1 of "<<host_genetics.array[_hostParams.array[18] + n ]<<std::endl;
 
-        for(int i=0; i<_hostParams.array[5]; i++){
-            std::cerr<<"and a memory #"<<i<<" of"<<host_genetics.array[_hostParams.array[14] + n + i*_hostParams.array[10]]<<std::endl;
-        }
+            for(int i=0; i<_hostParams.array[23]; i++){
+                std::cerr<<"for site: "<<i<<std::endl;
+                 std::cerr<<"certainty of: "<<host_genetics.array[_hostParams.array[22]+n+i*_hostParams.array[10]]<<std::endl;
+                std::cerr<<"when of: "<<host_genetics.array[_hostParams.array[21]+n+i*_hostParams.array[10]]<<std::endl;
 
-        std::cerr<<"with a when of: "<<host_genetics.array[_hostParams.array[21]+n]<<std::endl;
+            }
 
         std::cerr<<std::endl;
     }
