@@ -69,7 +69,7 @@ bool prep::readNetParmeters(const char *filepath){
         return false;
     }
     rapidjson::Value &a = doc["neurons"];
-    int input, hidden, memory, memGateIn, memGateOut, memGateForget, output;
+    int input, hidden, smemory, lmemory, memGateIn, memGateOut, memGateForget, output;
     for(rapidjson::Value::ConstMemberIterator itr = a.MemberBegin();
         itr != a.MemberEnd(); ++itr){
         std::string tmp = itr->name.GetString();
@@ -79,8 +79,11 @@ bool prep::readNetParmeters(const char *filepath){
         else if(tmp == "hidden")
             hidden = itr->value.GetInt();
 
-        else if(tmp == "memory")
-            memory = itr->value.GetInt();
+        else if(tmp == "smemory")
+            smemory = itr->value.GetInt();
+
+        else if(tmp == "lmemory")
+            lmemory = itr->value.GetInt();
 
         else if(tmp == "memIn")
             memGateIn = itr->value.GetInt();
@@ -171,8 +174,11 @@ neuroType prep::enumStringcmp(std::string def){
     else if(def == "hidden")
         ret = typeHidden;
 
-    else if(def == "memory")
-        ret = typeMemory;
+    else if(def == "smemory")
+        ret = typeShortMemory;
+
+    else if(def == "lmemory")
+        ret = typeLongMemory;
 
     else if(def == "memGateIn")
         ret = typeMemGateIn;

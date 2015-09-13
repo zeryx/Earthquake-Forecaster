@@ -28,7 +28,8 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
     const int weightsOffset = params.array[11] + idx + device_offset;
     const int inputOffset = params.array[12] + idx + device_offset;
     const int hiddenOffset = params.array[13] + idx + device_offset;
-    const int memOffset = params.array[14] + idx + device_offset;
+    const int shortMemOffset = params.array[14] + idx + device_offset;
+    const int longMemOffset = params["longMemOffset"]+idx*params["numIndividuals"]+device_offset;
     const int memGateInOffset = params.array[15] + idx + device_offset;
     const int memGateOutOffset = params.array[16] + idx + device_offset;
     const int memGateForgetOffset = params.array[17] + idx + device_offset;
@@ -114,8 +115,8 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
 
                 }
 
-                else if(sharedQueue[itr].first.def == typeMemory && sharedQueue[itr].second.def == typeZero){
-                    neuroZero(Vec.array[memOffset+sharedQueue[itr].first.id*ind]);
+                else if(sharedQueue[itr].first.def == typeShortMemory && sharedQueue[itr].second.def == typeZero){
+                    neuroZero(Vec.array[shortMemOffset+sharedQueue[itr].first.id*ind]);
 
                 }
 
@@ -182,43 +183,101 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
 
 
                 //memory gates
-                else if(sharedQueue[itr].first.def == typeInput && sharedQueue[itr].second.def == typeMemory && sharedQueue[itr].third.def == typeMemGateIn){
+                else if(sharedQueue[itr].first.def == typeInput && sharedQueue[itr].second.def == typeShortMemory && sharedQueue[itr].third.def == typeMemGateIn){
 
                     tmp = Vec.array[inputOffset+sharedQueue[itr].first.id*ind]; // squash inputs so as to not saturate hidden neurons
                     neuroSquash(tmp);
 
-                    neuroMemGate(Vec.array[memGateInOffset+sharedQueue[itr].third.id*ind], tmp, Vec.array[memOffset+sharedQueue[itr].second.id*ind], 0.5);
+                    neuroMemGate(Vec.array[memGateInOffset+sharedQueue[itr].third.id*ind], tmp, Vec.array[shortMemOffset+sharedQueue[itr].second.id*ind], 0.5);
                 }
 
-                else if(sharedQueue[itr].first.def == typeHidden && sharedQueue[itr].second.def == typeMemory && sharedQueue[itr].third.def == typeMemGateIn){
+                else if(sharedQueue[itr].first.def == typeHidden && sharedQueue[itr].second.def == typeShortMemory && sharedQueue[itr].third.def == typeMemGateIn){
 
                     tmp = Vec.array[hiddenOffset+sharedQueue[itr].first.id*ind];
                     neuroSquash(tmp);
 
-                    neuroMemGate(Vec.array[memGateInOffset+sharedQueue[itr].third.id*ind], tmp, Vec.array[memOffset+sharedQueue[itr].second.id*ind], 0.5);
+                    neuroMemGate(Vec.array[memGateInOffset+sharedQueue[itr].third.id*ind], tmp, Vec.array[shortMemOffset+sharedQueue[itr].second.id*ind], 0.5);
                 }
 
-                else if(sharedQueue[itr].first.def == typeOutput && sharedQueue[itr].second.def == typeMemory && sharedQueue[itr].third.def == typeMemGateIn){
+                else if(sharedQueue[itr].first.def == typeInput && sharedQueue[itr].second.def == typeLongMemory && sharedQueue[itr].third.def == typeMemGateIn){
+
+                    tmp = Vec.array[inputOffset+sharedQueue[itr].first.id*ind]; // squash inputs so as to not saturate hidden neurons
+                    neuroSquash(tmp);
+
+                    neuroMemGate(Vec.array[memGateInOffset+sharedQueue[itr].third.id*ind], tmp, Vec.array[shortMemOffset+sharedQueue[itr].second.id*ind], 0.5);
+                }
+
+                else if(sharedQueue[itr].first.def == typeOutput && sharedQueue[itr].second.def == typeShortMemory && sharedQueue[itr].third.def == typeMemGateIn){
                     neuroMemGate(Vec.array[memGateInOffset+sharedQueue[itr].third.id*ind],
                             Vec.array[outputOffset+sharedQueue[itr].first.id*ind],
-                            Vec.array[memOffset + sharedQueue[itr].second.id*ind], 0.5);
+                            Vec.array[shortMemOffset + sharedQueue[itr].second.id*ind], 0.5);
                 }
 
-                else if(sharedQueue[itr].first.def == typeMemory && sharedQueue[itr].second.def == typeHidden && sharedQueue[itr].third.def == typeMemGateOut){
+                else if(sharedQueue[itr].first.def == typeHidden && sharedQueue[itr].second.def == typeLongMemory && sharedQueue[itr].third.def == typeMemGateIn){
+
+                    tmp = Vec.array[hiddenOffset+sharedQueue[itr].first.id*ind];
+                    neuroSquash(tmp);
+
+                    neuroMemGate(Vec.array[memGateInOffset+sharedQueue[itr].third.id*ind], tmp, Vec.array[longMemOffset+sharedQueue[itr].second.id*ind], 0.5);
+                }
+
+                else if(sharedQueue[itr].first.def == typeShortMemory && sharedQueue[itr].second.def == typeLongMemory && sharedQueue[itr].third.def == typeMemGateIn){
+
+                    tmp = Vec.array[hiddenOffset+sharedQueue[itr].first.id*ind];
+
+                    neuroMemGate(Vec.array[memGateInOffset+sharedQueue[itr].third.id*ind], tmp, Vec.array[longMemOffset+sharedQueue[itr].second.id*ind], 0.5);
+                }
+
+                else if(sharedQueue[itr].first.def == typeOutput && sharedQueue[itr].second.def == typeLongMemory && sharedQueue[itr].third.def == typeMemGateIn){
+                    neuroMemGate(Vec.array[memGateInOffset+sharedQueue[itr].third.id*ind],
+                            Vec.array[outputOffset+sharedQueue[itr].first.id*ind],
+                            Vec.array[longMemOffset + sharedQueue[itr].second.id*ind], 0.5);
+                }
+
+                else if(sharedQueue[itr].first.def == typeShortMemory && sharedQueue[itr].second.def == typeHidden && sharedQueue[itr].third.def == typeMemGateOut){
                     neuroMemGate(Vec.array[memGateOutOffset+sharedQueue[itr].third.id*ind],
-                            Vec.array[memOffset+sharedQueue[itr].first.id*ind],
+                            Vec.array[shortMemOffset+sharedQueue[itr].first.id*ind],
                             Vec.array[hiddenOffset+sharedQueue[itr].second.id*ind], 0.5);
                 }
 
-                else if(sharedQueue[itr].first.def == typeMemory && sharedQueue[itr].second.def == typeOutput && sharedQueue[itr].third.def == typeMemGateOut){
+                else if(sharedQueue[itr].first.def == typeShortMemory && sharedQueue[itr].second.def == typeOutput && sharedQueue[itr].third.def == typeMemGateOut){
                     neuroMemGate(Vec.array[memGateOutOffset+sharedQueue[itr].third.id*ind],
-                            Vec.array[memOffset+sharedQueue[itr].first.id*ind],
+                            Vec.array[shortMemOffset+sharedQueue[itr].first.id*ind],
                             Vec.array[outputOffset+sharedQueue[itr].second.id*ind], 0.5);
                 }
 
-                else if(sharedQueue[itr].first.def == typeMemory && sharedQueue[itr].second.def == typeMemGateForget){
+                else if(sharedQueue[itr].first.def == typeShortMemory && sharedQueue[itr].second.def == typeLongMemory && sharedQueue[itr].third.def == typeMemGateOut){
+                    neuroMemGate(Vec.array[memGateOutOffset+sharedQueue[itr].third.id*ind],
+                            Vec.array[shortMemOffset+sharedQueue[itr].first.id*ind],
+                            Vec.array[longMemOffset+sharedQueue[itr].second.id*ind], 0.5);
+                }
+
+                else if(sharedQueue[itr].first.def == typeLongMemory && sharedQueue[itr].second.def == typeHidden && sharedQueue[itr].third.def == typeMemGateOut){
+                    neuroMemGate(Vec.array[memGateOutOffset+sharedQueue[itr].third.id*ind],
+                            Vec.array[longMemOffset+sharedQueue[itr].first.id*ind],
+                            Vec.array[hiddenOffset+sharedQueue[itr].second.id*ind], 0.5);
+                }
+
+                else if(sharedQueue[itr].first.def == typeLongMemory && sharedQueue[itr].second.def == typeOutput && sharedQueue[itr].third.def == typeMemGateOut){
+                    neuroMemGate(Vec.array[memGateOutOffset+sharedQueue[itr].third.id*ind],
+                            Vec.array[longMemOffset+sharedQueue[itr].first.id*ind],
+                            Vec.array[outputOffset+sharedQueue[itr].second.id*ind], 0.5);
+                }
+
+                else if(sharedQueue[itr].first.def == typeLongMemory && sharedQueue[itr].second.def == typeShortMemory && sharedQueue[itr].third.def == typeMemGateOut){
+                    neuroMemGate(Vec.array[memGateOutOffset+sharedQueue[itr].third.id*ind],
+                            Vec.array[longMemOffset+sharedQueue[itr].first.id*ind],
+                            Vec.array[shortMemOffset+sharedQueue[itr].second.id*ind], 0.5);
+                }
+
+                else if(sharedQueue[itr].first.def == typeShortMemory && sharedQueue[itr].second.def == typeMemGateForget){
                     neuroMemForget(Vec.array[memGateForgetOffset+sharedQueue[itr].second.id*ind],
-                            Vec.array[memOffset + sharedQueue[itr].first.id*ind], 0.5);
+                            Vec.array[shortMemOffset + sharedQueue[itr].first.id*ind], 0.5);
+                }
+
+                else if(sharedQueue[itr].first.def == typeLongMemory && sharedQueue[itr].second.def == typeMemGateForget){
+                    neuroMemForget(Vec.array[memGateForgetOffset+sharedQueue[itr].second.id*ind],
+                            Vec.array[longMemOffset + sharedQueue[itr].first.id*ind], 0.5);
                 }
 
                 //bias

@@ -1,33 +1,39 @@
 #ifndef CONNECTIONS_H
 #define CONNECTIONS_H
 #include <string>
-enum neuroType{
+enum neuroNoun{
     typeNULL =0,
-    typeInput =1,
-    typeHidden =2,
-    typeMemory = 3,
-    typeMemGateIn = 4,
-    typeMemGateOut = 5,
-    typeMemGateForget = 6,
-    typeOutput = 7,
-    typeSquash =8,
-    typeZero =9,
-    typeBias =10
+    nounInput =1,
+    nounHidden =2,
+    nounShortMemory = 3,
+    nounLongMemory = 4,
+    nounMemGateIn = 5,
+    nounMemGateOut = 6,
+    nounMemGateForget = 7,
+    nounOutput = 8,
+    nounBias =9
 };
 
-template <typename T, typename H>
-struct descriptor{
-    T def;
+enum neuroVerb{
+    verbSquash =10,
+    verbZero =11,
+    verbPush = 12,
+    verbMemGate = 13,
+    verbMemForget = 14
+};
+
+struct Noun{
+    neuroNoun def;
     H id;
+};
+struct Verb{
+    neuroVerb def;
 };
 
 struct Order{
-    descriptor<neuroType, int> first;
-    descriptor<neuroType, int> second;
-    descriptor<neuroType, int> third;
+    Noun first;
+    Noun second;
+    Noun third;
+//    noun fourth; //unused
+    Verb verb;
 };
-
-
-
-
-#endif
