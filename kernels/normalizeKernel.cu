@@ -18,6 +18,6 @@ __global__ void normalizeKern(kernelArray<double> Vec, kernelArray<int> params, 
         Vec.array[mem +i*ind] = 0;
     }
     for(int i=0; i<params.array[23]; i++){
-         Vec.array[communityMag + i*ind] = 0;
+         Vec.array[communityMag + i*ind] = 1;
     }
 }

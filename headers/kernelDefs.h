@@ -5,6 +5,7 @@
 #include <connections.h>
 #include <utility>
 #include <thrust/pair.h>
+
 extern __constant__ int inputData[];
 extern __constant__ double answers[];
 extern __constant__ double globalQuakes[];

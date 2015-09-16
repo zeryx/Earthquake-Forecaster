@@ -44,11 +44,12 @@ __host__ __device__ double scoreFunc(double whenGuess, float whenAns, double lat
 
     const double shiftedWhere = shift(distCalc(latGuess, lonGuess, latAns, lonAns), 80150.2, 0, 100, 0);
     const double shiftedWhen = shift(fabs(whenAns-whenGuess), 2160, 0, 100, 0);
-    const double newFit = exp((certainty+1)*(-(shiftedWhere+shiftedWhen)));
-
-    if( newFit < avgFit*exp(-20.0))
+    float newFit = exp((certainty+1)*(-(shiftedWhere+shiftedWhen)));
+    if(isnan(newFit))
+        newFit = 0;
+    if( newFit < avgFit*exp(-100.0))
         return 0;
 
     else
-        return (avgFit+newFit/(2160*20)); //massively increased the weight towards the average, penalizing being wrong much more severely.
+        return  newFit/2159+avgFit; //massively increased the weight towards the average, penalizing being wrong much more severely.
 }

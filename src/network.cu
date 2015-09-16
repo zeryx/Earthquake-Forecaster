@@ -25,7 +25,7 @@
 //    _hostParams.array[11] = weights offset
 //    _hostParams.array[12] = input offset
 //    _hostParams.array[13] = hidden neurons offset
-//    _hostParams.array[14] = short term memory neurons offset
+//    _hostParams.array[14] = memory neurons offset
 //    _hostParams.array[15] = memoryIn neurons offset
 //    _hostParams.array[16] = memoryOut neurons offset
 //    _hostParams.array[17] = memoryForget neurons offset
@@ -37,8 +37,6 @@
 //    _hostParams.array[23] = number of sites
 //    _hostParams.array[24] = sample rate
 //    _hostParams.array[26] = number of orders
-//    _hostParams.array[27] = number of long term memory neurons per individual
-//_hostParams.array[28] = long term memory neurons offset
 
 
 NetworkGenetic::NetworkGenetic(){
@@ -163,7 +161,7 @@ bool NetworkGenetic::loadFromFile(std::ifstream &stream){
     std::cerr.precision(2);
     while(std::getline(stream, item)){ // each value in the array
         host_genetics.array[itr] = std::stod(item);
-        if(itr%(host_genetics.size/100) == 0){
+        if(itr%(host_genetics.size/10) == 0){
             std::cerr<<(float)itr/(float)host_genetics.size<<std::endl;
         }
         itr++;
@@ -175,13 +173,13 @@ bool NetworkGenetic::loadFromFile(std::ifstream &stream){
 void NetworkGenetic::saveToFile(std::ofstream &stream){
     std::cerr<<"saving to file."<<std::endl;
     std::cerr.precision(2);
+//            std::ios_base::sync_with_stdio(false);
     for(int itr=0; itr<host_genetics.size; itr++){
-        stream<< host_genetics.array[itr]<<"\n";
+        stream<<host_genetics.array[itr]<<"\n";
         if(itr%(host_genetics.size/10) == 0){
             std::cerr<<(float)itr/(float)host_genetics.size<<std::endl;
         }
     }
-    CUDA_SAFE_CALL(cudaDeviceReset());
 }
 
 void NetworkGenetic::confDeviceParams(){
@@ -189,9 +187,8 @@ void NetworkGenetic::confDeviceParams(){
     this->setParams(11, 0);
     this->setParams(12, _hostParams.array[11] + _hostParams.array[10] * _hostParams.array[1]);  // input neurons offset. (weights_offset + numweights*numindividuals)
     this->setParams(13, _hostParams.array[12] + _hostParams.array[10] * _hostParams.array[3]);  // hidden neurons offset. (input_offset +numInputs*numIndividuals)
-    this->setParams(14, _hostParams.array[13] + _hostParams.array[10] * _hostParams.array[4]);  // short memory neurons offset. (hidden_offset + numHidden*numIndividuals)
-    this->setParams(28, _hostParams.array[14] + _hostParams.array[10] * _hostParams.array[5]);  //long memory neurons offset (smem_offset + numsmem*numIndividuals)
-    this->setParams(15, _hostParams.array[14] + _hostParams.array[10] * _hostParams.array[27]);  // memoryIn Gate nodes offset. (lmem_offset + numlMem*numIndividuals)
+    this->setParams(14, _hostParams.array[13] + _hostParams.array[10] * _hostParams.array[4]);  // memory neurons offset. (hidden_offset + numHidden*numIndividuals)
+    this->setParams(15, _hostParams.array[14] + _hostParams.array[10] * _hostParams.array[5]);  // memoryIn Gate nodes offset. (mem_offset + numMem*numIndividuals)
     this->setParams(16, _hostParams.array[15] + _hostParams.array[10] * _hostParams.array[6]);  // memoryOut Gate nodes offset. (memIn_offset + numMemIn*numIndividuals)
     this->setParams(17, _hostParams.array[16] + _hostParams.array[10] * _hostParams.array[7]);  // memoryForget Gate nodes offset. (memOut_offset + numMemOut*numIndividuals)
     this->setParams(18, _hostParams.array[17] + _hostParams.array[10] * _hostParams.array[8]);  // output neurons offset. (memForget_offset + numMemOut*numIndividuals)
@@ -324,22 +321,23 @@ void NetworkGenetic::trainForecast(std::vector<double> *ret, int &hour, std::vec
         device_offset += _streamSize;
     }
     CUDA_SAFE_CALL(cudaDeviceSynchronize());
-    std::cerr.precision(40);
+    std::cerr.precision(7);
     for(int n=0; n<5; n++){
         std::cerr<<host_genetics.array[_hostParams.array[19]+n]<<std::endl;
 
         std::cerr<<"first weight is: "<<host_genetics.array[_hostParams.array[11]+n]<<std::endl;
+        std::cerr<<"memory: ";
+        for(int i=0; i<_hostParams.array[5]; i++){
+            std::cerr<<" "<<host_genetics.array[_hostParams.array[14]+n+i*_hostParams.array[10]];
+        }
+        std::cerr<<std::endl;
 
-            std::cerr<<"hidden 1 of "<<host_genetics.array[_hostParams.array[13]  + n ]<<std::endl;
+        for(int i=0; i<_hostParams.array[23]; i++){
+            std::cerr<<"for site: "<<i;
+            std::cerr<<"   certainty of: "<<(host_genetics.array[_hostParams.array[22]+n+i*_hostParams.array[10]])*100;
+            std::cerr<<" when of: "<<host_genetics.array[_hostParams.array[21]+n+i*_hostParams.array[10]]<<std::endl;
 
-            std::cerr<<"output 1 of "<<host_genetics.array[_hostParams.array[18] + n ]<<std::endl;
-
-            for(int i=0; i<_hostParams.array[23]; i++){
-                std::cerr<<"for site: "<<i<<std::endl;
-                 std::cerr<<"certainty of: "<<host_genetics.array[_hostParams.array[22]+n+i*_hostParams.array[10]]<<std::endl;
-                std::cerr<<"when of: "<<host_genetics.array[_hostParams.array[21]+n+i*_hostParams.array[10]]<<std::endl;
-
-            }
+        }
 
         std::cerr<<std::endl;
     }

@@ -1,1305 +1,2139 @@
 {
-  "orders" : [ { "first" : { "def" : "memGateIn",
-            "id" : 0
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateIn",
-            "id" : 1
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateIn",
-            "id" : 2
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateIn",
-            "id" : 3
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateIn",
-            "id" : 4
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateOut",
-            "id" : 0
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateOut",
-            "id" : 1
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateOut",
-            "id" : 2
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateOut",
-            "id" : 3
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateOut",
-            "id" : 4
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateForget",
-            "id" : 0
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateForget",
-            "id" : 1
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateForget",
-            "id" : 2
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateForget",
-            "id" : 3
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateForget",
-            "id" : 4
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "output",
-            "id" : 0
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "output",
-            "id" : 1
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "output",
-            "id" : 2
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 0
-          },
-        "second" : { "def" : "memGateIn",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 1
-          },
-        "second" : { "def" : "memGateIn",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 2
-          },
-        "second" : { "def" : "memGateIn",
-            "id" : 2
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 3
-          },
-        "second" : { "def" : "memGateIn",
-            "id" : 3
-          }
-      },
-
-
-      { "first" : { "def" : "hidden",
-            "id" : 4
-          },
-        "second" : { "def" : "memGateIn",
-            "id" : 4
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 0
-          },
-        "second" : { "def" : "memGateOut",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 1
-          },
-        "second" : { "def" : "memGateOut",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 2
-          },
-        "second" : { "def" : "memGateOut",
-            "id" : 2
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 3
-          },
-        "second" : { "def" : "memGateOut",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 4
-          },
-        "second" : { "def" : "memGateOut",
-            "id" : 4
-          }
-      },
-
-  
-      { "first" : { "def" : "hidden",
-            "id" : 0
-          },
-        "second" : { "def" : "memGateForget",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 1
-          },
-        "second" : { "def" : "memGateForget",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 2
-          },
-        "second" : { "def" : "memGateForget",
-            "id" : 2
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 3
-          },
-        "second" : { "def" : "memGateForget",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 4
-          },
-        "second" : { "def" : "memGateForget",
-            "id" : 4
-          }
-      },
-
-
-      { "first" : { "def" : "hidden",
-            "id" : 0
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 1
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 2
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 3
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 4
-          },
-        "second" : { "def" : "zero",
-            "id" : 0
-          }
-      },
-
-
-      { "first" : { "def" : "input",
-            "id" : 0
-          },
-        "second" : { "def" : "memGateIn",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 1
-          },
-        "second" : { "def" : "memGateIn",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 2
-          },
-        "second" : { "def" : "memGateIn",
-            "id" : 2
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 3
-          },
-        "second" : { "def" : "memGateIn",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 4
-          },
-        "second" : { "def" : "memGateIn",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 5
-          },
-        "second" : { "def" : "memGateIn",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 6
-          },
-        "second" : { "def" : "memGateIn",
-            "id" : 4
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 7
-          },
-        "second" : { "def" : "memGateIn",
-            "id" : 4
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 8
-          },
-        "second" : { "def" : "memGateIn",
-            "id" : 4
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 0
-          },
-        "second" : { "def" : "memGateOut",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 1
-          },
-        "second" : { "def" : "memGateOut",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 2
-          },
-        "second" : { "def" : "memGateOut",
-            "id" : 2
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 3
-          },
-        "second" : { "def" : "memGateOut",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 4
-          },
-        "second" : { "def" : "memGateOut",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 5
-          },
-        "second" : { "def" : "memGateOut",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 6
-          },
-        "second" : { "def" : "memGateOut",
-            "id" : 4
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 7
-          },
-        "second" : { "def" : "memGateOut",
-            "id" : 4
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 8
-          },
-        "second" : { "def" : "memGateOut",
-            "id" : 4
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 0
-          },
-        "second" : { "def" : "memGateForget",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 1
-          },
-        "second" : { "def" : "memGateForget",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 2
-          },
-        "second" : { "def" : "memGateForget",
-            "id" : 2
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 3
-          },
-        "second" : { "def" : "memGateForget",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 4
-          },
-        "second" : { "def" : "memGateForget",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 5
-          },
-        "second" : { "def" : "memGateForget",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 6
-          },
-        "second" : { "def" : "memGateForget",
-            "id" : 4
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 7
-          },
-        "second" : { "def" : "memGateForget",
-            "id" : 4
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 8
-          },
-        "second" : { "def" : "memGateForget",
-            "id" : 4
-          }
-      },
-
-
-      { "first" : { "def" : "memGateIn",
-            "id" : 0
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateIn",
-            "id" : 1
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateIn",
-            "id" : 2
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateIn",
-            "id" : 3
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateIn",
-            "id" : 4
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-
-
-      { "first" : { "def" : "memGateOut",
-            "id" : 0
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateOut",
-            "id" : 1
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateOut",
-            "id" : 2
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateOut",
-            "id" : 3
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateOut",
-            "id" : 4
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-
-
-      { "first" : { "def" : "memGateForget",
-            "id" : 0
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateForget",
-            "id" : 1
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateForget",
-            "id" : 2
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateForget",
-            "id" : 3
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memGateForget",
-            "id" : 4
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-
-
-      { "first" : { "def" : "input",
-            "id" : 0
-          },
-        "second" : { "def" : "hidden",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 1
-          },
-        "second" : { "def" : "hidden",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 2
-          },
-        "second" : { "def" : "hidden",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 3
-          },
-        "second" : { "def" : "hidden",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 4
-          },
-        "second" : { "def" : "hidden",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 5
-          },
-        "second" : { "def" : "hidden",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 6
-          },
-        "second" : { "def" : "hidden",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 7
-          },
-        "second" : { "def" : "hidden",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 8
-          },
-        "second" : { "def" : "hidden",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 0
-          },
-        "second" : { "def" : "hidden",
-            "id" : 1
-          }
-      },
-
-
-      { "first" : { "def" : "input",
-            "id" : 1
-          },
-        "second" : { "def" : "hidden",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 2
-          },
-        "second" : { "def" : "hidden",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 3
-          },
-        "second" : { "def" : "hidden",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 4
-          },
-        "second" : { "def" : "hidden",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 5
-          },
-        "second" : { "def" : "hidden",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 6
-          },
-        "second" : { "def" : "hidden",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 7
-          },
-        "second" : { "def" : "hidden",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 8
-          },
-        "second" : { "def" : "hidden",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 0
-          },
-        "second" : { "def" : "hidden",
-            "id" : 2
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 1
-          },
-        "second" : { "def" : "hidden",
-            "id" : 2
-          }
-      },
-
-
-      { "first" : { "def" : "input",
-            "id" : 2
-          },
-        "second" : { "def" : "hidden",
-            "id" : 2
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 3
-          },
-        "second" : { "def" : "hidden",
-            "id" : 2
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 4
-          },
-        "second" : { "def" : "hidden",
-            "id" : 2
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 5
-          },
-        "second" : { "def" : "hidden",
-            "id" : 2
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 6
-          },
-        "second" : { "def" : "hidden",
-            "id" : 2
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 7
-          },
-        "second" : { "def" : "hidden",
-            "id" : 2
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 8
-          },
-        "second" : { "def" : "hidden",
-            "id" : 2
-          }
-      },
-
-      { "first" : { "def" : "input",
-            "id" : 0
-          },
-        "second" : { "def" : "hidden",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 1
-          },
-        "second" : { "def" : "hidden",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 2
-          },
-        "second" : { "def" : "hidden",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 3
-          },
-        "second" : { "def" : "hidden",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 4
-          },
-        "second" : { "def" : "hidden",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 5
-          },
-        "second" : { "def" : "hidden",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 6
-          },
-        "second" : { "def" : "hidden",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 7
-          },
-        "second" : { "def" : "hidden",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 8
-          },
-        "second" : { "def" : "hidden",
-            "id" : 3
-          }
-      },
-
-      { "first" : { "def" : "input",
-            "id" : 0
-          },
-        "second" : { "def" : "hidden",
-            "id" : 4
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 1
-          },
-        "second" : { "def" : "hidden",
-            "id" : 4
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 2
-          },
-        "second" : { "def" : "hidden",
-            "id" : 4
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 3
-          },
-        "second" : { "def" : "hidden",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 4
-          },
-        "second" : { "def" : "hidden",
-            "id" : 4
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 5
-          },
-        "second" : { "def" : "hidden",
-            "id" : 4
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 6
-          },
-        "second" : { "def" : "hidden",
-            "id" : 4
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 7
-          },
-        "second" : { "def" : "hidden",
-            "id" : 4
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 8
-          },
-        "second" : { "def" : "hidden",
-            "id" : 4
-          }
-      },
-
-
-      { "first" : { "def" : "input",
-            "id" : 0
-          },
-        "second" : { "def" : "memory",
-            "id" : 0
-          },
-        "third" : { "def" : "memGateIn",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 1
-          },
-        "second" : { "def" : "memory",
-            "id" : 1
-          },
-        "third" : { "def" : "memGateIn",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 2
-          },
-        "second" : { "def" : "memory",
-            "id" : 2
-          },
-        "third" : { "def" : "memGateIn",
-            "id" : 2
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 3
-          },
-        "second" : { "def" : "memory",
-            "id" : 3
-          },
-        "third" : { "def" : "memGateIn",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 4
-          },
-        "second" : { "def" : "memory",
-            "id" : 3
-          },
-        "third" : { "def" : "memGateIn",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 5
-          },
-        "second" : { "def" : "memory",
-            "id" : 3
-          },
-        "third" : { "def" : "memGateIn",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 6
-          },
-        "second" : { "def" : "memory",
-            "id" : 4
-          },
-        "third" : { "def" : "memGateIn",
-            "id" : 4
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 7
-          },
-        "second" : { "def" : "memory",
-            "id" : 4
-          },
-        "third" : { "def" : "memGateIn",
-            "id" : 4
-          }
-      },
-      { "first" : { "def" : "input",
-            "id" : 8
-          },
-        "second" : { "def" : "memory",
-            "id" : 4
-          },
-        "third" : { "def" : "memGateIn",
-            "id" : 4
-          }
-      },
-
-
-      { "first" : { "def" : "memory",
-            "id" : 0
-          },
-        "second" : { "def" : "memGateForget",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memory",
-            "id" : 1
-          },
-        "second" : { "def" : "memGateForget",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "memory",
-            "id" : 2
-          },
-        "second" : { "def" : "memGateForget",
-            "id" : 2
-          }
-      },
-      { "first" : { "def" : "memory",
-            "id" : 3
-          },
-        "second" : { "def" : "memGateForget",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "memory",
-            "id" : 4
-          },
-        "second" : { "def" : "memGateForget",
-            "id" : 4
-          }
-      },
-
-
-      { "first" : { "def" : "memory",
-            "id" : 0
-          },
-        "second" : { "def" : "hidden",
-            "id" : 0
-          },
-        "third" : { "def" : "memGateOut",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "memory",
-            "id" : 1
-          },
-        "second" : { "def" : "hidden",
-            "id" : 1
-          },
-        "third" : { "def" : "memGateOut",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "memory",
-            "id" : 2
-          },
-        "second" : { "def" : "hidden",
-            "id" : 2
-          },
-        "third" : { "def" : "memGateOut",
-            "id" : 2
-          }
-      },
-      { "first" : { "def" : "memory",
-            "id" : 3
-          },
-        "second" : { "def" : "hidden",
-            "id" : 3
-          },
-        "third" : { "def" : "memGateOut",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "memory",
-            "id" : 4
-          },
-        "second" : { "def" : "hidden",
-            "id" : 4
-          },
-        "third" : { "def" : "memGateOut",
-            "id" : 4
-          }
-      },
-  
-
-      { "first" : { "def" : "bias",
-            "id" : 0
-          },
-        "second" : { "def" : "hidden",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "bias",
-            "id" : 0
-          },
-        "second" : { "def" : "hidden",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "bias",
-            "id" : 0
-          },
-        "second" : { "def" : "hidden",
-            "id" : 2
-          }
-      },
-      { "first" : { "def" : "bias",
-            "id" : 0
-          },
-        "second" : { "def" : "hidden",
-            "id" : 3
-          }
-      },
-      { "first" : { "def" : "bias",
-            "id" : 0
-          },
-        "second" : { "def" : "hidden",
-            "id" : 4
-          }
-      },
-
-
-      { "first" : { "def" : "hidden",
-            "id" : 0
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 1
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 2
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 3
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 4
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-
-
-      { "first" : { "def" : "hidden",
-            "id" : 0
-          },
-        "second" : { "def" : "output",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 1
-          },
-        "second" : { "def" : "output",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 2
-          },
-        "second" : { "def" : "output",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 4
-          },
-        "second" : { "def" : "output",
-            "id" : 0
-          }
-      },
-
-
-      { "first" : { "def" : "hidden",
-            "id" : 0
-          },
-        "second" : { "def" : "output",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 1
-          },
-        "second" : { "def" : "output",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 2
-          },
-        "second" : { "def" : "output",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 3
-          },
-        "second" : { "def" : "output",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 4
-          },
-        "second" : { "def" : "output",
-            "id" : 1
-          }
-      },
-
-
-      { "first" : { "def" : "hidden",
-            "id" : 0
-          },
-        "second" : { "def" : "output",
-            "id" : 2
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 1
-          },
-        "second" : { "def" : "output",
-            "id" : 2
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 2
-          },
-        "second" : { "def" : "output",
-            "id" : 2
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 3
-          },
-        "second" : { "def" : "output",
-            "id" : 2
-          }
-      },
-      { "first" : { "def" : "hidden",
-            "id" : 4
-          },
-        "second" : { "def" : "output",
-            "id" : 2
-          }
-      },
-
-
-      { "first" : { "def" : "bias",
-            "id" : 0
-          },
-        "second" : { "def" : "output",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "bias",
-            "id" : 0
-          },
-        "second" : { "def" : "output",
-            "id" : 1
-          }
-      },
-      { "first" : { "def" : "bias",
-            "id" : 0
-          },
-        "second" : { "def" : "output",
-            "id" : 2
-          }
-      },
-
-
-      { "first" : { "def" : "output",
-            "id" : 0
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "output",
-            "id" : 1
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      },
-      { "first" : { "def" : "output",
-            "id" : 2
-          },
-        "second" : { "def" : "squash",
-            "id" : 0
-          }
-      }
-    ]
+	"orders":[
+		{
+			"first":{
+				"def":"memGateIn",
+				"id":0
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateIn",
+				"id":1
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateIn",
+				"id":2
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateIn",
+				"id":3
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateIn",
+				"id":4
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateOut",
+				"id":0
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateOut",
+				"id":1
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateOut",
+				"id":2
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateOut",
+				"id":3
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateOut",
+				"id":4
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateForget",
+				"id":0
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateForget",
+				"id":1
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateForget",
+				"id":2
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateForget",
+				"id":3
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateForget",
+				"id":4
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"first":{
+				"def":"output",
+				"id":0
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"first":{
+				"def":"output",
+				"id":1
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"first":{
+				"def":"output",
+				"id":2
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":0
+			},
+			"second":{
+				"def":"memGateIn",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":1
+			},
+			"second":{
+				"def":"memGateIn",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":2
+			},
+			"second":{
+				"def":"memGateIn",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":3
+			},
+			"second":{
+				"def":"memGateIn",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":4
+			},
+			"second":{
+				"def":"memGateIn",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":0
+			},
+			"second":{
+				"def":"memGateOut",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":1
+			},
+			"second":{
+				"def":"memGateOut",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":2
+			},
+			"second":{
+				"def":"memGateOut",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":3
+			},
+			"second":{
+				"def":"memGateOut",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":4
+			},
+			"second":{
+				"def":"memGateOut",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":0
+			},
+			"second":{
+				"def":"memGateForget",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":1
+			},
+			"second":{
+				"def":"memGateForget",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":2
+			},
+			"second":{
+				"def":"memGateForget",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":3
+			},
+			"second":{
+				"def":"memGateForget",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":4
+			},
+			"second":{
+				"def":"memGateForget",
+				"id":4
+			}
+		},
+		{
+			"first":{
+				"def":"hidden",
+				"id":0
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"first":{
+				"def":"hidden",
+				"id":1
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"first":{
+				"def":"hidden",
+				"id":2
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"first":{
+				"def":"hidden",
+				"id":3
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"first":{
+				"def":"hidden",
+				"id":4
+			},
+			"verb":{
+				"def":"zero"
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":0
+			},
+			"second":{
+				"def":"memGateIn",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":1
+			},
+			"second":{
+				"def":"memGateIn",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":2
+			},
+			"second":{
+				"def":"memGateIn",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":3
+			},
+			"second":{
+				"def":"memGateIn",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":4
+			},
+			"second":{
+				"def":"memGateIn",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":5
+			},
+			"second":{
+				"def":"memGateIn",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":6
+			},
+			"second":{
+				"def":"memGateIn",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":7
+			},
+			"second":{
+				"def":"memGateIn",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":8
+			},
+			"second":{
+				"def":"memGateIn",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":0
+			},
+			"second":{
+				"def":"memGateOut",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":1
+			},
+			"second":{
+				"def":"memGateOut",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":2
+			},
+			"second":{
+				"def":"memGateOut",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":3
+			},
+			"second":{
+				"def":"memGateOut",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":4
+			},
+			"second":{
+				"def":"memGateOut",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":5
+			},
+			"second":{
+				"def":"memGateOut",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":6
+			},
+			"second":{
+				"def":"memGateOut",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":7
+			},
+			"second":{
+				"def":"memGateOut",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":8
+			},
+			"second":{
+				"def":"memGateOut",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":0
+			},
+			"second":{
+				"def":"memGateForget",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":1
+			},
+			"second":{
+				"def":"memGateForget",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":2
+			},
+			"second":{
+				"def":"memGateForget",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":3
+			},
+			"second":{
+				"def":"memGateForget",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":4
+			},
+			"second":{
+				"def":"memGateForget",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":5
+			},
+			"second":{
+				"def":"memGateForget",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":6
+			},
+			"second":{
+				"def":"memGateForget",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":7
+			},
+			"second":{
+				"def":"memGateForget",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":8
+			},
+			"second":{
+				"def":"memGateForget",
+				"id":4
+			}
+		},
+		{
+			"first":{
+				"def":"memGateIn",
+				"id":0
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateIn",
+				"id":1
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateIn",
+				"id":2
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateIn",
+				"id":3
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateIn",
+				"id":4
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateOut",
+				"id":0
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateOut",
+				"id":1
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateOut",
+				"id":2
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateOut",
+				"id":3
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateOut",
+				"id":4
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateForget",
+				"id":0
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateForget",
+				"id":1
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateForget",
+				"id":2
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateForget",
+				"id":3
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"first":{
+				"def":"memGateForget",
+				"id":4
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":0
+			},
+			"second":{
+				"def":"hidden",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":1
+			},
+			"second":{
+				"def":"hidden",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":2
+			},
+			"second":{
+				"def":"hidden",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":3
+			},
+			"second":{
+				"def":"hidden",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":4
+			},
+			"second":{
+				"def":"hidden",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":5
+			},
+			"second":{
+				"def":"hidden",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":6
+			},
+			"second":{
+				"def":"hidden",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":7
+			},
+			"second":{
+				"def":"hidden",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":8
+			},
+			"second":{
+				"def":"hidden",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":0
+			},
+			"second":{
+				"def":"hidden",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":1
+			},
+			"second":{
+				"def":"hidden",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":2
+			},
+			"second":{
+				"def":"hidden",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":3
+			},
+			"second":{
+				"def":"hidden",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":4
+			},
+			"second":{
+				"def":"hidden",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":5
+			},
+			"second":{
+				"def":"hidden",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":6
+			},
+			"second":{
+				"def":"hidden",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":7
+			},
+			"second":{
+				"def":"hidden",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":8
+			},
+			"second":{
+				"def":"hidden",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":0
+			},
+			"second":{
+				"def":"hidden",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":1
+			},
+			"second":{
+				"def":"hidden",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":2
+			},
+			"second":{
+				"def":"hidden",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":3
+			},
+			"second":{
+				"def":"hidden",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":4
+			},
+			"second":{
+				"def":"hidden",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":5
+			},
+			"second":{
+				"def":"hidden",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":6
+			},
+			"second":{
+				"def":"hidden",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":7
+			},
+			"second":{
+				"def":"hidden",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":8
+			},
+			"second":{
+				"def":"hidden",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":0
+			},
+			"second":{
+				"def":"hidden",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":1
+			},
+			"second":{
+				"def":"hidden",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":2
+			},
+			"second":{
+				"def":"hidden",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":3
+			},
+			"second":{
+				"def":"hidden",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":4
+			},
+			"second":{
+				"def":"hidden",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":5
+			},
+			"second":{
+				"def":"hidden",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":6
+			},
+			"second":{
+				"def":"hidden",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":7
+			},
+			"second":{
+				"def":"hidden",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":8
+			},
+			"second":{
+				"def":"hidden",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":0
+			},
+			"second":{
+				"def":"hidden",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":1
+			},
+			"second":{
+				"def":"hidden",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":2
+			},
+			"second":{
+				"def":"hidden",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":3
+			},
+			"second":{
+				"def":"hidden",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":4
+			},
+			"second":{
+				"def":"hidden",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":5
+			},
+			"second":{
+				"def":"hidden",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":6
+			},
+			"second":{
+				"def":"hidden",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":7
+			},
+			"second":{
+				"def":"hidden",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"input",
+				"id":8
+			},
+			"second":{
+				"def":"hidden",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"memGate"
+			},
+			"first":{
+				"def":"input",
+				"id":0
+			},
+			"second":{
+				"def":"memory",
+				"id":0
+			},
+			"third":{
+				"def":"memGateIn",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"memGate"
+			},
+			"first":{
+				"def":"input",
+				"id":1
+			},
+			"second":{
+				"def":"memory",
+				"id":1
+			},
+			"third":{
+				"def":"memGateIn",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"memGate"
+			},
+			"first":{
+				"def":"input",
+				"id":2
+			},
+			"second":{
+				"def":"memory",
+				"id":2
+			},
+			"third":{
+				"def":"memGateIn",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"memGate"
+			},
+			"first":{
+				"def":"input",
+				"id":3
+			},
+			"second":{
+				"def":"memory",
+				"id":3
+			},
+			"third":{
+				"def":"memGateIn",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"memGate"
+			},
+			"first":{
+				"def":"input",
+				"id":4
+			},
+			"second":{
+				"def":"memory",
+				"id":3
+			},
+			"third":{
+				"def":"memGateIn",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"memGate"
+			},
+			"first":{
+				"def":"input",
+				"id":5
+			},
+			"second":{
+				"def":"memory",
+				"id":3
+			},
+			"third":{
+				"def":"memGateIn",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"memGate"
+			},
+			"first":{
+				"def":"input",
+				"id":6
+			},
+			"second":{
+				"def":"memory",
+				"id":4
+			},
+			"third":{
+				"def":"memGateIn",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"memGate"
+			},
+			"first":{
+				"def":"input",
+				"id":7
+			},
+			"second":{
+				"def":"memory",
+				"id":4
+			},
+			"third":{
+				"def":"memGateIn",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"memGate"
+			},
+			"first":{
+				"def":"input",
+				"id":8
+			},
+			"second":{
+				"def":"memory",
+				"id":4
+			},
+			"third":{
+				"def":"memGateIn",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"memGate"
+			},
+			"first":{
+				"def":"memory",
+				"id":0
+			},
+			"second":{
+				"def":"memGateForget",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"memGate"
+			},
+			"first":{
+				"def":"memory",
+				"id":1
+			},
+			"second":{
+				"def":"memGateForget",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"memGate"
+			},
+			"first":{
+				"def":"memory",
+				"id":2
+			},
+			"second":{
+				"def":"memGateForget",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"memGate"
+			},
+			"first":{
+				"def":"memory",
+				"id":3
+			},
+			"second":{
+				"def":"memGateForget",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"memGate"
+			},
+			"first":{
+				"def":"memory",
+				"id":4
+			},
+			"second":{
+				"def":"memGateForget",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"memGate"
+			},
+			"first":{
+				"def":"memory",
+				"id":0
+			},
+			"second":{
+				"def":"hidden",
+				"id":0
+			},
+			"third":{
+				"def":"memGateOut",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"memGate"
+			},
+			"first":{
+				"def":"memory",
+				"id":1
+			},
+			"second":{
+				"def":"hidden",
+				"id":1
+			},
+			"third":{
+				"def":"memGateOut",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"memGate"
+			},
+			"first":{
+				"def":"memory",
+				"id":2
+			},
+			"second":{
+				"def":"hidden",
+				"id":2
+			},
+			"third":{
+				"def":"memGateOut",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"memGate"
+			},
+			"first":{
+				"def":"memory",
+				"id":3
+			},
+			"second":{
+				"def":"hidden",
+				"id":3
+			},
+			"third":{
+				"def":"memGateOut",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"memGate"
+			},
+			"first":{
+				"def":"memory",
+				"id":4
+			},
+			"second":{
+				"def":"hidden",
+				"id":4
+			},
+			"third":{
+				"def":"memGateOut",
+				"id":4
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"bias",
+				"id":0
+			},
+			"second":{
+				"def":"hidden",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"bias",
+				"id":0
+			},
+			"second":{
+				"def":"hidden",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"bias",
+				"id":0
+			},
+			"second":{
+				"def":"hidden",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"bias",
+				"id":0
+			},
+			"second":{
+				"def":"hidden",
+				"id":3
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"bias",
+				"id":0
+			},
+			"second":{
+				"def":"hidden",
+				"id":4
+			}
+		},
+		{
+			"first":{
+				"def":"hidden",
+				"id":0
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"first":{
+				"def":"hidden",
+				"id":1
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"first":{
+				"def":"hidden",
+				"id":2
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"first":{
+				"def":"hidden",
+				"id":3
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"first":{
+				"def":"hidden",
+				"id":4
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":0
+			},
+			"second":{
+				"def":"output",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":1
+			},
+			"second":{
+				"def":"output",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":2
+			},
+			"second":{
+				"def":"output",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":4
+			},
+			"second":{
+				"def":"output",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":0
+			},
+			"second":{
+				"def":"output",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":1
+			},
+			"second":{
+				"def":"output",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":2
+			},
+			"second":{
+				"def":"output",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":3
+			},
+			"second":{
+				"def":"output",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":4
+			},
+			"second":{
+				"def":"output",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":0
+			},
+			"second":{
+				"def":"output",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":1
+			},
+			"second":{
+				"def":"output",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":2
+			},
+			"second":{
+				"def":"output",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":3
+			},
+			"second":{
+				"def":"output",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"hidden",
+				"id":4
+			},
+			"second":{
+				"def":"output",
+				"id":2
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"bias",
+				"id":0
+			},
+			"second":{
+				"def":"output",
+				"id":0
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"bias",
+				"id":0
+			},
+			"second":{
+				"def":"output",
+				"id":1
+			}
+		},
+		{
+			"verb":{
+				"def":"push"
+			},
+			"first":{
+				"def":"bias",
+				"id":0
+			},
+			"second":{
+				"def":"output",
+				"id":2
+			}
+		},
+		{
+			"first":{
+				"def":"output",
+				"id":0
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"first":{
+				"def":"output",
+				"id":1
+			},
+			"verb":{
+				"def":"squash"
+			}
+		},
+		{
+			"first":{
+				"def":"output",
+				"id":2
+			},
+			"verb":{
+				"def":"squash"
+			}
+		}
+	]
 }
+

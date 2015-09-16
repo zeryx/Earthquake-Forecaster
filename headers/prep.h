@@ -2,6 +2,8 @@
 #define PREP_H
 #include <network.h>
 #include <string>
+#include <connections.h>
+
 
 class prep{
 public:
@@ -28,7 +30,9 @@ public:
 
     void forecast(std::vector<double> &ret, int &hour, std::vector<int> &data, double &K, std::vector<double> &globalQuakes);
 
-    neuroType enumStringcmp(std::string);
+    neuroNouns nounStringcmp(std::string);
+
+    neuroVerbs verbStringcmp(std::string);
 
 private:
     NetworkGenetic _net;

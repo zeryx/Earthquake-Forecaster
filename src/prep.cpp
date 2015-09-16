@@ -1,5 +1,4 @@
 #include <prep.h>
-#include <connections.h>
 #include <rapidjson/document.h>
 #include <rapidjson/filereadstream.h>
 #include <rapidjson/error/error.h>
@@ -69,7 +68,7 @@ bool prep::readNetParmeters(const char *filepath){
         return false;
     }
     rapidjson::Value &a = doc["neurons"];
-    int input, hidden, smemory, lmemory, memGateIn, memGateOut, memGateForget, output;
+    int input, hidden, memory, memGateIn, memGateOut, memGateForget, output;
     for(rapidjson::Value::ConstMemberIterator itr = a.MemberBegin();
         itr != a.MemberEnd(); ++itr){
         std::string tmp = itr->name.GetString();
@@ -79,11 +78,8 @@ bool prep::readNetParmeters(const char *filepath){
         else if(tmp == "hidden")
             hidden = itr->value.GetInt();
 
-        else if(tmp == "smemory")
-            smemory = itr->value.GetInt();
-
-        else if(tmp == "lmemory")
-            lmemory = itr->value.GetInt();
+        else if(tmp == "memory")
+            memory = itr->value.GetInt();
 
         else if(tmp == "memIn")
             memGateIn = itr->value.GetInt();
@@ -127,35 +123,58 @@ bool prep::readOrders(const char* filepath){
     for(size_t itr=0; itr<orders.Size(); itr++){
         Order tmp;
         std::string def1 = orders[itr]["first"]["def"].GetString();
-        std::string def2 = orders[itr]["second"]["def"].GetString();
-        tmp.first.id = orders[itr]["first"]["id"].GetInt();
-        tmp.second.id = orders[itr]["second"]["id"].GetInt();
-        tmp.first.def = this->enumStringcmp(def1);
-        tmp.second.def= this->enumStringcmp(def2);
+        std::string verb1 = orders[itr]["verb"]["def"].GetString();
+
+        tmp.setFirst(this->nounStringcmp(def1), orders[itr]["first"]["id"].GetInt());
+        tmp.setVerb(this->verbStringcmp(verb1));
+
+        if(orders[itr].HasMember("second")){
+                    std::string def2 = orders[itr]["second"]["def"].GetString();
+
+                    tmp.setSecond(this->nounStringcmp(def2), orders[itr]["second"]["id"].GetInt());
+        }
+        else{
+            tmp.setSecond(nounNULL, 0);
+        }
+
         if(orders[itr].HasMember("third")){
-            std::string def3 = orders[itr]["third"]["def"].GetString();
-            tmp.third.id = orders[itr]["third"]["id"].GetInt();
-            tmp.third.def = this->enumStringcmp(def3);
-            if(tmp.third.def == typeNULL){
+            std::string def2 = orders[itr]["third"]["def"].GetString();
+
+            tmp.setThird(this->nounStringcmp(def2), orders[itr]["third"]["id"].GetInt());
+            if(tmp.third().def == nounNULL){
                 std::cerr<<"invalid descriptor for third parameter, at number"<<itr<<std::endl;
                 return false;
             }
         }
         else{
-            tmp.third.def = typeNULL;
-            tmp.third.id =0;
+            tmp.setThird(nounNULL, 0);
         }
-        if(tmp.first.def == typeNULL || tmp.second.def == typeNULL){
+
+        if(orders[itr].HasMember("fourth")){
+            std::string def2 = orders[itr]["fourth"]["def"].GetString();
+            tmp.setFourth(this->nounStringcmp(def2), orders[itr]["fourth"]["id"].GetInt());
+
+            if(tmp.fourth().def == nounNULL){
+                std::cerr<<"invalid descriptor for third parameter, at number"<<itr<<std::endl;
+                return false;
+            }
+        }
+        else{
+            tmp.setFourth(nounNULL, 0);
+        }
+
+        if(tmp.first().def == nounNULL || tmp.verb().def == verbNULL){
             std::cerr<<"invalid descriptor for first &/or second parameter, at number"<<itr<<std::endl;
             return false;
         }
 
 
         //check if weights should be incremented.
-        if(tmp.second.def != typeZero
-                && tmp.second.def != typeSquash
-                && tmp.third.def == typeNULL)
+        if(tmp.verb().def != verbZero
+                && tmp.verb().def != verbSquash
+                && tmp.third().def == nounNULL)
             weights++;
+
         _connections[itr] = tmp;
     }
     std::cerr<<"number of weights: "<<weights<<std::endl;
@@ -164,42 +183,53 @@ bool prep::readOrders(const char* filepath){
     return true;
 }
 
-neuroType prep::enumStringcmp(std::string def){
+neuroNouns prep::nounStringcmp(std::string def){
 
-    neuroType ret = typeNULL;
+    neuroNouns ret = nounNULL;
 
     if(def == "input")
-        ret = typeInput;
+        ret = nounInput;
 
     else if(def == "hidden")
-        ret = typeHidden;
+        ret = nounHidden;
 
-    else if(def == "smemory")
-        ret = typeShortMemory;
-
-    else if(def == "lmemory")
-        ret = typeLongMemory;
+    else if(def == "memory")
+        ret = nounMemory;
 
     else if(def == "memGateIn")
-        ret = typeMemGateIn;
+        ret = nounMemGateIn;
 
     else if(def == "memGateOut")
-        ret = typeMemGateOut;
+        ret = nounMemGateOut;
 
     else if(def == "memGateForget")
-        ret = typeMemGateForget;
+        ret = nounMemGateForget;
 
     else if(def == "output")
-        ret = typeOutput;
-
-    else if(def == "zero")
-        ret = typeZero;
+        ret = nounOutput;
 
     else if(def == "bias")
-        ret = typeBias;
+        ret = nounBias;
 
-    else if(def == "squash")
-        ret = typeSquash;
+
+    return ret;
+}
+
+neuroVerbs prep::verbStringcmp(std::string def){
+
+    neuroVerbs ret = verbNULL;
+
+    if(def == "squash")
+        ret = verbSquash;
+
+    else if(def == "zero")
+        ret = verbZero;
+
+    else if(def == "push")
+        ret = verbPush;
+
+    else if(def == "memGate")
+        ret = verbMemGate;
 
     return ret;
 }
