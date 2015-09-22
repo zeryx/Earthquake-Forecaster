@@ -60,7 +60,7 @@ int main(int argc, char** arg){
 
 
         std::cin>>hour;
-        if(hour== -1 || hour == 500)
+        if(hour== -1)
             break;
         std::cin>>DLEN;
         for(int i=0; i<DLEN; i++){
@@ -101,3 +101,4 @@ int main(int argc, char** arg){
     }
     return 1;
 }
+
