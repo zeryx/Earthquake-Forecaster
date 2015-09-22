@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <ostream>
+#include <iomanip>
 #include <vector>
 #include <ctime>
 #include <cstdio>
@@ -321,9 +322,13 @@ void NetworkGenetic::trainForecast(std::vector<double> *ret, int &hour, std::vec
         device_offset += _streamSize;
     }
     CUDA_SAFE_CALL(cudaDeviceSynchronize());
-    std::cerr.precision(7);
+
+
     for(int n=0; n<5; n++){
+
+        std::cerr<<std::endl<<std::setprecision(25);
         std::cerr<<host_genetics.array[_hostParams.array[19]+n]<<std::endl;
+        std::cerr<<std::setprecision(5);
 
         std::cerr<<"first weight is: "<<host_genetics.array[_hostParams.array[11]+n]<<std::endl;
         std::cerr<<"memory: ";
@@ -331,15 +336,22 @@ void NetworkGenetic::trainForecast(std::vector<double> *ret, int &hour, std::vec
             std::cerr<<" "<<host_genetics.array[_hostParams.array[14]+n+i*_hostParams.array[10]];
         }
         std::cerr<<std::endl;
-
+        double avgWhen=0;
+        double maxCertainty =0;
+        double guessedWhen=0;
         for(int i=0; i<_hostParams.array[23]; i++){
-            std::cerr<<"for site: "<<i;
-            std::cerr<<"   certainty of: "<<(host_genetics.array[_hostParams.array[22]+n+i*_hostParams.array[10]])*100;
-            std::cerr<<" when of: "<<host_genetics.array[_hostParams.array[21]+n+i*_hostParams.array[10]]<<std::endl;
+            avgWhen += host_genetics.array[_hostParams.array[21] + n + i*_hostParams.array[10]];
+
+            if(host_genetics.array[_hostParams.array[22] + n + i*_hostParams.array[10]] > maxCertainty){
+                maxCertainty = host_genetics.array[_hostParams.array[22] + n + i*_hostParams.array[10]];
+                guessedWhen = host_genetics.array[_hostParams.array[21] + n + i*_hostParams.array[10]];
+            }
 
         }
+        avgWhen /= _hostParams.array[23];
+        std::cerr<<"average earthquake forecasted time (in hrs from now):  "<<avgWhen<<std::endl;
+        std::cerr<<"guessed time To Quake (in hrs from now):  "<<guessedWhen<<std::endl;
 
-        std::cerr<<std::endl;
     }
     CUDA_SAFE_CALL(cudaFree(dConnect));
     CUDA_SAFE_CALL(cudaFree(retVec.array));

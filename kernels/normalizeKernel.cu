@@ -13,11 +13,11 @@ __global__ void normalizeKern(kernelArray<double> Vec, kernelArray<int> params, 
         }
     }
 
-    //reset all memory, and community magnitude values for every individual, since the next run is a brand new trial.
-    for(int i=0; i<params.array[5]; i++){
-        Vec.array[mem +i*ind] = 0;
-    }
+    //reset community magnitude & memory values for every individual, since the next run is a brand new trial.
     for(int i=0; i<params.array[23]; i++){
          Vec.array[communityMag + i*ind] = 1;
     }
+
+    for(int i=0; i<params.array[5]; i++)
+        Vec.array[mem + i*ind] = 0;
 }

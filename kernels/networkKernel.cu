@@ -15,6 +15,7 @@ extern __constant__ int trainingsize;
 
 __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order* commandQueue, int hour, kernelArray<double> meanCh,
                         kernelArray<double> stdCh, size_t device_offset){
+
     extern __shared__  Order sharedQueue[];
     const int tix = threadIdx.x;
     if(tix < params.array[26]){
@@ -45,10 +46,13 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
     const double avgLonGQuake = globalQuakes[1];
     const double GQuakeAvgMag = globalQuakes[3];
 
-
     const double ansLat = siteData[(int)answers[0]*2];
     const double ansLon = siteData[(int)answers[0]*2+1];
     const int whenAns = (int)answers[1] - hour;
+
+    //if hour is 0, cut fitness in half.
+    if(hour == 0)
+        Vec.array[fitnessOffset] /= 250;
 
     //reset values from previous individual.
     //community magnitude is not set, as this needs to be continued.
@@ -354,8 +358,7 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
             guessLon = siteData[j*2+1];
         }
     }
-    avgCertainty = avgCertainty/params.array[23];
 
     double oldFit = isnan(Vec.array[fitnessOffset]) ? 0 : Vec.array[fitnessOffset];
-    Vec.array[fitnessOffset] = scoreFunc(whenGuess, whenAns, guessLat, guessLon, ansLat, ansLon, oldFit, avgCertainty); //we take the average beacuse consistency is more important than being really good at this particular hour.
+    Vec.array[fitnessOffset] = scoreFunc(whenGuess, whenAns, guessLat, guessLon, ansLat, ansLon, oldFit, hour); //we take the average beacuse consistency is more important than being really good at this particular hour.
 }
