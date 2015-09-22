@@ -39,8 +39,8 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
     const int outputOffset = params.array[18] + idx + device_offset;
     const int fitnessOffset = params.array[19] + idx + device_offset;
     const int communityMagOffset = params.array[20] +idx +device_offset;
-    const int whenOffset = params.array[21] + idx + device_offset;
-    const int howCertainOffset = params.array[22] + idx + device_offset;
+    const int guessOffset = params.array[21] + idx + device_offset;
+    const int closestSiteOffset = params.array[22] + idx + device_offset;
 
     const double avgLatGQuake = globalQuakes[0];
     const double avgLonGQuake = globalQuakes[1];
@@ -52,13 +52,13 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
 
     //if hour is 0, cut fitness in half.
     if(hour == 0)
-        Vec.array[fitnessOffset] /= 250;
+        Vec.array[fitnessOffset] /= 1000;
 
     //reset values from previous individual.
     //community magnitude is not set, as this needs to be continued.
     for(int i=0; i<params.array[23]; i++){
-        Vec.array[whenOffset +i*ind] = 0;
-        Vec.array[howCertainOffset +i*ind] =0;
+        Vec.array[guessOffset +i*ind] = 0;
+        Vec.array[closestSiteOffset +i*ind] =0;
     }
     for(int i=0; i<trainingsize; i++){ // training size is a constant parameter for the size of each timestep
 
@@ -333,32 +333,30 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
 
             }
 
-            Vec.array[whenOffset+j*ind] += shift(isnan(Vec.array[outputOffset+0*ind])? 0 : Vec.array[outputOffset+0*ind], 1, -1, 2160, 0);
-            Vec.array[howCertainOffset+j*ind] += shift(isnan(Vec.array[outputOffset+1*ind])? 0 : Vec.array[outputOffset+1*ind], 1, -1, 1, 0);
+            Vec.array[guessOffset+j*ind] += shift(isnan(Vec.array[outputOffset+0*ind])? 0 : Vec.array[outputOffset+0*ind], 1, -1, 1, 0);
+            Vec.array[closestSiteOffset+j*ind] += shift(isnan(Vec.array[outputOffset+1*ind])? 0 : Vec.array[outputOffset+1*ind], 1, -1, 1, 0);
             Vec.array[communityMagOffset+j*ind] =  shift(isnan(Vec.array[outputOffset+2*ind])? 0 : Vec.array[outputOffset+2*ind], 1, -1, 10, 0); // set the next sets communityMag = output #3.
         }
     }
-    for(int j=0; j<params.array[23]; j++){ // now lets get the average when and howcertain values.
-        Vec.array[whenOffset+j*ind] = Vec.array[whenOffset+j*ind]/trainingsize;
-        Vec.array[howCertainOffset+j*ind] = Vec.array[howCertainOffset+j*ind]/trainingsize;
+    for(int j=0; j<params.array[23]; j++){ // now lets get the average when and closestSite values.
+        Vec.array[guessOffset+j*ind] = Vec.array[guessOffset+j*ind]/trainingsize;
+        Vec.array[closestSiteOffset+j*ind] = Vec.array[closestSiteOffset+j*ind]/trainingsize;
     }
-    /*calculate score for this individual during this round, current scoring mechanism is - e^(-(abs(whenGuess-whenAns)+distToCorrectSite)), closer to 1 the better.   */
+    /*calculate score for this individual during this round, current scoring mechanism is - e^(-(abs(guess-whenAns)+distToCorrectSite)), closer to 1 the better.   */
     double maxCertainty = 0;
-    float avgCertainty = 0;
-    float whenGuess=0;
-    float guessLat=0;
-    float guessLon=0;
+    float guess=0;
+    float closestLat=0;
+    float closestLon=0;
 
     for(int j=0; j<params.array[23]; j++){
-        avgCertainty += Vec.array[howCertainOffset+j*ind];
-        if(Vec.array[howCertainOffset+j*ind] > maxCertainty){
-            maxCertainty = Vec.array[howCertainOffset+j*ind];
-            whenGuess = Vec.array[whenOffset+j*ind];
-            guessLat = siteData[j*2];
-            guessLon = siteData[j*2+1];
+        if(Vec.array[closestSiteOffset+j*ind] > maxCertainty){
+            maxCertainty = Vec.array[closestSiteOffset+j*ind];
+            guess = Vec.array[guessOffset+j*ind];
+            closestLat = siteData[j*2];
+            closestLon = siteData[j*2+1];
         }
     }
 
     double oldFit = isnan(Vec.array[fitnessOffset]) ? 0 : Vec.array[fitnessOffset];
-    Vec.array[fitnessOffset] = scoreFunc(whenGuess, whenAns, guessLat, guessLon, ansLat, ansLon, oldFit, hour); //we take the average beacuse consistency is more important than being really good at this particular hour.
+    Vec.array[fitnessOffset] = scoreFunc(guess, whenAns, closestLat, closestLon, ansLat, ansLon, oldFit, hour, 10); //we take the average beacuse consistency is more important than being really good at this particular hour.
 }

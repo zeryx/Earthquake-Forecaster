@@ -1,6 +1,6 @@
 #include <utilFunc.h>
 #include <float.h>
-#define __AVG 500
+#define __AVG 2000
 __host__ __device__ float bearingCalc(float lat1, float lon1, float lat2, float lon2){
 
     float y = sin(lon2-lon1) * cos(lat2);
@@ -41,12 +41,18 @@ __host__ __device__ double ActFunc(double &x){
     return tanh(x);
 }
 
-__host__ __device__ double scoreFunc(double whenGuess, float whenAns, double latGuess, double lonGuess,
-                                     double latAns, double lonAns, double avgFit, int hour){
+__host__ __device__ double scoreFunc(double guess, float whenAns, double latGuess, double lonGuess,
+                                     double latAns, double lonAns, double avgFit, int hour, int daysInScope){
 
     const double shiftedWhere = shift(distCalc(latGuess, lonGuess, latAns, lonAns), 80150.2, 0, 100, 0);
-    const double shiftedWhen = shift(fabs(whenAns-whenGuess), 2160, 0, 100, 0);
-    const double newFit = exp(-(shiftedWhere+shiftedWhen));
+
+    double correctedGuess;
+    if(hour <= whenAns && hour + daysInScope*24 > whenAns) // if the hour of the quake is within scope, then guess should be big, otherwise small
+        correctedGuess = exp(guess); //max value is guess = 1 or correctedGuess = e^1
+    else
+        correctedGuess = exp(-guess);
+
+    const double newFit = correctedGuess + exp(-(shiftedWhere));
 
     return  (newFit+avgFit*(__AVG-1))/__AVG; //massively increased the weight towards the average, penalizing being wrong much more severely.
 }

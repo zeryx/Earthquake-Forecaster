@@ -336,21 +336,21 @@ void NetworkGenetic::trainForecast(std::vector<double> *ret, int &hour, std::vec
             std::cerr<<" "<<host_genetics.array[_hostParams.array[14]+n+i*_hostParams.array[10]];
         }
         std::cerr<<std::endl;
-        double avgWhen=0;
-        double maxCertainty =0;
-        double guessedWhen=0;
+        double avgGuess=0;
+        double bestGuess =0;
+        double closestGuess=0;
         for(int i=0; i<_hostParams.array[23]; i++){
-            avgWhen += host_genetics.array[_hostParams.array[21] + n + i*_hostParams.array[10]];
+            avgGuess += host_genetics.array[_hostParams.array[21] + n + i*_hostParams.array[10]];
 
-            if(host_genetics.array[_hostParams.array[22] + n + i*_hostParams.array[10]] > maxCertainty){
-                maxCertainty = host_genetics.array[_hostParams.array[22] + n + i*_hostParams.array[10]];
-                guessedWhen = host_genetics.array[_hostParams.array[21] + n + i*_hostParams.array[10]];
+            if(host_genetics.array[_hostParams.array[22] + n + i*_hostParams.array[10]] > bestGuess){
+                bestGuess = host_genetics.array[_hostParams.array[22] + n + i*_hostParams.array[10]];
+                closestGuess = host_genetics.array[_hostParams.array[21] + n + i*_hostParams.array[10]];
             }
 
         }
-        avgWhen /= _hostParams.array[23];
-        std::cerr<<"average earthquake forecasted time (in hrs from now):  "<<avgWhen<<std::endl;
-        std::cerr<<"guessed time To Quake (in hrs from now):  "<<guessedWhen<<std::endl;
+        avgGuess /= _hostParams.array[23];
+        std::cerr<<"average from all guesses for this weightset:  "<<avgGuess<<std::endl;
+        std::cerr<<"will an earthquake happen within 10 days from now?:  "<<closestGuess<<std::endl;
 
     }
     CUDA_SAFE_CALL(cudaFree(dConnect));
@@ -652,13 +652,13 @@ void NetworkGenetic::challengeForecast(std::vector<double> *ret, int &hour, std:
     //            CommunityMag[j] =  output[2]; // set the next sets communityMag = output #3.
     //        }
     //    }
-    //        float maxCertainty=0;
+    //        float bestGuess=0;
     //        float whenGuess=0;
     //        float guessLat=0;
     //        float guessLon=0;
     //        for(int j=0; j<_hostParams.array[23]; j++){
-    //            if(HowCertain[j] > maxCertainty){
-    //                maxCertainty = HowCertain[j];
+    //            if(HowCertain[j] > bestGuess){
+    //                bestGuess = HowCertain[j];
     //                whenGuess = When[j];
     //                guessLat = siteData.at(j*2);
     //                guessLon = siteData.at(j*2+1);
