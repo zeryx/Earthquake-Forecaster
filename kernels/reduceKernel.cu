@@ -4,12 +4,14 @@ __global__ void reduceFirstKern(kernelArray<double> Vec, kernelArray<double> per
     extern __shared__ float sumData[];
 
     unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    int ind = params.array[19] + idx + device_offset;
+    int fit = params.array[19] + idx + device_offset;
 
     // load input into __shared__ memory
     double x = 0;
-
-    x = Vec.array[ind];
+    if(!isnan(Vec.array[fit]))
+        x = Vec.array[fit];
+    else
+        x = 0;
 
     sumData[threadIdx.x] = x;
     __syncthreads();

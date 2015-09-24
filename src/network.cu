@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <ostream>
+#include <iomanip>
 #include <vector>
 #include <ctime>
 #include <cstdio>
@@ -161,7 +162,7 @@ bool NetworkGenetic::loadFromFile(std::ifstream &stream){
     std::cerr.precision(2);
     while(std::getline(stream, item)){ // each value in the array
         host_genetics.array[itr] = std::stod(item);
-        if(itr%(host_genetics.size/100) == 0){
+        if(itr%(host_genetics.size/10) == 0){
             std::cerr<<(float)itr/(float)host_genetics.size<<std::endl;
         }
         itr++;
@@ -173,13 +174,13 @@ bool NetworkGenetic::loadFromFile(std::ifstream &stream){
 void NetworkGenetic::saveToFile(std::ofstream &stream){
     std::cerr<<"saving to file."<<std::endl;
     std::cerr.precision(2);
+//            std::ios_base::sync_with_stdio(false);
     for(int itr=0; itr<host_genetics.size; itr++){
-        stream<< host_genetics.array[itr]<<"\n";
+        stream<<host_genetics.array[itr]<<"\n";
         if(itr%(host_genetics.size/10) == 0){
             std::cerr<<(float)itr/(float)host_genetics.size<<std::endl;
         }
     }
-    CUDA_SAFE_CALL(cudaDeviceReset());
 }
 
 void NetworkGenetic::confDeviceParams(){
@@ -212,7 +213,7 @@ void NetworkGenetic::setParams(int num, int val){
 
 
 void NetworkGenetic::reformatTraining(std::vector<int>&old_input, std::vector<double> &ans, std::vector<double> &sitedata, std::vector<double>&globalquakes, double &kp){ // increase the timestep and reduce resolution, takes too long.
-    int trainingSize = 5;
+    int trainingSize = 3;
     int * new_input = new int[trainingSize*3*_hostParams.array[23]];
     int *siteOffset = new int[15], *chanOffset = new int[3];
     long long stor[trainingSize*3*_hostParams.array[23]];
@@ -321,24 +322,45 @@ void NetworkGenetic::trainForecast(std::vector<double> *ret, int &hour, std::vec
         device_offset += _streamSize;
     }
     CUDA_SAFE_CALL(cudaDeviceSynchronize());
-    std::cerr.precision(40);
+
+
     for(int n=0; n<5; n++){
+
+        std::cerr<<std::endl<<std::setprecision(25);
         std::cerr<<host_genetics.array[_hostParams.array[19]+n]<<std::endl;
+        std::cerr<<std::setprecision(5);
+        std::cerr<<"memory: ";
+        for(int i=0; i<_hostParams.array[5]; i++)
+            std::cerr<<" "<<host_genetics.array[_hostParams.array[14] + n + i*_hostParams.array[10]];
+        std::cerr<<std::endl;
 
-        std::cerr<<"first weight is: "<<host_genetics.array[_hostParams.array[11]+n]<<std::endl;
+        std::cerr<<"hidden: ";
+        for(int i=0; i<_hostParams.array[4]; i++)
+            std::cerr<<" "<<host_genetics.array[_hostParams.array[13] + n + i*_hostParams.array[10]];
+        std::cerr<<std::endl;
 
-            std::cerr<<"hidden 1 of "<<host_genetics.array[_hostParams.array[13]  + n ]<<std::endl;
+        double avgGuess=0;
+        double bestGuess =0;
+        double closestGuess=0;
+        for(int i=0; i<_hostParams.array[23]; i++){
+            avgGuess += host_genetics.array[_hostParams.array[21] + n + i*_hostParams.array[10]];
 
-            std::cerr<<"output 1 of "<<host_genetics.array[_hostParams.array[18] + n ]<<std::endl;
-
-            for(int i=0; i<_hostParams.array[23]; i++){
-                std::cerr<<"for site: "<<i<<std::endl;
-                 std::cerr<<"certainty of: "<<host_genetics.array[_hostParams.array[22]+n+i*_hostParams.array[10]]<<std::endl;
-                std::cerr<<"when of: "<<host_genetics.array[_hostParams.array[21]+n+i*_hostParams.array[10]]<<std::endl;
-
+            if(host_genetics.array[_hostParams.array[22] + n + i*_hostParams.array[10]] > bestGuess){
+                bestGuess = host_genetics.array[_hostParams.array[22] + n + i*_hostParams.array[10]];
+                closestGuess = host_genetics.array[_hostParams.array[21] + n + i*_hostParams.array[10]];
             }
 
-        std::cerr<<std::endl;
+        }
+        avgGuess /= _hostParams.array[23];
+        std::cerr<<"average from all guesses for this weightset:  "<<avgGuess<<std::endl;
+        std::cerr<<"will an earthquake happen within 31 days from now?:  "<<closestGuess<<std::endl;
+        std::cerr<<"ANS: ";
+
+        if(0<= ans[1]-hour && 31*24 >= ans[1]-hour)
+            std::cerr<<"true"<<std::endl;
+        else
+            std::cerr<<"false"<<std::endl;
+
     }
     CUDA_SAFE_CALL(cudaFree(dConnect));
     CUDA_SAFE_CALL(cudaFree(retVec.array));
@@ -639,13 +661,13 @@ void NetworkGenetic::challengeForecast(std::vector<double> *ret, int &hour, std:
     //            CommunityMag[j] =  output[2]; // set the next sets communityMag = output #3.
     //        }
     //    }
-    //        float maxCertainty=0;
+    //        float bestGuess=0;
     //        float whenGuess=0;
     //        float guessLat=0;
     //        float guessLon=0;
     //        for(int j=0; j<_hostParams.array[23]; j++){
-    //            if(HowCertain[j] > maxCertainty){
-    //                maxCertainty = HowCertain[j];
+    //            if(HowCertain[j] > bestGuess){
+    //                bestGuess = HowCertain[j];
     //                whenGuess = When[j];
     //                guessLat = siteData.at(j*2);
     //                guessLon = siteData.at(j*2+1);

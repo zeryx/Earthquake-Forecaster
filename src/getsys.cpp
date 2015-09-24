@@ -12,7 +12,7 @@ size_t GetHostRamInBytes()
     while(fgets(line, sizeof(line), meminfo))
     {
         size_t  ram;
-        if(sscanf(line, "MemAvailable: %zu kB", &ram) == 1)
+        if(sscanf(line, "MemFree: %zu kB", &ram) == 1)
         {
             fclose(meminfo);
             return ram*1000;
