@@ -213,7 +213,7 @@ void NetworkGenetic::setParams(int num, int val){
 
 
 void NetworkGenetic::reformatTraining(std::vector<int>&old_input, std::vector<double> &ans, std::vector<double> &sitedata, std::vector<double>&globalquakes, double &kp){ // increase the timestep and reduce resolution, takes too long.
-    int trainingSize = 5;
+    int trainingSize = 3;
     int * new_input = new int[trainingSize*3*_hostParams.array[23]];
     int *siteOffset = new int[15], *chanOffset = new int[3];
     long long stor[trainingSize*3*_hostParams.array[23]];
@@ -329,13 +329,16 @@ void NetworkGenetic::trainForecast(std::vector<double> *ret, int &hour, std::vec
         std::cerr<<std::endl<<std::setprecision(25);
         std::cerr<<host_genetics.array[_hostParams.array[19]+n]<<std::endl;
         std::cerr<<std::setprecision(5);
-
-        std::cerr<<"first weight is: "<<host_genetics.array[_hostParams.array[11]+n]<<std::endl;
         std::cerr<<"memory: ";
-        for(int i=0; i<_hostParams.array[5]; i++){
-            std::cerr<<" "<<host_genetics.array[_hostParams.array[14]+n+i*_hostParams.array[10]];
-        }
+        for(int i=0; i<_hostParams.array[5]; i++)
+            std::cerr<<" "<<host_genetics.array[_hostParams.array[14] + n + i*_hostParams.array[10]];
         std::cerr<<std::endl;
+
+        std::cerr<<"hidden: ";
+        for(int i=0; i<_hostParams.array[4]; i++)
+            std::cerr<<" "<<host_genetics.array[_hostParams.array[13] + n + i*_hostParams.array[10]];
+        std::cerr<<std::endl;
+
         double avgGuess=0;
         double bestGuess =0;
         double closestGuess=0;
@@ -350,7 +353,13 @@ void NetworkGenetic::trainForecast(std::vector<double> *ret, int &hour, std::vec
         }
         avgGuess /= _hostParams.array[23];
         std::cerr<<"average from all guesses for this weightset:  "<<avgGuess<<std::endl;
-        std::cerr<<"will an earthquake happen within 10 days from now?:  "<<closestGuess<<std::endl;
+        std::cerr<<"will an earthquake happen within 31 days from now?:  "<<closestGuess<<std::endl;
+        std::cerr<<"ANS: ";
+
+        if(0<= ans[1]-hour && 31*24 >= ans[1]-hour)
+            std::cerr<<"true"<<std::endl;
+        else
+            std::cerr<<"false"<<std::endl;
 
     }
     CUDA_SAFE_CALL(cudaFree(dConnect));

@@ -14,7 +14,7 @@ __host__ __device__ double shift( double x, float oldMax, float oldMin, float ne
 __host__ __device__ double ActFunc(double& x);
 
 __host__  __device__ double scoreFunc(double guess, float whenAns, double latGuess, double lonGuess,
-                                             double latAns, double lonAns, double avgFit, int hour, int daysInScope);
+                                             double latAns, double lonAns, double avgFit, int daysInScope);
 
 
 

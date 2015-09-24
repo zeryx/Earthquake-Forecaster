@@ -1,5 +1,5 @@
 {"neurons" : 
-{ "hidden" : 5,
+{ "hidden" : 7,
       "input" : 9,
       "memForget" : 5,
       "memIn" : 5,

@@ -1,6 +1,6 @@
 #include <utilFunc.h>
 #include <float.h>
-#define __AVG 2000
+
 __host__ __device__ float bearingCalc(float lat1, float lon1, float lat2, float lon2){
 
     float y = sin(lon2-lon1) * cos(lat2);
@@ -42,17 +42,18 @@ __host__ __device__ double ActFunc(double &x){
 }
 
 __host__ __device__ double scoreFunc(double guess, float whenAns, double latGuess, double lonGuess,
-                                     double latAns, double lonAns, double avgFit, int hour, int daysInScope){
+                                     double latAns, double lonAns, double avgFit, int daysInScope){
 
-    const double shiftedWhere = shift(distCalc(latGuess, lonGuess, latAns, lonAns), 80150.2, 0, 100, 0);
+    const double shiftedWhere = shift(distCalc(latGuess, lonGuess, latAns, lonAns), 80150.2, 0, 1, 0);
 
     double correctedGuess;
-    if(hour <= whenAns && hour + daysInScope*24 > whenAns) // if the hour of the quake is within scope, then guess should be big, otherwise small
-        correctedGuess = exp(guess); //max value is guess = 1 or correctedGuess = e^1
+    if(0 <= whenAns && daysInScope*24 > whenAns) // whenAns aleady has the current hour subtracted from the hour of the quake event
+
+        correctedGuess = guess; // closer to 1 the better, since the quake event is within scope
     else
-        correctedGuess = exp(-guess);
+        correctedGuess = 1-guess; // closr to 0 the better, since the quake event is not within scope
 
-    const double newFit = correctedGuess + exp(-(shiftedWhere));
+    const double newFit = correctedGuess*(1-shiftedWhere); // max value is 1, minimum value is 0.
 
-    return  (newFit+avgFit*(__AVG-1))/__AVG; //massively increased the weight towards the average, penalizing being wrong much more severely.
+    return  newFit+avgFit; //maximum score for each timestep is 1, minimum is 0.
 }

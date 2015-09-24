@@ -66,8 +66,8 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
         double CommunityLon = 0;
 
         for(int j=0; j<params.array[23]; j++){//sitesWeighted Lat/Lon values are determined based on all previous zsites mag output value.
-            CommunityLat += siteData[j*2]*Vec.array[communityMagOffset+j*ind];
-            CommunityLon += siteData[j*2+1]*Vec.array[communityMagOffset+j*ind];
+            CommunityLat += siteData[j*2] * Vec.array[communityMagOffset+j*ind];
+            CommunityLon += siteData[j*2+1] * Vec.array[communityMagOffset+j*ind];
         }
 
         CommunityLat = CommunityLat/params.array[23];
@@ -141,7 +141,7 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
                         && sharedQueue[itr]._second.def == nounHidden
                         && sharedQueue[itr]._verb.def == verbPush){
 
-                    tmp = Vec.array[inputOffset + sharedQueue[itr]._first.id*ind]*Vec.array[weightsOffset+n++*ind];
+                    tmp = Vec.array[inputOffset + sharedQueue[itr]._first.id*ind] * Vec.array[weightsOffset+n++*ind];
                     neuroSum(Vec.array[hiddenOffset + sharedQueue[itr]._second.id*ind], tmp);
                 }
 
@@ -149,7 +149,7 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
                         && sharedQueue[itr]._second.def == nounMemGateIn
                         && sharedQueue[itr]._verb.def == verbPush){
 
-                    tmp = Vec.array[inputOffset + sharedQueue[itr]._first.id*ind]*Vec.array[weightsOffset+n++*ind];
+                    tmp = Vec.array[inputOffset + sharedQueue[itr]._first.id*ind] * Vec.array[weightsOffset+n++*ind];
                     neuroSum(Vec.array[memGateInOffset + sharedQueue[itr]._second.id*ind], tmp);
                 }
 
@@ -157,7 +157,7 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
                         && sharedQueue[itr]._second.def == nounMemGateOut
                         && sharedQueue[itr]._verb.def == verbPush){
 
-                    tmp = Vec.array[inputOffset + sharedQueue[itr]._first.id*ind]*Vec.array[weightsOffset+n++*ind];
+                    tmp = Vec.array[inputOffset + sharedQueue[itr]._first.id*ind] * Vec.array[weightsOffset+n++*ind];
                     neuroSum(Vec.array[memGateOutOffset + sharedQueue[itr]._second.id*ind], tmp);
                 }
 
@@ -165,7 +165,7 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
                         && sharedQueue[itr]._second.def == nounMemGateForget
                         && sharedQueue[itr]._verb.def == verbPush){
 
-                    tmp = Vec.array[inputOffset + sharedQueue[itr]._first.id*ind]*Vec.array[weightsOffset+n++*ind];
+                    tmp = Vec.array[inputOffset + sharedQueue[itr]._first.id*ind] * Vec.array[weightsOffset+n++*ind];
                     neuroSum(Vec.array[memGateForgetOffset + sharedQueue[itr]._second.id*ind], tmp);
                 }
 
@@ -173,7 +173,7 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
                         && sharedQueue[itr]._second.def == nounHidden
                         && sharedQueue[itr]._verb.def == verbPush){
 
-                    tmp = Vec.array[hiddenOffset + sharedQueue[itr]._first.id*ind]*Vec.array[weightsOffset+n++*ind];
+                    tmp = Vec.array[hiddenOffset + sharedQueue[itr]._first.id*ind] * Vec.array[weightsOffset+n++*ind];
                     neuroSum(Vec.array[hiddenOffset + sharedQueue[itr]._second.id*ind], tmp);
                 }
 
@@ -181,7 +181,7 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
                         && sharedQueue[itr]._second.def == nounMemGateIn
                         && sharedQueue[itr]._verb.def == verbPush){
 
-                    tmp = Vec.array[hiddenOffset + sharedQueue[itr]._first.id*ind]*Vec.array[weightsOffset+n++*ind];
+                    tmp = Vec.array[hiddenOffset + sharedQueue[itr]._first.id*ind] * Vec.array[weightsOffset+n++*ind];
                     neuroSum(Vec.array[memGateInOffset + sharedQueue[itr]._second.id*ind], tmp);
                 }
 
@@ -189,7 +189,7 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
                         && sharedQueue[itr]._second.def == nounOutput
                         && sharedQueue[itr]._verb.def == verbPush){
 
-                    tmp = Vec.array[hiddenOffset + sharedQueue[itr]._first.id*ind]*Vec.array[weightsOffset+n++*ind];
+                    tmp = Vec.array[hiddenOffset + sharedQueue[itr]._first.id*ind] * Vec.array[weightsOffset+n++*ind];
                     neuroSum(Vec.array[outputOffset + sharedQueue[itr]._second.id*ind], tmp);
                 }
 
@@ -198,7 +198,7 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
                         && sharedQueue[itr]._second.def == nounMemGateOut
                         && sharedQueue[itr]._verb.def == verbPush){
 
-                    tmp = Vec.array[hiddenOffset + sharedQueue[itr]._first.id*ind]*Vec.array[weightsOffset+n++*ind];
+                    tmp = Vec.array[hiddenOffset + sharedQueue[itr]._first.id*ind] * Vec.array[weightsOffset+n++*ind];
                     neuroSum(Vec.array[memGateOutOffset + sharedQueue[itr]._second.id*ind], tmp);
                 }
 
@@ -206,7 +206,7 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
                         && sharedQueue[itr]._second.def == nounMemGateForget
                         && sharedQueue[itr]._verb.def == verbPush){
 
-                    Vec.array[hiddenOffset + sharedQueue[itr]._first.id*ind]*Vec.array[weightsOffset+n++*ind];
+                    Vec.array[hiddenOffset + sharedQueue[itr]._first.id*ind] * Vec.array[weightsOffset+n++*ind];
                     neuroSum(Vec.array[memGateForgetOffset + sharedQueue[itr]._second.id*ind], tmp);
                 }
 
@@ -343,14 +343,14 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
         Vec.array[closestSiteOffset+j*ind] = Vec.array[closestSiteOffset+j*ind]/trainingsize;
     }
     /*calculate score for this individual during this round, current scoring mechanism is - e^(-(abs(guess-whenAns)+distToCorrectSite)), closer to 1 the better.   */
-    double maxCertainty = 0;
+    double closestSite = 0;
     float guess=0;
     float closestLat=0;
     float closestLon=0;
 
     for(int j=0; j<params.array[23]; j++){
-        if(Vec.array[closestSiteOffset+j*ind] > maxCertainty){
-            maxCertainty = Vec.array[closestSiteOffset+j*ind];
+        if(Vec.array[closestSiteOffset+j*ind] > closestSite){
+            closestSite = Vec.array[closestSiteOffset+j*ind];
             guess = Vec.array[guessOffset+j*ind];
             closestLat = siteData[j*2];
             closestLon = siteData[j*2+1];
@@ -358,5 +358,5 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
     }
 
     double oldFit = isnan(Vec.array[fitnessOffset]) ? 0 : Vec.array[fitnessOffset];
-    Vec.array[fitnessOffset] = scoreFunc(guess, whenAns, closestLat, closestLon, ansLat, ansLon, oldFit, hour, 10); //we take the average beacuse consistency is more important than being really good at this particular hour.
+    Vec.array[fitnessOffset] = scoreFunc(guess, whenAns, closestLat, closestLon, ansLat, ansLon, oldFit, 31); //we take the average beacuse consistency is more important than being really good at this particular hour.
 }
