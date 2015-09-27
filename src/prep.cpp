@@ -235,7 +235,7 @@ neuroVerbs prep::verbStringcmp(std::string def){
 }
 
 void prep::EndOfTrial(const char* filepath){
-    _net.endOfTrial();
+    _net.training();
     std::ofstream ret;
     ret.open(filepath,  std::ofstream::trunc | std::ifstream::binary);
     _net.saveToFile(ret);
@@ -253,7 +253,7 @@ void prep::hotStart(const char* filepath){
 }
 
 void prep::coldStart(){
-    _net.allocateHostAndGPUObjects(GetDeviceRamInBytes()*0.85, GetHostRamInBytes()*0.30);
+    _net.allocateHostAndGPUObjects(GetDeviceRamInBytes()*0.75, GetHostRamInBytes()*0.2);
     _net.generateWeights();
 
 }

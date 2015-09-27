@@ -329,6 +329,12 @@ void NetworkGenetic::trainForecast(std::vector<double> *ret, int &hour, std::vec
         std::cerr<<std::endl<<std::setprecision(25);
         std::cerr<<host_genetics.array[_hostParams.array[19]+n]<<std::endl;
         std::cerr<<std::setprecision(5);
+
+        std::cerr<<"inputs: ";
+        for(int i=0; i<_hostParams.array[3]; i++)
+            std::cerr<<" "<<host_genetics.array[_hostParams.array[12] + n + i*_hostParams.array[10]];
+        std::cerr<<std::endl;
+
         std::cerr<<"memory: ";
         for(int i=0; i<_hostParams.array[5]; i++)
             std::cerr<<" "<<host_genetics.array[_hostParams.array[14] + n + i*_hostParams.array[10]];
@@ -349,14 +355,15 @@ void NetworkGenetic::trainForecast(std::vector<double> *ret, int &hour, std::vec
                 bestGuess = host_genetics.array[_hostParams.array[22] + n + i*_hostParams.array[10]];
                 closestGuess = host_genetics.array[_hostParams.array[21] + n + i*_hostParams.array[10]];
             }
-
         }
+
         avgGuess /= _hostParams.array[23];
+
         std::cerr<<"average from all guesses for this weightset:  "<<avgGuess<<std::endl;
-        std::cerr<<"will an earthquake happen within 31 days from now?:  "<<closestGuess<<std::endl;
+        std::cerr<<"will an earthquake happen within 15 days from now?:  "<<closestGuess<<std::endl;
         std::cerr<<"ANS: ";
 
-        if(0<= ans[1]-hour && 31*24 >= ans[1]-hour)
+        if(0<= ans[1]-hour && 15*24 >= ans[1]-hour)
             std::cerr<<"true"<<std::endl;
         else
             std::cerr<<"false"<<std::endl;
@@ -366,10 +373,9 @@ void NetworkGenetic::trainForecast(std::vector<double> *ret, int &hour, std::vec
     CUDA_SAFE_CALL(cudaFree(retVec.array));
     CUDA_SAFE_CALL(cudaFree(dmeanCh.array));
     CUDA_SAFE_CALL(cudaFree(dstdCh.array));
-
 }
 
-void NetworkGenetic::endOfTrial(){
+void NetworkGenetic::training(){
     std::cerr<<"end of trial reached."<<std::endl;
 
     int regBlockSize = 512;
@@ -459,7 +465,6 @@ void NetworkGenetic::endOfTrial(){
     CUDA_SAFE_CALL(cudaFree(dfitnessAvg));
     CUDA_SAFE_CALL(cudaFree(evoGridSize));
     CUDA_SAFE_CALL(cudaFree(dparentChildCutoff));
-    CUDA_SAFE_CALL(cudaFree(device_genetics.array));
     delete[] seed;
 }
 

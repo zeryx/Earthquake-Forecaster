@@ -42,7 +42,7 @@ __host__ __device__ double ActFunc(double &x){
 }
 
 __host__ __device__ double scoreFunc(double guess, float whenAns, double latGuess, double lonGuess,
-                                     double latAns, double lonAns, double avgFit, int daysInScope){
+                                     double latAns, double lonAns, double fit, int daysInScope){
 
     const double shiftedWhere = shift(distCalc(latGuess, lonGuess, latAns, lonAns), 80150.2, 0, 1, 0);
 
@@ -55,5 +55,5 @@ __host__ __device__ double scoreFunc(double guess, float whenAns, double latGues
 
     const double newFit = correctedGuess*(1-shiftedWhere); // max value is 1, minimum value is 0.
 
-    return  newFit+avgFit; //maximum score for each timestep is 1, minimum is 0.
+    return  newFit+fit; //maximum score for each timestep is 1, minimum is 0.
 }

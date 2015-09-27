@@ -16,6 +16,9 @@ __host__ __device__ double ActFunc(double& x);
 __host__  __device__ double scoreFunc(double guess, float whenAns, double latGuess, double lonGuess,
                                              double latAns, double lonAns, double avgFit, int daysInScope);
 
+__host__ __device__ double dervFunc(double guess, float whenAns, double latGuess, double lonGuess,
+                                     double latAns, double lonAns, double avgFit, int daysInScope);
+
 
 
 

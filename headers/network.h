@@ -24,7 +24,7 @@ public:
                        Order *connections, std::vector<double> &answers, std::vector<double> &siteData);
 
 
-    void endOfTrial();
+    void training();
 
     void challengeForecast(std::vector<double> *ret, int &hour, std::vector<int> &data, double &K, std::vector<double> &globalQuakes, Order *connections, std::vector<double> &siteData);
 
