@@ -52,7 +52,7 @@ __global__ void NetKern(kernelArray<double> Vec, kernelArray<int> params, Order*
 
     //if hour is 0, cut fitness in half.
     if(hour == 0){
-        Vec.array[fitnessOffset] /= 1000;
+        Vec.array[fitnessOffset] = 0;
 
         for(int i=0; i<params.array[5]; i++) // reset memory to 1
             Vec.array[memOffset + i*ind] = 1;

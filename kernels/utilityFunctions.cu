@@ -44,16 +44,23 @@ __host__ __device__ double ActFunc(double &x){
 __host__ __device__ double scoreFunc(double guess, float whenAns, double latGuess, double lonGuess,
                                      double latAns, double lonAns, double fit, int daysInScope){
 
-    const double shiftedWhere = shift(distCalc(latGuess, lonGuess, latAns, lonAns), 80150.2, 0, 1, 0);
+    const double shiftedWhere = shift(distCalc(latGuess, lonGuess, latAns, lonAns), 80150.2/2, 0, 1, 0);
 
     double correctedGuess;
-    if(0 <= whenAns && daysInScope*24 > whenAns) // whenAns aleady has the current hour subtracted from the hour of the quake event
+    if(0 <= whenAns && daysInScope*24 > whenAns){ // whenAns aleady has the current hour subtracted from the hour of the quake event
 
         correctedGuess = guess; // closer to 1 the better, since the quake event is within scope
-    else
-        correctedGuess = 1-guess; // closr to 0 the better, since the quake event is not within scope
+        if (correctedGuess < 0.5)
+            correctedGuess = -correctedGuess;
+    }
 
-    const double newFit = correctedGuess*(1-shiftedWhere); // max value is 1, minimum value is 0.
+    else{
+        correctedGuess = 1-guess; // closr to 0 the better, since the quake event is not within scope
+        if (correctedGuess < 0.5)
+            correctedGuess = -correctedGuess;
+    }
+
+    const double newFit = correctedGuess + (1-shiftedWhere); // max value is 1, minimum value is 0.
 
     return  newFit+fit; //maximum score for each timestep is 1, minimum is 0.
 }
