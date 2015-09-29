@@ -1,10 +1,4 @@
-{"neurons" : 
-{ "hidden" : 7,
-      "input" : 9,
-      "memForget" : 5,
-      "memIn" : 5,
-      "memOut" : 5,
-      "memory" : 5,
-      "output" : 3
-    }
+{
+"trainingSet" : 113,
+"neurons" : { "hidden" : 7,"input" : 9,"memForget" : 5,"memIn" : 5,"memOut" : 5,"memory" : 5,"output" : 3}
 }

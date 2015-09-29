@@ -51,13 +51,13 @@ __host__ __device__ double scoreFunc(double guess, float whenAns, double latGues
 
         correctedGuess = guess; // closer to 1 the better, since the quake event is within scope
         if (correctedGuess < 0.5)
-            correctedGuess = -correctedGuess;
+            correctedGuess = -correctedGuess*10;
     }
 
     else{
         correctedGuess = 1-guess; // closr to 0 the better, since the quake event is not within scope
         if (correctedGuess < 0.5)
-            correctedGuess = -correctedGuess;
+            correctedGuess = -correctedGuess*10;
     }
 
     const double newFit = correctedGuess + (1-shiftedWhere); // max value is 1, minimum value is 0.

@@ -36,11 +36,11 @@ int main(int argc, char** arg){
         std::cin>>gtf_site>>gtf_hour>>gtf_lat>>gtf_long>>gtf_mag>>gtf_dist;
         start.doingTraining(gtf_site, gtf_hour, gtf_lat, gtf_long, gtf_mag, gtf_dist);
 
-        if(start.checkForGenomes("/home/ubuntu/mount/genome/weights.bin")){
+        if(start.checkForGenomes()){
 
             std::cerr<<"running a hot start"<<std::endl;
 
-            start.hotStart("/home/ubuntu/mount/genome/weights.bin");
+            start.hotStart();
         }
         else{
             std::cerr<<"running a cold start"<<std::endl;
@@ -97,7 +97,7 @@ int main(int argc, char** arg){
         std::cout.flush();
     }
     if(doTraining == 1){
-        start.EndOfTrial("/home/ubuntu/mount/genome/weights.bin");
+        start.EndOfTrial();
     }
     return 1;
 }

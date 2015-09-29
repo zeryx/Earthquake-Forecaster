@@ -15,8 +15,10 @@ prep::~prep(){
 
 }
 
-bool prep::checkForGenomes(const char* filepath){
-    FILE* gFile = std::fopen(filepath, "r");
+bool prep::checkForGenomes(){
+    std::string location= "/home/ubuntu/";
+    location += _trainingNum + ".bin";
+    FILE* gFile = std::fopen(location.c_str(), "r");
     std::cerr<<"checking for genomes file.."<<std::endl;
     bool chk = false;
     if(gFile){
@@ -63,10 +65,12 @@ bool prep::readNetParmeters(const char *filepath){
         std::cerr<<"not in json format or file doesn't exist."<<std::endl;
         return false;
     }
-    if(!doc.HasMember("neurons")){
-        std::cerr<<"no member named neurons exists in file"<<std::endl;
+    if(!doc.HasMember("neurons") || !doc.HasMember("trainingSet")){
+        std::cerr<<"net.json is missing parameters"<<std::endl;
         return false;
     }
+    rapidjson::Value &set = doc["trainingSet"];
+    _trainingNum = set.GetInt();
     rapidjson::Value &a = doc["neurons"];
     int input, hidden, memory, memGateIn, memGateOut, memGateForget, output;
     for(rapidjson::Value::ConstMemberIterator itr = a.MemberBegin();
@@ -234,20 +238,23 @@ neuroVerbs prep::verbStringcmp(std::string def){
     return ret;
 }
 
-void prep::EndOfTrial(const char* filepath){
+void prep::EndOfTrial(){
     _net.training();
     std::ofstream ret;
-    ret.open(filepath,  std::ofstream::trunc | std::ifstream::binary);
+    std::string location= "/home/ubuntu/";
+    location += _trainingNum + ".bin";
+    ret.open(location.c_str(),  std::ofstream::trunc | std::ifstream::binary);
     _net.saveToFile(ret);
     ret.close();
     std::cerr<<"weights stored successfully"<<std::endl;
-
 }
 
 
-void prep::hotStart(const char* filepath){
+void prep::hotStart(){
     std::ifstream gstream;
-    gstream.open(filepath, std::ifstream::ate | std::ifstream::binary);
+    std::string location= "/home/ubuntu/";
+    location += _trainingNum + ".bin";
+    gstream.open(location.c_str(), std::ifstream::ate | std::ifstream::binary);
     _net.loadFromFile(gstream);
     gstream.close();
 }

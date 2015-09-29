@@ -11,7 +11,7 @@ public:
 
     ~prep();
 
-    void hotStart(const char*);
+    void hotStart();
 
     void coldStart();
 
@@ -22,9 +22,9 @@ public:
 
     bool readOrders(const char* filepath);
 
-    bool checkForGenomes(const char* filepath);
+    bool checkForGenomes();
 
-    void EndOfTrial(const char* filepath);
+    void EndOfTrial();
 
     bool init(int sampleRate, int SiteNum, std::vector<double> *siteData);
 
@@ -40,6 +40,7 @@ private:
     std::vector<double> _answers;
     std::vector<double> *_siteData;
     bool _istraining;
+    std::string _trainingNum;
 
 
 };
