@@ -16,8 +16,7 @@ prep::~prep(){
 }
 
 bool prep::checkForGenomes(){
-    std::string location= "/home/ubuntu/";
-    location += _trainingNum + ".bin";
+    std::string location= "wt" +_trainingNum + ".bin";
     FILE* gFile = std::fopen(location.c_str(), "r");
     std::cerr<<"checking for genomes file.."<<std::endl;
     bool chk = false;
@@ -70,7 +69,8 @@ bool prep::readNetParmeters(const char *filepath){
         return false;
     }
     rapidjson::Value &set = doc["trainingSet"];
-    _trainingNum = set.GetInt();
+    _trainingNum = set.GetString();
+    std::cerr<<"training set number is: "<<_trainingNum<<std::endl;
     rapidjson::Value &a = doc["neurons"];
     int input, hidden, memory, memGateIn, memGateOut, memGateForget, output;
     for(rapidjson::Value::ConstMemberIterator itr = a.MemberBegin();
@@ -241,8 +241,7 @@ neuroVerbs prep::verbStringcmp(std::string def){
 void prep::EndOfTrial(){
     _net.training();
     std::ofstream ret;
-    std::string location= "/home/ubuntu/";
-    location += _trainingNum + ".bin";
+    std::string location= "wt" +_trainingNum + ".bin";
     ret.open(location.c_str(),  std::ofstream::trunc | std::ifstream::binary);
     _net.saveToFile(ret);
     ret.close();
@@ -252,8 +251,7 @@ void prep::EndOfTrial(){
 
 void prep::hotStart(){
     std::ifstream gstream;
-    std::string location= "/home/ubuntu/";
-    location += _trainingNum + ".bin";
+    std::string location= "wt" +_trainingNum + ".bin";
     gstream.open(location.c_str(), std::ifstream::ate | std::ifstream::binary);
     _net.loadFromFile(gstream);
     gstream.close();
